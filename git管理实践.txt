@@ -5,3 +5,7 @@ sfx ......pqpqpqpqpq
 wck 2023.9
 wck https://github.com/sfmoraa/SJTUhelper.git
 wck sfmoraa is soooooooo smart!!!
+
+zyc 2023.9
+zyc this is a line of code
+zyc this is another line of code
