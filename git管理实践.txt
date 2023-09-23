@@ -1,3 +1,7 @@
 sfx 2023.9
 sfx abcdefg1234567
 sfx ......pqpqpqpqpq
+
+wck 2023.9
+wck https://github.com/sfmoraa/SJTUhelper.git
+wck sfmoraa is soooooooo smart!!!
