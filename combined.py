@@ -3,11 +3,12 @@ import openai
 import pandas as pd
 import re
 from lxml import etree
-from time import time, localtime, strftime
+from time import time, localtime, strftime,mktime,strptime
 from PIL import Image, ImageEnhance
 import pytesseract
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import json
 
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
@@ -152,29 +153,42 @@ def get_weibo_hot_topic():
     pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
 
 
-'''*************SJTU板块*************'''
+'''*******************************SJTU板块*****************************'''
+
+global_GA_cookie = None
+
+
+def _get_GA():
+    global global_GA_cookie
+    if global_GA_cookie is not None:
+        pass
+    else:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options)
+        url = "https://www.google-analytics.com/analytics.js"
+        driver.get(url)
+        # analytics_script = driver.execute_script("return document.documentElement.innerHTML")
+        # decoded_code = html.unescape(analytics_script)
+        # modified_script = decoded_code[125:-14] + "\nga('create', 'UA-XXXX-Y');"
+        # driver.execute_script(modified_script)
+
+        with open("js/GA.js", "r") as GA:
+            print("executing GA ......")
+            driver.execute_script(GA.read())
+        global_GA_cookie = driver.get_cookies()
+        global_GA_cookie.append({'name': '_ga_QP6YR9D8CK', 'path': '/', 'value': "GS1.3." + str(int(time())) + ".31.0." + str(int(time())) + ".0.0.0"})
+        driver.quit()
+    return global_GA_cookie
 
 
 def autocaptcha(path):
-    """Auto identify captcha in path.
-
-    Use pytesseract to identify captcha.
-
-    Args:
-        path: string, image path.
-
-    Returns:
-        string, OCR identified code.
-    """
     im = Image.open(path)
-
     im = im.convert('L')
     im = ImageEnhance.Contrast(im)
     im = im.enhance(3)
     img2 = Image.new('RGB', (150, 60), (255, 255, 255))
     img2.paste(im.copy(), (25, 10))
-
-    # TODO: add auto environment detect
     return pytesseract.image_to_string(img2)
 
 
@@ -193,7 +207,7 @@ def _debug_show_resp(resp, addition_msg=None):
     print("----------------------------------------------------")
 
 
-def process_captcha_and_GA(resp, session, username, password, return_driver=False):
+def process_captcha_and_GA(resp, session, username, password):
     captcha_id = re_search(r'img.src = \'captcha\?(.*)\'', resp.text)
     if not captcha_id:
         print('Captcha not found! Retrying...')
@@ -217,29 +231,13 @@ def process_captcha_and_GA(resp, session, username, password, return_driver=Fals
     data = {'sid': sid, 'returl': returl, 'se': se, 'client': client, 'user': username,
             'pass': password, 'captcha': code, 'v': "", 'uuid': uuid}
 
-    """*************************** G A ******************************"""
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-    url = "https://www.google-analytics.com/analytics.js"
-    driver.get(url)
-    # analytics_script = driver.execute_script("return document.documentElement.innerHTML")
-    # decoded_code = html.unescape(analytics_script)
-    # modified_script = decoded_code[125:-14] + "\nga('create', 'UA-XXXX-Y');"
-    # driver.execute_script(modified_script)
+    GA_cookie = _get_GA()
 
-    with open("js/GA.js", "r") as GA:
-        print("executing GA ......")
-        driver.execute_script(GA.read())
-
-    for cookie in driver.get_cookies():
+    for cookie in GA_cookie:
         session.cookies.set(cookie['name'], cookie['value'], path=cookie['path'])
     session.cookies.set('_gat', "1")
-    if return_driver:
-        return session, data, driver
-    else:
-        driver.quit()
-        return session, data
+
+    return session, data
     """*************************** G A ******************************"""
 
 
@@ -250,7 +248,7 @@ def dekt():
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
     dekt_session = requests.Session()
     resp_from_oauth_start = dekt_session.get(dekt_login_url, headers=myheaders)
-    dekt_session, data, mydriver = process_captcha_and_GA(resp_from_oauth_start, dekt_session, username, password, True)
+    dekt_session, data = process_captcha_and_GA(resp_from_oauth_start, dekt_session, username, password)
     resp = dekt_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', data=data)
     print("rrrrrrrrrrrrrrrrrrrrrr")
 
@@ -304,41 +302,48 @@ def dekt():
     print(href_values)
     return 1
 
-
 def canvas():
+    df = pd.read_csv('course_id_name_dict.csv')
+    course_id_name_dict = df.set_index(df.columns[0]).to_dict()[df.columns[1]]
     username = input('Username: ')
     password = input('Password: ')
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
     myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
     oc_session = requests.Session()
+    if global_GA_cookie is not None:
+        for cookie in global_GA_cookie:
+            oc_session.cookies.set_cookie(cookie['name'], cookie['value'], path=cookie['path'])
     oc_session.get(canvas_login_url, headers=myheaders_for_oc)
 
     resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
     myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
     oauth_session = requests.Session()
+    while True:
+        try:
+            resp_from_oauth = oauth_session.get(resp_from_openid_connect.headers['Location'], headers=myheaders_for_oauth)
+            oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
+            resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
+            resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
+            resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
 
-    resp_from_oauth = oauth_session.get(resp_from_openid_connect.headers['Location'], headers=myheaders_for_oauth)
-    _debug_show_resp(resp_from_oauth)
-    oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
-
-    # site_sum_cookie = "GS"
-    # site_sum_cookie_name="_ga_QP6YR9D8CK"
-    # for cookie in oc_session.cookies:
-    #     if cookie.name == '_gid':
-    #         site_sum_cookie+=cookie.value[2:6]
-    #         site_sum_cookie+=cookie.value[17:27]
-    #         site_sum_cookie+=".1.0."
-    #         site_sum_cookie+=cookie.value[17:27]
-    #         site_sum_cookie+=".0.0.0"
-    #         oc_session.cookies.set(site_sum_cookie_name, site_sum_cookie)
-    #         break
-
-    resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
-    resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
-    resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
+            break
+        except Exception:
+            print("oops!retrying...")
+            continue
     oc_session.cookies.update(oauth_session.cookies)
     resp_from_oc = oc_session.get(resp_from_oauth2_authorize.headers['Location'], headers=myheaders_for_oc)
-    print(resp_from_oc.text)
+    planner_data=oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date="+strftime("%Y-%m-%d", localtime(time() + (-14 * 24 * 60 * 60)))+"T16:00:00.000Z&end_date="+strftime("%Y-%m-%d", localtime(time() + (14 * 24 * 60 * 60)))+"T16:00:00.000Z&order=asc")
+    json_data = json.loads(planner_data.text[9:])
+    rst=[]
+    for item in json_data:
+        if item['course_id'] not in course_id_name_dict:
+            get_course_name_resp=oc_session.get("https://oc.sjtu.edu.cn/courses/"+str(item['course_id']),headers=myheaders_for_oc)
+            course_id_name_dict[item['course_id']]=etree.HTML(get_course_name_resp.text).xpath("//title//text()")[0]
+        rst.append([strftime("%Y-%m-%d+%H:%M:%S", localtime(mktime(strptime(item['plannable']['due_at'], "%Y-%m-%dT%H:%M:%SZ"))+8 * 60 * 60)),item['submissions']['submitted'],item['plannable_id'],course_id_name_dict[item['course_id']],item['plannable']['description'],item['plannable']['name'],item['plannable']['html_url']])
+    rst = sorted(rst, key=lambda x: x[0])
+    pd.DataFrame.from_dict(course_id_name_dict, orient='index').to_csv('course_id_name_dict.csv')
+    pd.DataFrame(columns=['due_time','submission_status','id','course_name','description','name','url'],data=rst).to_csv("PERSONAL_canvas.csv")
+    print("canvas success!!!")
 
 
 shuiyuan_category_dict = {'60': '校友之家', '53': '水源站务', '61': '课业学习', '68': '音乐之声', '54': '站务公告', '70': '二〇新声', '46': '宠物花草', '51': '极客时间', '41': 'g_jwc', '49': 'g_library', '50': '青年之声', '66': '硬件产品', '55': 'g_nic', '64': '滋滋猪鸡', '71': 'g_piano', '62': '溯·源', '69': '心情驿站', '45': '热点新闻', '2': '我的帖子',
@@ -411,9 +416,9 @@ def shuiyuan():
             ref += '/' + str(item['last_read_post_number'])
         rst.append([ref, item['title'], item['posts_count'], item['reply_count'], item['unseen'], shuiyuan_category_dict[str(item['category_id'])], item['tags'], item['views']])
     pd.DataFrame(columns=['ref', 'title', 'posts_count', 'reply_count', 'unseen', 'category', 'tags', 'views'], data=rst).to_csv('PERSONAL_shuiyuanLatest.csv', encoding='utf-8')
-    # 仅当种类字典需要更新时才调用此函数
+    # 仅当category字典需要更新时才调用此函数
     # update_shuiyuan_category(shuiyuan_session,default_headers)
-
+    print("shuiyuan success!!!")
     return 1
 
 
@@ -465,6 +470,23 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
         rst.append([event["title"], event["startTime"], event["endTime"], event["location"], "https://calendar.sjtu.edu.cn/api/event/detail?id=" + event['eventId']])
     rst = sorted(rst, key=lambda x: x[1])
     pd.DataFrame(columns=['title', 'startTime', 'endTime', 'location', 'json_detail_url'], data=rst).to_csv('PERSONAL_calendar.csv', encoding='utf-8')
+    print("calendar success!!!")
+
+def seiee_notification(getpages=1):
+    seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
+    rst = []
+    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",'Host':"www.seiee.sjtu.edu.cn"}
+    seiee_session=requests.Session()
+    seiee_session.get(seiee_url,headers=myheaders)
+    for page in range(getpages):
+        resp_from_seiee_notification= seiee_session.post("https://www.seiee.sjtu.edu.cn/active/ajax_article_list.html",data={'page': str(page+1),'cat_id': '241','search_cat_code': '','search_cat_title': '','template': 'v_ajax_normal_list1'},headers=myheaders)
+        myhtml = etree.HTML(resp_from_seiee_notification.text[15:-1].encode('latin1').decode('unicode_escape').replace("\/","/"))
+        sections = myhtml.xpath("//li")
+        for notice in sections:
+            rst.append([notice.xpath(".//div[@class='name']")[0].text.strip(),notice.xpath(".//span")[0].text.strip()+"-"+notice.xpath(".//p")[0].text.strip(),notice.xpath(".//a")[0].get('href')])
+    pd.DataFrame(columns=['name','date','href'], data=rst).to_csv('seieeNotification.csv')
+
+
 
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
@@ -479,4 +501,5 @@ if __name__ == '__main__':
     # canvas()
     # shuiyuan()
     # mysjtu_calendar()
+    seiee_notification(3)
     print("over")
