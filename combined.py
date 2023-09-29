@@ -3,7 +3,7 @@ import openai
 import pandas as pd
 import re
 from lxml import etree
-from time import time, localtime, strftime,mktime,strptime
+from time import time, localtime, strftime, mktime, strptime
 from PIL import Image, ImageEnhance
 import pytesseract
 from selenium import webdriver
@@ -28,25 +28,13 @@ def gpt_35_api_stream(messages: list):
                 break
             for delta_k, delta_v in event['choices'][0]['delta'].items():
                 completion[delta_k] += delta_v
-        messages.append(completion)  # 直接在传入参数 messages 中追加消息
+        messages.append(completion)
         return (True, completion['content'])
     except Exception as err:
         return (False, f'OpenAI API 异常: {err}')
 
 
 def re_search(retext, text):
-    """Regular expression search.
-
-    Prevent exception when re.search cant find one,
-    Only returns the first group.
-
-    Args:
-        retext: string, regular expression.
-        text: string, text want to search.
-
-    Returns:
-        string, the matched group, None when not find.
-    """
     tmp = re.search(retext, text)
     if tmp:
         return tmp.group(1)
@@ -55,10 +43,6 @@ def re_search(retext, text):
 
 
 def get_timestamp():
-    """13 lengths timestamp.
-    Returns:
-        current timestamp.
-    """
     return str(round(time() * 1000))
 
 
@@ -166,8 +150,8 @@ def _get_GA():
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(options=chrome_options)
-        url = "https://www.google-analytics.com/analytics.js"
-        driver.get(url)
+        # url = "https://www.google-analytics.com/analytics.js"
+        # driver.get(url)
         # analytics_script = driver.execute_script("return document.documentElement.innerHTML")
         # decoded_code = html.unescape(analytics_script)
         # modified_script = decoded_code[125:-14] + "\nga('create', 'UA-XXXX-Y');"
@@ -190,6 +174,23 @@ def autocaptcha(path):
     img2 = Image.new('RGB', (150, 60), (255, 255, 255))
     img2.paste(im.copy(), (25, 10))
     return pytesseract.image_to_string(img2)
+
+
+def auto_jaccount_authorize(location, username, password):
+    oauth_session = requests.Session()
+    myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
+    while True:
+        try:
+            resp_from_oauth = oauth_session.get(location, headers=myheaders_for_oauth)
+            oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
+            resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
+            resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
+            resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
+            break
+        except Exception:
+            print("oops!retrying...")
+            continue
+    return oauth_session.cookies, resp_from_oauth2_authorize.headers['Location']
 
 
 def _debug_show_resp(resp, addition_msg=None):
@@ -230,9 +231,7 @@ def process_captcha_and_GA(resp, session, username, password):
         return -888
     data = {'sid': sid, 'returl': returl, 'se': se, 'client': client, 'user': username,
             'pass': password, 'captcha': code, 'v': "", 'uuid': uuid}
-
     GA_cookie = _get_GA()
-
     for cookie in GA_cookie:
         session.cookies.set(cookie['name'], cookie['value'], path=cookie['path'])
     session.cookies.set('_gat', "1")
@@ -245,66 +244,179 @@ def dekt():
     username = input('Username: ')
     password = input('Password: ')
     dekt_login_url = 'https://jaccount.sjtu.edu.cn/oauth2/authorize?response_type=code&client_id=sowyD3hGhP6f6O92bevg&redirect_uri=https://dekt.sjtu.edu.cn/h5/index&state=&scope=basic'
-    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
+    myheaders_for_dekt = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "dekt.sjtu.edu.cn"}
+    oauth_session_cookies, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
     dekt_session = requests.Session()
-    resp_from_oauth_start = dekt_session.get(dekt_login_url, headers=myheaders)
-    dekt_session, data = process_captcha_and_GA(resp_from_oauth_start, dekt_session, username, password)
-    resp = dekt_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', data=data)
-    print("rrrrrrrrrrrrrrrrrrrrrr")
+    dekt_session.cookies.update(oauth_session_cookies)
+    myheaders_for_dekt['Content-Type'] = "application/json"
+    resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
+    token = resp_from_dekt.json()['data']['token']
+    myheaders_for_dekt.update({'Jtoken': resp_from_dekt.json()['data']['jtoken'], 'Curuserid': "null"})
+    rst = []
+    resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_hszl.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["红色之旅", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                                                                       ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                                                                   ), item['activityPicurl']])
+    resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_ldjy.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["劳动教育", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                ), item['activityPicurl']])
+    resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_zygy.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["志愿公益", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                ), item['activityPicurl']])
+    resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_wthd.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["文体活动", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                ), item['activityPicurl']])
+    resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_kjcx.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["科技创新", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                ), item['activityPicurl']])
+    resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_jtjz.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["讲坛讲座", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                ), item['activityPicurl']])
+    resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                     data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_qt.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["其他", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                      ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                  ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                              ), item['activityPicurl']])
+    resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_hszl.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["红色之旅", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                                                                                     ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                                                                                 ), item['activityPicurl']])
+    resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_ldjy.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["劳动教育", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
+    resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_zygy.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["志愿公益", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
+    resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_wthd.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["文体活动", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
+    resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_kjcx.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["科技创新", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
+    resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_jtjz.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["讲坛讲座", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
+    resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
+                                     data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    for item in resp_from_qt.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = "/"
+        rst.append(["其他", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                           ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                       ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                   ), item['activityPicurl']])
+    pd.DataFrame(columns=['种类', 'id', '名称', '报名开始时间', '报名结束时间', '活动开始时间', '活动结束时间', '配图url'], data=rst).to_csv("dekt.csv")
 
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get("https://dekt.sjtu.edu.cn/")
-
-    for cookie in dekt_session.cookies:
-        print(cookie.name, cookie.value, cookie.path, cookie.domain)
-        print({'name': cookie.name, 'value': cookie.value, 'path': cookie.path})
-        driver.add_cookie({'name': cookie.name, 'value': cookie.value, 'path': cookie.path, 'domain': cookie.domain})
-    driver.get("https://dekt.sjtu.edu.cn/h5/index")
-
-    print(driver.current_url)
-    print(driver.page_source)
-    script = """
-    function executeScript(url) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', url);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    resolve(xhr.responseText);
-                } else {
-                    reject('Request failed. Status: ' + xhr.status);
-                }
-            };
-            xhr.onerror = function() {
-                reject('Request failed. Network error.');
-            };
-            xhr.send();
-        });
-    }
-
-    return executeScript('https://dekt.sjtu.edu.cn/h5/index/h5/static/js/app.ae584f2c.js');
-    """
-    '''
-        return executeScript('https://dekt.sjtu.edu.cn/h5/index/h5/static/js/chunk-vendors.f37c3f31.js');
-
-    '''
-    response = driver.execute_script(script)
-    print(response)
-
-    driver.quit()
-    return 111
-
-    myhtml = etree.HTML(resp.text)
-    sections = myhtml.xpath('//link[contains(@href, "static/js/Activities")]')
-    href_values = [link.get("href") for link in sections]
-    print(href_values)
     return 1
 
+
 def canvas():
-    df = pd.read_csv('course_id_name_dict.csv')
-    course_id_name_dict = df.set_index(df.columns[0]).to_dict()[df.columns[1]]
+    try:
+        df = pd.read_csv('course_id_name_dict.csv')
+        course_id_name_dict = df.set_index(df.columns[0]).to_dict()[df.columns[1]]
+    except FileNotFoundError:
+        course_id_name_dict = {}
     username = input('Username: ')
     password = input('Password: ')
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
@@ -316,33 +428,44 @@ def canvas():
     oc_session.get(canvas_login_url, headers=myheaders_for_oc)
 
     resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
-    myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
-    oauth_session = requests.Session()
-    while True:
-        try:
-            resp_from_oauth = oauth_session.get(resp_from_openid_connect.headers['Location'], headers=myheaders_for_oauth)
-            oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
-            resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
-            resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
-            resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
+    oauth_session_cookies, jump_url = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
 
-            break
-        except Exception:
-            print("oops!retrying...")
-            continue
-    oc_session.cookies.update(oauth_session.cookies)
-    resp_from_oc = oc_session.get(resp_from_oauth2_authorize.headers['Location'], headers=myheaders_for_oc)
-    planner_data=oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date="+strftime("%Y-%m-%d", localtime(time() + (-14 * 24 * 60 * 60)))+"T16:00:00.000Z&end_date="+strftime("%Y-%m-%d", localtime(time() + (14 * 24 * 60 * 60)))+"T16:00:00.000Z&order=asc")
+    oc_session.cookies.update(oauth_session_cookies)
+    resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
+    planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
+
     json_data = json.loads(planner_data.text[9:])
-    rst=[]
+    rst = []
     for item in json_data:
         if item['course_id'] not in course_id_name_dict:
-            get_course_name_resp=oc_session.get("https://oc.sjtu.edu.cn/courses/"+str(item['course_id']),headers=myheaders_for_oc)
-            course_id_name_dict[item['course_id']]=etree.HTML(get_course_name_resp.text).xpath("//title//text()")[0]
-        rst.append([strftime("%Y-%m-%d+%H:%M:%S", localtime(mktime(strptime(item['plannable']['due_at'], "%Y-%m-%dT%H:%M:%SZ"))+8 * 60 * 60)),item['submissions']['submitted'],item['plannable_id'],course_id_name_dict[item['course_id']],item['plannable']['description'],item['plannable']['name'],item['plannable']['html_url']])
+            get_course_name_resp = oc_session.get("https://oc.sjtu.edu.cn/courses/" + str(item['course_id']), headers=myheaders_for_oc)
+            course_id_name_dict[item['course_id']] = etree.HTML(get_course_name_resp.text).xpath("//title//text()")[0]
+        if 'due_at' not in item['plannable']:
+            due_at = '/'
+        else:
+            due_at = strftime("%Y-%m-%d+%H:%M:%S", localtime(mktime(strptime(item['plannable']['due_at'], "%Y-%m-%dT%H:%M:%SZ")) + 8 * 60 * 60))
+        if item['submissions'] == "false" or item['submissions'] == False:
+            submit = "Not required"
+        else:
+            if item['submissions']['submitted'] == False or item['submissions']['submitted'] == "false":
+                if item['planner_override'] is not None:
+                    submit = "true"
+                else:
+                    submit = 'false'
+            else:
+                submit = "true"
+        if 'description' not in item['plannable']:
+            descript = "/"
+        else:
+            descript = item['plannable']['description']
+        if 'name' in item['plannable']:
+            name = item['plannable']['name']
+        else:
+            name = item['plannable']['title']
+        rst.append([due_at, submit, item['plannable_id'], course_id_name_dict[item['course_id']], descript, name, item['plannable']['html_url']])
     rst = sorted(rst, key=lambda x: x[0])
     pd.DataFrame.from_dict(course_id_name_dict, orient='index').to_csv('course_id_name_dict.csv')
-    pd.DataFrame(columns=['due_time','submission_status','id','course_name','description','name','url'],data=rst).to_csv("PERSONAL_canvas.csv")
+    pd.DataFrame(columns=['due_time', 'submission_status', 'id', 'course_name', 'description', 'name', 'url'], data=rst).to_csv("PERSONAL_canvas.csv")
     print("canvas success!!!")
 
 
@@ -392,21 +515,11 @@ def shuiyuan():
     shuiyuan_resp1 = shuiyuan_session.get(shuiyuan_login_url, headers=myheaders_for_shuiyuan)
     data = {'authenticity_token': shuiyuan_resp1.text[9:-2]}
     resp_from_auth_jaccount = shuiyuan_session.post("https://shuiyuan.sjtu.edu.cn/auth/jaccount", headers=default_headers, data=data, allow_redirects=False)
-    oauth_session = requests.Session()
-    myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
-    while True:
-        try:
-            resp_from_oauth = oauth_session.get(resp_from_auth_jaccount.headers['Location'], headers=myheaders_for_oauth)
-            oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
-            resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
-            resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
-            resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
-            break
-        except Exception:
-            print("oops!retrying...")
-            continue
-    shuiyuan_session.cookies.update(oauth_session.cookies)
-    resp_from_shuiyuan = shuiyuan_session.get(resp_from_oauth2_authorize.headers['Location'], headers=myheaders_for_shuiyuan)
+
+    oauth_session_cookies, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
+
+    shuiyuan_session.cookies.update(oauth_session_cookies)
+    resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
     infos = resp_from_latest.json()['topic_list']['topics']
     rst = []
@@ -472,21 +585,20 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
     pd.DataFrame(columns=['title', 'startTime', 'endTime', 'location', 'json_detail_url'], data=rst).to_csv('PERSONAL_calendar.csv', encoding='utf-8')
     print("calendar success!!!")
 
+
 def seiee_notification(getpages=1):
     seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
     rst = []
-    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",'Host':"www.seiee.sjtu.edu.cn"}
-    seiee_session=requests.Session()
-    seiee_session.get(seiee_url,headers=myheaders)
+    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "www.seiee.sjtu.edu.cn"}
+    seiee_session = requests.Session()
+    seiee_session.get(seiee_url, headers=myheaders)
     for page in range(getpages):
-        resp_from_seiee_notification= seiee_session.post("https://www.seiee.sjtu.edu.cn/active/ajax_article_list.html",data={'page': str(page+1),'cat_id': '241','search_cat_code': '','search_cat_title': '','template': 'v_ajax_normal_list1'},headers=myheaders)
-        myhtml = etree.HTML(resp_from_seiee_notification.text[15:-1].encode('latin1').decode('unicode_escape').replace("\/","/"))
+        resp_from_seiee_notification = seiee_session.post("https://www.seiee.sjtu.edu.cn/active/ajax_article_list.html", data={'page': str(page + 1), 'cat_id': '241', 'search_cat_code': '', 'search_cat_title': '', 'template': 'v_ajax_normal_list1'}, headers=myheaders)
+        myhtml = etree.HTML(resp_from_seiee_notification.text[15:-1].encode('latin1').decode('unicode_escape').replace("\/", "/"))
         sections = myhtml.xpath("//li")
         for notice in sections:
-            rst.append([notice.xpath(".//div[@class='name']")[0].text.strip(),notice.xpath(".//span")[0].text.strip()+"-"+notice.xpath(".//p")[0].text.strip(),notice.xpath(".//a")[0].get('href')])
-    pd.DataFrame(columns=['name','date','href'], data=rst).to_csv('seieeNotification.csv')
-
-
+            rst.append([notice.xpath(".//div[@class='name']")[0].text.strip(), notice.xpath(".//span")[0].text.strip() + "-" + notice.xpath(".//p")[0].text.strip(), notice.xpath(".//a")[0].get('href')])
+    pd.DataFrame(columns=['name', 'date', 'href'], data=rst).to_csv('seieeNotification.csv')
 
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
@@ -497,9 +609,9 @@ if __name__ == '__main__':
     # get_gold_price()
     # print(gpt_filter('zhihu'))
     # get_weibo_hot_topic()
-    # dekt()
+    dekt()
     # canvas()
     # shuiyuan()
     # mysjtu_calendar()
-    seiee_notification(3)
+    # seiee_notification(3)
     print("over")
