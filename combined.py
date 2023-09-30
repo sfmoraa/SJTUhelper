@@ -150,8 +150,8 @@ def _get_GA():
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(options=chrome_options)
-        # url = "https://www.google-analytics.com/analytics.js"
-        # driver.get(url)
+        url = "https://www.google-analytics.com/analytics.js"
+        driver.get(url)
         # analytics_script = driver.execute_script("return document.documentElement.innerHTML")
         # decoded_code = html.unescape(analytics_script)
         # modified_script = decoded_code[125:-14] + "\nga('create', 'UA-XXXX-Y');"
@@ -262,8 +262,8 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["红色之旅", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                                                                       ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                                                                   ), item['activityPicurl']])
+                                                                                                                                                                     ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                                                                                 ), item['activityPicurl']])
     resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_ldjy.json()['rows']:
@@ -272,9 +272,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["劳动教育", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                ), item['activityPicurl']])
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
     resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_zygy.json()['rows']:
@@ -283,9 +283,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["志愿公益", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                ), item['activityPicurl']])
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
     resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_wthd.json()['rows']:
@@ -294,9 +294,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["文体活动", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                ), item['activityPicurl']])
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
     resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_kjcx.json()['rows']:
@@ -305,9 +305,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["科技创新", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                ), item['activityPicurl']])
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
     resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_jtjz.json()['rows']:
@@ -316,9 +316,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["讲坛讲座", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                ), item['activityPicurl']])
+                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                     ), item['activityPicurl']])
     resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                      data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_qt.json()['rows']:
@@ -327,9 +327,9 @@ def dekt():
         else:
             enrollStartTime = "/"
         rst.append(["其他", str(item['id']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                      ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                  ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                              ), item['activityPicurl']])
+                                                                                           ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                       ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                   ), item['activityPicurl']])
     resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_hszl.json()['rows']:
@@ -584,6 +584,50 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
     rst = sorted(rst, key=lambda x: x[1])
     pd.DataFrame(columns=['title', 'startTime', 'endTime', 'location', 'json_detail_url'], data=rst).to_csv('PERSONAL_calendar.csv', encoding='utf-8')
     print("calendar success!!!")
+    return calendar_session.cookies
+
+
+"""************************* 数据格式说明 *******************************
+变量名                 含义                       类型          格式
+title               日程名                      字符串         不可为空
+startTime           日程开始时间                 字符串         形如2023-10-1 23:00 
+endTime             日程结束时间                 字符串         形如2023-10-1 23:00 
+status              日程状态                    字符串         在忙 or 空闲 or 不在办公室 三者中的一个
+reminderMinutes     日程开始前多少分钟进行提醒      整数          日程不提醒时设为缺省值-1，否则为非负整数，建议为0,5,10，30，60，1440,10080中的值
+allDay              是否为全天事件               布尔值         默认为False
+location            日程地点                    字符串         可为空
+description         日程描述                    字符串         可为空
+schedule_type       日程种类                    字符串         课程 or 会议 or 私人 三者中的一个
+recurrence          日程重复状态                 None 或 字典   字典形如 {"endDate":"2024-9-30 23:59","rangeType":"EndDate","patternType":"Weekly","intervalNumber":1}
+                                                                endDate         字符串         形如2024-9-30 23:59
+                                                                rangeType       固定为字符串EndDate
+                                                                patternType     与intervalNumber搭配使用，可选组合如下：(Daily,1),(Weekly,1),(Weekly,2),(AbsoluteMonthly,1),(AbsoluteYearly,1)
+"""
+
+
+# required_cookies应包括 _ga 与 _ga_QP6YR9D8CK 与 JSESSIONID
+def create_schedule(required_cookies, title, startTime, endTime, status, reminderMinutes=-1, allDay=False, location="", description="", schedule_type="私人", recurrence=None):
+    schedule_data = {"allDay": allDay, "body": description, "endTime": endTime, "importance": "LOW", "location": location, "reminderMinutes": reminderMinutes, "recurrence": recurrence, "status": status, "recurrenceEndDate": "", "startTime": startTime, "title": title, "extremity": False}
+    if schedule_type == "课程":
+        schedule_data['calendarId'] = "67fb2fa3-c3bf-46e0-99be-2e07ea2725b7"
+    elif schedule_type == "会议":
+        schedule_data['calendarId'] = "b469c560-cd67-47f4-8c15-22684a3eb71d"
+    elif schedule_type == "私人":
+        schedule_data['calendarId'] = "028bac3d-5032-45ce-bcf5-a4da21a28cb1"
+    else:
+        print("日程种类错误")
+        return 0
+    if reminderMinutes == -1:
+        schedule_data['reminderOn'] = False
+    else:
+        schedule_data['reminderOn'] = True
+    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn", 'Content-Type': "application/json;charset=UTF-8"}
+    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False).json()
+    if resp['success'] != True:
+        print("Creation failure due to", resp['msg'])
+        return 0
+    else:
+        print("Create schedule success!")
 
 
 def seiee_notification(getpages=1):
@@ -609,9 +653,10 @@ if __name__ == '__main__':
     # get_gold_price()
     # print(gpt_filter('zhihu'))
     # get_weibo_hot_topic()
-    dekt()
+    # dekt()
     # canvas()
     # shuiyuan()
-    # mysjtu_calendar()
+    mysjtu_sessions_cookies = mysjtu_calendar()
+    create_schedule(mysjtu_sessions_cookies, "mytest2", "2023-10-1 8:00", "2023-10-1 10:00", "在忙", 15, False, "minhang", "hahaha", "私人")
     # seiee_notification(3)
     print("over")
