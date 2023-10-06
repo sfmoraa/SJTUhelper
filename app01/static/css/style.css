@@ -791,3 +791,63 @@ section {
   }
 }
 /*# sourceMappingURL=style.css.map */
+
+
+
+
+
+
+
+
+.options {
+  position:fixed;
+  margin-top: 100px;
+  float: left;
+  width: 100px;
+  height: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  #background-color: rgb(243, 244, 246);
+  background-color: aqua;
+  border-radius: 10px;
+  transition: .3s;
+  overflow: hidden;
+}
+
+.box {
+  display: block;
+  height: 15%;
+  width: 85%;
+  margin: 9px;
+  border-radius: 5px;
+  position: relative;
+  transition: .3s;
+  color: rgb(0, 0, 0);
+}
+.box img {
+  font-size: 60px;
+  width: 60px;
+  height: 60px;
+  position: absolute;
+}
+
+.box span{
+  position: relative;
+  top: 11px;
+  left: 70px;
+  font: 500 20px '';
+  opacity: 0;
+  transition: .1s;
+}
+.options:hover{
+  width: 200px;.box:hover{
+    background-color: rgb(55, 65, 81);
+  }
+}
+
+.options:hover span{
+  opacity: 1;
+}
+
