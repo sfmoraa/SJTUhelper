@@ -17,6 +17,7 @@
    <!-- custom css file link  -->
    <link rel="stylesheet" href="{% static 'css/style_main.css' %}">
 
+
 </head>
 <body>
 
@@ -87,15 +88,15 @@
 
    <!-- options section starts here -->
    <div class="options">
-      <a href="#" class="box"><img src="{% static 'img/zhihu.svg' %}"/><span>知乎</span></a>
-      <a href="#" class="box"><img src="images/bilibili.jpg"/><span> B站</span></a>
-      <a href="#" class="box"><img src="images/shuiyuan.jpg"/><span>水源</span></a>
-      <a href="#" class="box"><img src="images/weibo.jpg"/><span>微博</span></a>
-      <a href="#" class="box"><img src="images/jiaowoban.jpg"/><span>交我办</span></a>
-      <a href="#" class="box"><img src="images/github.jpg"/><span>github</span></a>
-      <a href="#" class="box"><img src="images/tianqi.jpg"/><span>天气</span></a>
-      <a href="#" class="box"><img src="images/sjtu.jpg"/><span>dekt</span></a>
-      <a href="#" class="box"><img src="images/sjtu.jpg"/><span>canvas</span></a>
+      <a href="zhihu" class="box"><img src="{% static 'img/zhihu.svg' %}"/><span>知乎</span></a>
+      <a href="#" class="box"><img src="{% static 'img/bilibili.svg' %}"/><span> B站</span></a>
+      <a href="#" class="box"><img src="{% static 'img/shuiyuan.jpg' %}"/><span>水源</span></a>
+      <a href="#" class="box"><img src="{% static 'img/weibo.jpg' %}"/><span>微博</span></a>
+      <a href="#" class="box"><img src="{% static 'img/jiaowoban.jpg' %}"/><span>交我办</span></a>
+      <a href="#" class="box"><img src="{% static 'img/github.svg' %}"/><span>github</span></a>
+      <a href="#" class="box"><img src="{% static 'img/tianqi.jpg' %}"/><span>天气</span></a>
+      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>dekt</span></a>
+      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>canvas</span></a>
    </div>
 
 <!-- options section ends here -->
@@ -105,32 +106,34 @@
         <h1>info list</h1>
 
 
-    
 
-        {% for obj in zhihuHotTopic %}
-        <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
-                <div class="blog-slider__item swiper-slide">
-                    <a target="_blank">
-                        <div class="blog-slider__img">
-                            <a href="{{obj.2}}">
-                                {% autoescape off %}
-                                {{ obj.3 }}
-                                {% endautoescape %}</a>
+        <div class="block-custom-large">
+            {% for obj in zhihuHotTopic %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img">
+                                        <a href="{{obj.2}}">
+                                            {% autoescape off %}
+                                            {{ obj.3 }}
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.2}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.1 }}                    </div>
+                                    </a>
+
+                                </div>
+                            </div>
                         </div>
-                     </a>
-                    <div class="blog-slider__content">
-                        <span class="blog-slider__code">
-                                            </span>
-                        <a target="_blank" href="{{obj.2}}"  >
-                            <div class="blog-slider__title">
-                                {{ obj.1 }}                    </div>
-                        </a>
-
-                    </div>
                 </div>
-            </div>
-        {% endfor %}
-
+            {% endfor %}
+        </div>
 
     
 
@@ -151,7 +154,10 @@
 
 
 <!-- custom js file link  -->
-<script src="js/script.js"></script>
+<script src="{% static 'js/script.js' %}"></script>
+<script>
+ListAnimation();
+</script>
 
 </body>
 </html>
