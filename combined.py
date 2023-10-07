@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import json
 import os
+import numpy as np
 # from app01.models import  UserInfo,collection,zhihu,github,bilibili,weibo,dektinfo
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
@@ -208,6 +209,76 @@ def gpt_filter(site, cue=None):
             for index in numbers:
                 content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index-1].link])
             return content
+    elif site == 'dekt':
+        if cue is None:
+            cue = "电院青志队组织的或者校青志队组织的活动"
+        current_topics = dektinfo.objects.all()
+        topics = ""
+        i=1
+        for a in current_topics:
+            topics += '('+str(i)+') '+a.category+":"+a.activity_name + '；'
+            i+=1
+        print(topics)
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
+        ans = gpt_35_api_stream(messages)
+        if ans[0] != True:
+            print("gpt调用异常！！！！！", ans)
+            return 0
+        else:
+            content = []
+            numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
+            # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
+            for index in numbers:
+                content.append([current_topics[index - 1].category, current_topics[index - 1].item_id, current_topics[index-1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time, current_topics[index - 1].enroll_start_time, current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
+            content.sort(key=lambda x:x[5])
+            return content
+    elif site == 'seiee_notion':
+        if cue is None:
+            cue = "和学生工作相关的内容"
+        current_topics = seieeNotification.objects.all()
+        topics = ""
+        i=1
+        for a in current_topics:
+            topics += '('+str(i)+') '+a.name+'；'
+            i+=1
+        print(topics)
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
+        ans = gpt_35_api_stream(messages)
+        if ans[0] != True:
+            print("gpt调用异常！！！！！", ans)
+            return 0
+        else:
+            content = []
+            numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
+            # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
+            for index in numbers:
+                content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index-1].href])
+            return content
+    elif site == 'minhang_weather':
+        if cue is None:
+            cue = "和学生工作相关的内容"
+        current_topics = minhang_24h_weather.objects.all()
+        # topics = ""
+        # i=1
+        content = []
+        for a in current_topics:
+        #     topics += '('+str(i)+') '+a.weather_text+'；'
+        #     i+=1
+        # print(topics)
+        # messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
+        # ans = gpt_35_api_stream(messages)
+        # if ans[0] != True:
+        #     print("gpt调用异常！！！！！", ans)
+        #     return 0
+        # else:
+        #     content = []
+        #     numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
+            # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
+            # for index in numbers:
+            #     content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index-1].href])
+            # return content
+            content.append([a.Name_of_weather_picture,a.weather_text,a.temperature,a.wind_direction,a.wind_strength,a.hour])
+        return content
     elif 'shuiyuan' in site:
         if cue is None:
             cue = "学业考试相关，八卦相关的"
@@ -224,10 +295,9 @@ def gpt_filter(site, cue=None):
             row = cursor.fetchone()
             if not row:
                 break
-            topics += '(' + str(i) + ') ' + row[1] + '；'
+            topics += '(' + str(i) + ') ' + str(row[2].encode('utf-8')) + '；'
             current_topics.append(row)
             i+=1
-        topics=topics.encode('utf-8')
         print(topics)
         messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
@@ -239,9 +309,41 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1][0], current_topics[index - 1][1], current_topics[index-1][2], current_topics[index-1][3], current_topics[index-1][4], current_topics[index-1][5], current_topics[index-1][6], current_topics[index-1][7], current_topics[index-1][8]])
+                content.append([current_topics[index - 1][1], current_topics[index-1][2], current_topics[index-1][3], current_topics[index-1][4], current_topics[index-1][5], current_topics[index-1][6], current_topics[index-1][7], current_topics[index-1][8]])
             return content
-
+    elif 'calendar' in site:
+        if cue is None:
+            cue = "学业"
+        topics = ""
+        current_topics=[]
+        db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+        # 使用cursor()方法获取操作游标
+        cursor = db.cursor()
+        sql = "select * from `{}`".format(site)
+        # 4.执行sql语句
+        cursor.execute(sql)
+        i = 1
+        while True:
+            row = cursor.fetchone()
+            if not row:
+                break
+            topics += '(' + str(i) + ') ' + str(row[1].encode('utf-8')) + '；'
+            current_topics.append(row)
+            i+=1
+        print(topics)
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
+        ans = gpt_35_api_stream(messages)
+        if ans[0] != True:
+            print("gpt调用异常！！！！！", ans)
+            return 0
+        else:
+            content = []
+            numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
+            # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
+            for index in numbers:
+                content.append([current_topics[index - 1][1], current_topics[index-1][2], current_topics[index-1][3], current_topics[index-1][4], current_topics[index-1][5]])
+            content.sort(key=lambda x: x[1])  # 根据第一个字符串进行排序
+            return content
 def get_weibo_hot_topic():
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     rst = []
@@ -307,6 +409,7 @@ def get_minhang_24h_weather():
             rst[4].append(wind_strength.xpath("./text()")[0])
         for hour in item.xpath("./ul[5]/li"):
             rst[5].append(hour.xpath("./text()")[0])
+    minhang_24h_weather.objects.all().delete()
     reformed_rst=[[rst[0][i],rst[1][i],rst[2][i],rst[3][i],rst[4][i],rst[5][i]]for i in range(len(rst[0]))]
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i],weather_text=rst[1][i],temperature=rst[2][i],wind_direction=rst[3][i],wind_strength=rst[4][i],hour=rst[5][i])
@@ -739,6 +842,11 @@ def shuiyuan():
         ref = "https://shuiyuan.sjtu.edu.cn/t/topic/" + str(item['id'])
         if 'last_read_post_number' in item:
             ref += '/' + str(item['last_read_post_number'])
+        if item['tags']!=[]:
+            tags= ""
+            for data in item['tags']:
+                tags+=data
+            item['tags']=tags
         insert_dynamic_model_shuiyuan(table_name=username,ref=ref, title=item['title'],posts_count= item['posts_count'], reply_count=item['reply_count'], unseen=item['unseen'], shuiyuan_category_dict=shuiyuan_category_dict[str(item['category_id'])],tags=item['tags'], views=item['views'])
     # 仅当category字典需要更新时才调用此函数
     # update_shuiyuan_category(shuiyuan_session,default_headers)
