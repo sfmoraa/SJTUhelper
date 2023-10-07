@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Title</title>
 </head>
 <body>
@@ -11,9 +11,45 @@
     {% for obj in zhihuHotTopic %}
         <h3>{{ obj.0 }}{{ obj.1 }}</h3>
         <a href="{{obj.2}}">
-            {% autoescape off %}
+        {% autoescape off %}
             {{ obj.3 }}
-            {% endautoescape %}</a>
+            {% endautoescape %}
+            </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in github %}
+        <h3>{{ obj.0 }}</h3>
+        <h3> {{ obj.1 }}</h3>
+        <a href="{{obj.3}}">
+        {% autoescape off %}
+            {{ obj.2 }}
+            {% endautoescape %}
+        </a>
+    {% endfor %}
+</table>
+<table border="1">
+    {% for obj in bilibili %}
+        <h3>{{ obj.0 }}{{ obj.1 }}</h3>
+        <h3> {{ obj.2 }}</h3>
+        <a href="{{obj.4}}">
+        {% autoescape off %}
+        <img src="{{ obj.3 }}" alt="Image">
+        {% endautoescape %}
+        </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in weibo %}
+
+        <a href="{{obj.2}}">
+        {% autoescape off %}
+        <img src="{{ obj.1 }}" alt="Image">
+        {% endautoescape %}
+        <h3>{{ obj.0 }}</h3>
+        </a>
     {% endfor %}
 
 </table>

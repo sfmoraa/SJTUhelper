@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from app01.models import Department, UserInfo
+from app01.models import *
 
 print("views running")
 from combined import *
@@ -8,6 +8,7 @@ import pandas as pd
 # Create your views here.
 def index(request):
     return HttpResponse("欢迎使用")
+
 
 
 def user_list(request):
@@ -21,8 +22,24 @@ def user_add(request):
 
 
 def mytest(request):
-    reducedHotTopics = gpt_filter('zhihu',cue="")
-    return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics})
+    # get_zhihu_hot_topic(cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
+    # get_github_trending()
+    # get_bilibili_ranking()
+    # get_weibo_hot_topic()
+    # dekt()
+    # shuiyuan()
+    # mysjtu_calendar()
+    # reducedHotTopics1 = gpt_filter('zhihu',cue="我对军事政治不感兴趣")
+    # reducedHotTopics2 = gpt_filter('github',cue=None)
+    # reducedHotTopics3 = gpt_filter('bilibili',cue="我想获得小于10条内容")
+    # reducedHotTopics4 = gpt_filter('weibo')
+    # reducedHotTopics5 = gpt_filter('shuiyuan_zt-785')
+    reducedHotTopics1 = []
+    reducedHotTopics2 = []
+    reducedHotTopics3 = []
+    reducedHotTopics4 = []
+    # print(reducedHotTopics5)
+    return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics1,"github":reducedHotTopics2,"bilibili":reducedHotTopics3,"weibo":reducedHotTopics4,"dekt":[]})
 
 
 def tpl(request):
@@ -67,13 +84,16 @@ def login(request):
         # print(request.POST)
         username = request.POST.get("user")
         password = request.POST.get("pwd")
-
-        if username == "root" and password == "admin":
+        user = UserInfo.objects.filter(name=username, password=password).first()
+        if user:
+            # 用户名和密码匹配，执行登录成功的逻辑
+            # 例如，可以设置用户登录状态或重定向到其他页面
             # return HttpResponse("登录成功")
             return redirect("https://www.sjtu.edu.cn")
         else:
-            # return HttpResponse("登录失败")
-            return render(request, "login.html", {"error_msg": "用户名或密码错误"})
+            # 用户名或密码不正确，返回登录页面并显示错误信息
+            return render(request, 'login.html', {'error_message': '用户名或密码不正确'})
+
 
 
 def orm(request):
@@ -103,12 +123,14 @@ def info_add(request):
     pwd = request.POST.get("pwd")
     age = request.POST.get("age")
     UserInfo.objects.create(name=user, password=pwd, age=age)
+    create_dynamic_model_collection(table_name=user.rstrip("\n"))
     # return HttpResponse("添加成功")
     return redirect("http://127.0.0.1:8000/info/list/")
 
 
 def info_delete(request):
     nid = request.GET.get("nid")
+    # delete_dynamic_model_collection(UserInfo.objects.filter(id=nid).first().name)
     UserInfo.objects.filter(id=nid).delete()
     # return HttpResponse("删除成功")
     return redirect("http://127.0.0.1:8000/info/list/")

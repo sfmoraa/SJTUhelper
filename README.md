@@ -1,2 +1,2 @@
 # SJTUhelper
-A helpful website that grants SJTU students easy access to trending information and campus-related updates.
+A helpful website that helps SJTU students easily access trending information and campus-related updates.

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SJTUhelper.iml" filepath="$PROJECT_DIR$/.idea/SJTUhelper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SJTUhelper-main.iml" filepath="$PROJECT_DIR$/.idea/SJTUhelper-main.iml" />
     </modules>
   </component>
 </project>
