@@ -28,7 +28,7 @@ urlpatterns = [
     path('tpl/', views.tpl),
     path('mytest/',views.mytest),
     path('something/', views.something),
-
+    path('top/',views.top),
     path('login/', views.login),
     path('orm/', views.orm),
 

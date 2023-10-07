@@ -14,6 +14,8 @@ def user_list(request):
     # return HttpResponse("用户列表")
     return render(request, "user_list.html")
 
+def top(request):
+    return render(request, "top.html")
 
 def user_add(request):
     return HttpResponse("添加用户")

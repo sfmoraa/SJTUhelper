@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'nis3368',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'oj.jzxx.net',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -133,46 +133,3 @@ SIMPLEUI_HOME_INFO =False
 SIMPLEUI_ANALYSIS=False
 
 
-SIMPLEUI_CONFIG = {
-    # 是否使用系统默认菜单，自定义菜单时建议关闭。
-    'system_keep': False,
-
-    # 用于菜单排序和过滤, 不填此字段为默认排序和全部显示。空列表[] 为全部不显示.
-    'menu_display': ['用户信息管理','权限认证'],
-
-    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时刷新展示菜单内容。
-    # 一般建议关闭。
-    'dynamic': False,
-    'menus': [
-        {
-            'app': 'auth',
-            'name': '权限认证',
-            'icon': 'fas fa-user-shield',
-            'models': [
-                {
-                    'name': '管理用户列表',
-                    'icon': 'fa fa-user-secret',
-                    'url': 'auth/user/'
-                },
-                {
-                    'name': '用户组',
-                    'icon': 'fa fa-th-list',
-                    'url': 'auth/group/'
-                }
-            ]
-        },
-
-        {
-            'name': '用户信息管理',
-            'icon': 'fa fa-user-md',
-            'models': [
-                {
-                    'name': '普通用户列表',
-                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
-                    'url': '/admin/user/users/',
-                    'icon': 'fa fa-user'
-                },
-            ]
-        },
-    ]
-}
