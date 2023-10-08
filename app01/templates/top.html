@@ -128,14 +128,14 @@
       <h1 class="heading"> our menu </h1>
    
       <div class="container box-container">
-   
+
          <div class="box">
             <img src="../static/img/zhihu.svg" alt="zhihu" width="90px">
             <h3>Zhihu Topics</h3>
             <p>The recommendation of Zhihu topics college students interested in.</p>
             <a href="#" class="link-btn">view more</a>
          </div>
-   
+
          <div class="box">
             <img src="../static/img/github.svg" alt="github" width="70px">
             <h3>Github Trendings</h3>
@@ -176,13 +176,7 @@
    </section>
 
 
-    {% for obj in zhihuHotTopic %}
-        <h3>{{ obj.0 }}{{ obj.1 }}</h3>
-        <a href="{{obj.2}}">
-            {% autoescape off %}
-            {{ obj.3 }}
-            {% endautoescape %}</a>
-    {% endfor %}
+
 
 <section class="previews" id="previews">
 
@@ -194,14 +188,19 @@
    </script></h3>
 
    <div class="box-container container">
-         
-      <div class="box">
-         <div class="content">
-            <h3>知乎</h3>
-            <p>{{ obj.0 }}{{ obj.1 }}</p>
-            <a href="https://www.zhihu.com/question/624350845" class="link-btn">view more</a>
+
+       {% for obj in zhihuHotTopic%}
+         <div class="box">
+            {% autoescape off %}
+            {{ obj.3 }}
+            {% endautoescape %}
+            <div class="content">
+               <h3>{{ obj.0 }}{{ obj.1 }}</h3>
+               <a href="{{obj.2}}" class="link-btn">view more</a>
+            </div>
          </div>
-      </div>
+         {% endfor %}
+
 
       <div class="box">
          <video src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" data-canonical-src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2  width-fit" style="max-height:150px; min-height: 0px" autoplay>

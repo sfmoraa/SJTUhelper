@@ -15,7 +15,8 @@ def user_list(request):
     return render(request, "user_list.html")
 
 def top(request):
-    return render(request, "top.html")
+    reducedHotTopics = gpt_filter('zhihu', cue="")
+    return render(request, "top.html", {"zhihuHotTopic": reducedHotTopics})
 
 def user_add(request):
     return HttpResponse("添加用户")
