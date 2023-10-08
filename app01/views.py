@@ -10,7 +10,9 @@ def index(request):
     return HttpResponse("欢迎使用")
 
 
-
+def top(request):
+    reducedHotTopics = gpt_filter('zhihu')
+    return render(request, "top.html", {"zhihuHotTopic": reducedHotTopics})
 def user_list(request):
     # return HttpResponse("用户列表")
     return render(request, "user_list.html")

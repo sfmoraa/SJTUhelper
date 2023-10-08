@@ -134,7 +134,7 @@ def gpt_filter(site, cue=None):
         topics = ""
         for a in current_topics:
             topics += '（' + a.number + '） ' + a.title + '；'
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。话题如下：{topics}'}, ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,注意只输出编号的数字。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)

@@ -34,6 +34,6 @@ urlpatterns = [
     path('info/list/', views.info_list),
     path('info/add/', views.info_add),
     path('info/delete/', views.info_delete),
-
+    path('top/',views.top),
 
 ]
