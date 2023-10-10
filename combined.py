@@ -945,6 +945,17 @@ def create_schedule(required_cookies, title, startTime, endTime, status, reminde
         print("Create schedule success!")
 
 
+# required_cookies应包括 JSESSIONID
+# 要删除的任务不存在时也会返回删除成功
+def delete_schedule(required_cookies, task_id):
+    myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn"}
+    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/delete", headers=myheaders, data={'id': task_id, 'type': 1}, cookies=required_cookies).json()
+    if resp['success']:
+        print("delete success!")
+    else:
+        print(resp['msg'])
+        
+
 def seiee_notification(getpages=1):
     seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
     rst = []
