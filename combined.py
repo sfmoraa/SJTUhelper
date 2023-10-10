@@ -451,6 +451,20 @@ def auto_jaccount_authorize(location, username, password):
             resp_from_oauth = oauth_session.get(location, headers=myheaders_for_oauth)
             oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
             resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin', headers=myheaders_for_oauth, data=data, allow_redirects=False)
+            err_type=re.search(r'err=(.*)$', resp_from_ulogin.headers['Location'])
+            if err_type is None:
+                pass
+            elif err_type.group(1)=='0':
+                print("Wrong username or password! Recheck!")
+                exit(114514)
+            elif err_type.group(1)=='1':
+                print("Wrong Captcha, retrying!")
+                continue
+            elif err_type.group(1)=='16':
+                print("Wrong too many times, please wait a moment")
+            else:
+                print("Other error")
+                continue
             resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
             resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
             break
@@ -458,6 +472,8 @@ def auto_jaccount_authorize(location, username, password):
             print("oops!retrying...")
             continue
     return oauth_session.cookies, resp_from_oauth2_authorize.headers['Location']
+
+
 def process_captcha_and_GA(resp, session, username, password):
     captcha_id = re_search(r'img.src = \'captcha\?(.*)\'', resp.text)
     if not captcha_id:
