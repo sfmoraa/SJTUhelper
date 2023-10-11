@@ -525,6 +525,8 @@ def _get_GA():
         global_GA_cookie.append({'name': '_ga_QP6YR9D8CK', 'path': '/', 'value': "GS1.3." + str(int(time())) + ".31.0." + str(int(time())) + ".0.0.0"})
         driver.quit()
     return global_GA_cookie
+
+
 def dekt():
     global global_GA_cookie
     myheaders_for_dekt = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "dekt.sjtu.edu.cn"}
@@ -539,9 +541,8 @@ def dekt():
     else:
         oauth_session = requests.Session()
         dekt_session = requests.Session()
-        for cookie in global_GA_cookie:
-            oauth_session.cookies.set_cookie(cookie)
-            dekt_session.cookies.set_cookie(cookie)
+        oauth_session.cookies.update(global_GA_cookie)
+        dekt_session.cookies.update(global_GA_cookie)
         jump_url = oauth_session.get(dekt_login_url, headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}).request.url
 
     myheaders_for_dekt['Content-Type'] = "application/json"
@@ -776,11 +777,11 @@ def canvas():
 
     else:
         oc_session.cookies.update(global_GA_cookie)
-        resp=oc_session.get(canvas_login_url, headers=myheaders_for_oc)
-        resp=resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
+        resp = oc_session.get(canvas_login_url, headers=myheaders_for_oc)
+        resp = resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
         oauth_session = requests.Session()
         oauth_session.cookies.update(global_GA_cookie)
-        initial_url=resp.headers['Location']
+        initial_url = resp.headers['Location']
         while True:
             response = oauth_session.get(initial_url, headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}, allow_redirects=False)
             if response.status_code == 302:
@@ -906,16 +907,16 @@ def shuiyuan():
 
 def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今天而言
     global global_GA_cookie
+    mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
+    default_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "my.sjtu.edu.cn"}
+    myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
+    oauth_session = requests.Session()
     if global_GA_cookie is None:
         username = input('Username: ')
         password = input('Password: ')
-        mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
-        default_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "my.sjtu.edu.cn"}
         mysjtu_session = requests.Session()
         resp_from_mysjtu = mysjtu_session.get(mysjtu_url, headers=default_headers, allow_redirects=False)
         resp_from_mysjtu = mysjtu_session.get("https://my.sjtu.edu.cn" + resp_from_mysjtu.headers['Location'], headers=default_headers, allow_redirects=False)
-        oauth_session = requests.Session()
-        myheaders_for_oauth = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}
         while True:
             try:
                 resp_from_oauth = oauth_session.get(resp_from_mysjtu.headers['Location'], headers=myheaders_for_oauth)
@@ -927,15 +928,17 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
             except Exception:
                 print("oops!retrying...")
                 continue
+        global_GA_cookie = mysjtu_session.cookies
         mysjtu_session.cookies.update(oauth_session.cookies)
         mysjtu_session.get(resp_from_oauth2_authorize.headers['Location'], headers=default_headers)
-        global_GA_cookie = mysjtu_session.cookies
+
 
     else:
-        username = "数据库里的username"
+        oauth_session.cookies.update(global_GA_cookie)
+        username = 数据库内用户名
 
     calendar_session = requests.Session()
-    calendar_session.cookies.update((mysjtu_session.cookies))
+    calendar_session.cookies.update(global_GA_cookie)
     calendar_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn"}
     aa = calendar_session.get("https://calendar.sjtu.edu.cn/?tenantUserId=" + username, headers=calendar_headers, allow_redirects=False)
     aa = calendar_session.get(aa.headers['Location'], headers=calendar_headers, allow_redirects=False)
