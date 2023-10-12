@@ -1,21 +1,7 @@
 from django.db import models, OperationalError
 import pymysql
+from django.contrib.auth.models import User
 print("models running")
-# Create your models here.
-class UserInfo(models.Model):
-    name = models.CharField(max_length=32)
-    password = models.CharField(max_length=64)
-    age = models.IntegerField(default=20)
-
-class Department(models.Model):
-    title = models.CharField(max_length=16)
-
-class Role(models.Model):
-    caption = models.CharField(max_length=16)
-
-class collection(models.Model):
-    source=models.CharField(max_length=64)
-
 class zhihu(models.Model):
     number=models.CharField(max_length=10,default='')
     title=models.CharField(max_length=500,default='')
@@ -233,3 +219,66 @@ def insert_dynamic_model_calendar(table_name,title,starttime,endtime,location,js
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
+
+def create_dynamic_model_canvas(table_name):
+    table_name='canvas_'+table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用cursor()方法获取操作游标
+    cursor = db.cursor()
+    # 创建表格
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS `{}` (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            due_at VARCHAR(100),
+            submit VARCHAR(100),
+            plannable_id VARCHAR(100),
+            course_id_name_dict VARCHAR(100),
+            descript VARCHAR(500),
+            _name VARCHAR(100),
+            html_url VARCHAR(100)
+        )
+        """.format(table_name)
+
+    cursor.execute(create_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
+
+def delete_dynamic_model_canvas(table_name):
+    table_name='canvas_'+table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    # 执行 SQL 语句
+    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    cursor.execute(drop_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+def insert_dynamic_model_canvas(table_name,due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url):
+    # 打开数据库连接
+    table_name='canvas_'+table_name
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    insert_data_query = """
+        INSERT INTO `{}` (due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url)
+        VALUES
+            ('{}', '{}', '{}', '{}', '{}', '{}', '{}');
+        """.format(table_name, due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url)
+
+    print(insert_data_query)
+
+    cursor.execute(insert_data_query)
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
