@@ -16,6 +16,7 @@
 
    <!-- custom css file link  -->
    <link rel="stylesheet" href="{% static 'css/style_main.css' %}">
+   <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
 
 
 </head>
@@ -28,18 +29,20 @@
    <div class="container">
 
       <div class="row align-items-center">
+          <a href="#" class="logo mr-auto"> <i class="fas fa-mug-hot"></i> coffee </a>
 
-         <a href="#" class="logo mr-auto"> <i class="fas fa-mug-hot"></i> coffee </a>
+          <div class="key" id="key">
+              <form method="post">
+                  {% csrf_token %}
+                  <label style="color: white">关键词:</label>
+                  <input type="text" name="key" style="width:70%" value={{ key }} />
 
-         <nav class="nav">
-            <a href="#home">home</a>
-            <a href="#about">about</a>
-            <a href="#menu">menu</a>
-            <a href="#gallery">gallery</a>
-            <a href="#reviews">reviews</a>
-            <a href="#contact">contact</a>
-            <a href="#blogs">blogs</a>
-         </nav>
+                  <input type="submit" value="Submit">
+                  <span style="color: red"> {{ error_msg }} </span>
+              </form>
+          </div>
+
+
 
          <div class="icons">
             <div id="menu-btn" class="fas fa-bars"></div>
@@ -84,6 +87,9 @@
 
 
 
+
+
+
 <div>
 
    <!-- options section starts here -->
@@ -103,9 +109,13 @@
 
 
     <div class="container111">
+
+
+
+
+
+
         <h1>info list</h1>
-
-
 
         <div class="block-custom-large">
             {% for obj in zhihuHotTopic %}

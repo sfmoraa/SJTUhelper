@@ -5,6 +5,7 @@ print("views running")
 from combined import *
 import pandas as pd
 
+
 # Create your views here.
 def index(request):
     return HttpResponse("欢迎使用")
@@ -21,7 +22,7 @@ def user_add(request):
 
 
 def mytest(request):
-    reducedHotTopics = gpt_filter('zhihu',cue="")
+    reducedHotTopics = gpt_filter('zhihu', cue="")
     return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics})
 
 
@@ -113,6 +114,16 @@ def info_delete(request):
     # return HttpResponse("删除成功")
     return redirect("http://127.0.0.1:8000/info/list/")
 
+
 def main(request):
-    reducedHotTopics = gpt_filter('zhihu',cue="")
-    return render(request, "main.html", {"zhihuHotTopic": reducedHotTopics})
+    if request.method == "GET":
+        reducedHotTopics = gpt_filter('zhihu', cue="")
+        return render(request, "main.html",
+                      {"zhihuHotTopic": reducedHotTopics, "key": "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"})
+    else:
+        key = request.POST.get("key")
+        print(key)
+
+        reducedHotTopics = gpt_filter('zhihu', cue=key)
+        return render(request, "main.html", {"zhihuHotTopic": reducedHotTopics, "key": key})
+
