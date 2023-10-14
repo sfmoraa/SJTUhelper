@@ -14,8 +14,7 @@ from selenium.webdriver.chrome.options import Options
 import json
 import os
 import http.cookiejar
-
-# from app01.models import  UserInfo,collection,zhihu,github,bilibili,weibo,dektinfo
+from app01.models import *
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
 
@@ -990,8 +989,8 @@ def shuiyuan():
                 tags += data
             item['tags'] = tags
         insert_dynamic_model_shuiyuan(table_name=username, ref=ref, title=item['title'], posts_count=item['posts_count'], reply_count=item['reply_count'], unseen=item['unseen'], shuiyuan_category_dict=shuiyuan_category_dict[str(item['category_id'])], tags=item['tags'], views=item['views'])
-    仅当category字典需要更新时才调用此函数
-    update_shuiyuan_category(shuiyuan_session,default_headers)
+    # 仅当category字典需要更新时才调用此函数
+    # update_shuiyuan_category(shuiyuan_session,default_headers)
     print("shuiyuan success!!!")
     return 1
 
@@ -1029,7 +1028,7 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
     else:
         print("already logged in, entering [mysjtu]")
         oauth_session.cookies.update(global_GA_cookie)
-        username = 数据库内用户名
+        # username = 数据库内用户名
 
     calendar_session = requests.Session()
     calendar_session.cookies.update(global_GA_cookie)

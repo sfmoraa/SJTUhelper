@@ -4,15 +4,21 @@ from django.contrib.auth.models import User
 from django.contrib import auth
 print("views running")
 from combined import *
-import pandas as pd
+from django.core.mail import send_mail
+from django.contrib import messages
 
 # Create your views here.
+def index(request):
+    return HttpResponse("欢迎使用")
+
+
+
 
 
 
 def mytest(request):
     if not request.user.is_authenticated:
-        return HttpResponse("未登录")
+        return redirect("http://127.0.0.1:8000/login/")
     print(request.user.username)
     # get_zhihu_hot_topic(cookie =  '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
     # get_github_trending()
@@ -92,6 +98,7 @@ def login(request):
         if not user_obj:
             return render(request, 'login.html', {'error_message': '用户名或密码不正确'})
         else:
+            print(user_obj.is_active)
             print(user_obj.username)
             auth.login(request, user_obj)
             return redirect("https://www.sjtu.edu.cn")
@@ -102,20 +109,51 @@ def login(request):
 
 
 
-
-
-
-
-
 def info_add(request):
-    if request.method == "GET":
+    if request.method == "POST":
+        username = request.POST.get("user")
+        pwd = request.POST.get("pwd")
+        email = request.POST.get("email")
+        # user = User.objects.create_user(username=username, email=email, password=pwd)
+        user = User(username=username, email=email)
+        user.set_password(pwd)
+        user.is_active = False  # 设置用户状态为未激活
+        user.save()
+        send(request,user,email)
+        # return HttpResponse("添加成功")
+        #return redirect("http://127.0.0.1:8000/info/list/")
+        return HttpResponse('请点击邮箱链接验证')
+    else:
         return render(request, "info_add.html")
-    user = request.POST.get("user")
-    pwd = request.POST.get("pwd")
-    User.objects.create_user(username=user, password=pwd)
-    # create_dynamic_model_collection(table_name=user.rstrip("\n"))
-    # return HttpResponse("添加成功")
-    return redirect("http://127.0.0.1:8000/info/list/")
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes,force_str
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+
+        # 在这里可以执行其他激活成功后的操作，例如重定向到登录页面
+        return redirect("http://127.0.0.1:8000/login/")
+    else:
+        # 处理激活失败的情况，例如显示一个错误页面
+        return render(request, 'info_add.html')
+
+
 
 
 def info_delete(request):
@@ -124,3 +162,18 @@ def info_delete(request):
     User.objects.filter(id=nid).delete()
     # return HttpResponse("删除成功")
     return redirect("http://127.0.0.1:8000/info/list/")
+
+def log_out(request):
+    auth.logout(request)
+
+
+def send(request,user,email):
+    current_site = get_current_site(request)
+    # 发送激活邮件
+    mail_subject = '激活您的账号'
+    activation_link = f"http://{current_site.domain}/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}/"
+    message = render_to_string('activation_email.html', {
+        'user': user,
+        'activation_link': activation_link,
+    })
+    send_mail(mail_subject, message, '1761280008@qq.com', [email])

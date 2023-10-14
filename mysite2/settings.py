@@ -131,3 +131,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SIMPLEUI_HOME_INFO =False
 SIMPLEUI_ANALYSIS=False
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = '发送的邮箱可以暂时写自己的'
+EMAIL_HOST_PASSWORD = '一个密钥，在邮箱的客户端授权获得'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

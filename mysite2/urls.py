@@ -26,6 +26,6 @@ urlpatterns = [
     path('login/', views.login),
     path('info/add/', views.info_add),
     path('info/delete/', views.info_delete),
-
+    path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
 
 ]
