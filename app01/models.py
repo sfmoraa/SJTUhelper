@@ -13,7 +13,6 @@ class github(models.Model):
     title=models.CharField(max_length=500)
     description=models.CharField(max_length=500)
     href=models.URLField(max_length=500)
-
 class bilibili(models.Model):
     rank=models.IntegerField(default=1)
     pic_href=models.CharField(max_length=500,default='')

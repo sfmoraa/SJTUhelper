@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, HttpResponse, redirect
 from app01.models import *
 from django.contrib.auth.models import User
@@ -86,45 +87,12 @@ def something(request):
     # return redirect("https://www.sjtu.edu.cn")
 
 
-def login(request):
-    if request.method == "GET":
-        return render(request, "login.html")
-    else:
-        # print(request.POST)
-        username = request.POST.get("user")
-        password = request.POST.get("pwd")
-        user_obj = auth.authenticate(username=username, password=password)
-
-        if not user_obj:
-            return render(request, 'login.html', {'error_message': '用户名或密码不正确'})
-        else:
-            print(user_obj.is_active)
-            print(user_obj.username)
-            auth.login(request, user_obj)
-            return redirect("https://www.sjtu.edu.cn")
-            # 用户名或密码不正确，返回登录页面并显示错误信息
 
 
 
 
 
 
-def info_add(request):
-    if request.method == "POST":
-        username = request.POST.get("user")
-        pwd = request.POST.get("pwd")
-        email = request.POST.get("email")
-        # user = User.objects.create_user(username=username, email=email, password=pwd)
-        user = User(username=username, email=email)
-        user.set_password(pwd)
-        user.is_active = False  # 设置用户状态为未激活
-        user.save()
-        send(request,user,email)
-        # return HttpResponse("添加成功")
-        #return redirect("http://127.0.0.1:8000/info/list/")
-        return HttpResponse('请点击邮箱链接验证')
-    else:
-        return render(request, "info_add.html")
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -148,7 +116,7 @@ def activate(request, uidb64, token):
         user.save()
 
         # 在这里可以执行其他激活成功后的操作，例如重定向到登录页面
-        return redirect("http://127.0.0.1:8000/login/")
+        return redirect("http://127.0.0.1:8000/loginpage/")
     else:
         # 处理激活失败的情况，例如显示一个错误页面
         return render(request, 'info_add.html')
@@ -156,12 +124,7 @@ def activate(request, uidb64, token):
 
 
 
-def info_delete(request):
-    nid = request.GET.get("nid")
-    # delete_dynamic_model_collection(UserInfo.objects.filter(id=nid).first().name)
-    User.objects.filter(id=nid).delete()
-    # return HttpResponse("删除成功")
-    return redirect("http://127.0.0.1:8000/info/list/")
+
 
 def log_out(request):
     auth.logout(request)
@@ -176,4 +139,39 @@ def send(request,user,email):
         'user': user,
         'activation_link': activation_link,
     })
-    send_mail(mail_subject, message, '1761280008@qq.com', [email])
+    send_mail(mail_subject, message, '自己的邮箱', [email])
+def loginpage(request):
+    if request.method == "GET":
+        return render(request, "sign.html")
+    else:
+        # print(request.POST)
+        if 'signin' in request.POST:
+            username = request.POST.get("signin_usr")
+            password = request.POST.get("signin_pwd")
+            user_obj = auth.authenticate(username=username, password=password)
+
+            if not user_obj:
+                return render(request, 'sign.html', {'error_message': '用户名或密码不正确'})
+            else:
+                print(user_obj.is_active)
+                print(user_obj.username)
+                auth.login(request, user_obj)
+                return redirect("https://www.sjtu.edu.cn")
+
+            # 用户名或密码不正确，返回登录页面并显示错误信息
+        if 'signup' in request.POST:
+            username = request.POST.get("signup_usr")
+            pwd = request.POST.get("signup_pwd")
+            repwd = request.POST.get("signup_repwd")
+            email = request.POST.get("email")
+
+            if User.objects.filter(username=username):
+                return render(request, "sign.html", {'error1': '用户名重复'})
+            if pwd != repwd:
+                return render(request, "sign.html", {'error2': "两次密码不一致"})
+            user = User(username=username, email=email)
+            user.set_password(pwd)
+            user.is_active = False  # 设置用户状态为未激活
+            user.save()
+            send(request, user, email)
+            return HttpResponse('请点击邮箱链接验证')
