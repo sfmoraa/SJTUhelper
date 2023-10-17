@@ -753,6 +753,11 @@ def dekt():
     myheaders_for_dekt['Content-Type'] = "application/json"
     resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
+    if resp_from_dekt.json()['code']==1:
+        global_GA_cookie = None
+        print("Cookies expired! Please login again!")
+        dekt()
+        return
     token = resp_from_dekt.json()['data']['token']
     myheaders_for_dekt.update({'Jtoken': resp_from_dekt.json()['data']['jtoken'], 'Curuserid': "null"})
     rst = []
@@ -1003,6 +1008,11 @@ def canvas():
 
     resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
     planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
+    if planner_data.status_code != 200:
+        global_GA_cookie=None
+        print("Cookies expired! Please login again!")
+        canvas()
+        return
     json_data = json.loads(planner_data.text[9:])
     delete_dynamic_model_canvas(username)
     create_dynamic_model_canvas(username)
@@ -1101,6 +1111,11 @@ def shuiyuan():
     shuiyuan_session.cookies.update(global_GA_cookie)
     resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
+    if resp_from_latest.status_code !=200:
+        global_GA_cookie = None
+        print("Cookies expired! Please login again!")
+        shuiyuan()
+        return
     infos = resp_from_latest.json()['topic_list']['topics']
     create_dynamic_model_shuiyuan(username)
     for index, item in enumerate(infos):
@@ -1173,6 +1188,11 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
     aa = calendar_session.get(redirect_url, headers=calendar_headers)
     next_week_calendar_url = "https://calendar.sjtu.edu.cn/api/event/list?startDate=" + strftime("%Y-%m-%d", localtime(time() + (beginfrom * 24 * 60 * 60))) + "+00:00&endDate=" + strftime("%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
+    if calendar_list.status_code != 200:
+        global_GA_cookie = None
+        print("Cookies expired! Please login again!")
+        mysjtu_calendar()
+        return
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username,title=event["title"],starttime=event["startTime"],endtime=event["endTime"],location=event["location"],json_detail_url="https://calendar.sjtu.edu.cn/api/event/detail?id=" + event['eventId'])
