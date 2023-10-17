@@ -1014,6 +1014,7 @@ def canvas():
         canvas()
         return
     json_data = json.loads(planner_data.text[9:])
+    create_dynamic_model_canvas(username)
     delete_dynamic_model_canvas(username)
     create_dynamic_model_canvas(username)
     for item in json_data:
@@ -1118,6 +1119,8 @@ def shuiyuan():
         return
     infos = resp_from_latest.json()['topic_list']['topics']
     create_dynamic_model_shuiyuan(username)
+    delete_dynamic_model_shuiyuan(username)
+    create_dynamic_model_shuiyuan(username)
     for index, item in enumerate(infos):
         ref = "https://shuiyuan.sjtu.edu.cn/t/topic/" + str(item['id'])
         if 'last_read_post_number' in item:
@@ -1193,6 +1196,8 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
         print("Cookies expired! Please login again!")
         mysjtu_calendar()
         return
+    create_dynamic_model_calendar(username)
+    delete_dynamic_model_calendar(username)
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username,title=event["title"],starttime=event["startTime"],endtime=event["endTime"],location=event["location"],json_detail_url="https://calendar.sjtu.edu.cn/api/event/detail?id=" + event['eventId'])
