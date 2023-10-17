@@ -233,7 +233,7 @@ def create_dynamic_model_canvas(table_name):
             submit VARCHAR(100),
             plannable_id VARCHAR(100),
             course_id_name_dict VARCHAR(100),
-            descript VARCHAR(500),
+            descript TEXT,
             _name VARCHAR(100),
             html_url VARCHAR(100)
         )
@@ -273,7 +273,66 @@ def insert_dynamic_model_canvas(table_name,due_at, submit, plannable_id, course_
             ('{}', '{}', '{}', '{}', '{}', '{}', '{}');
         """.format(table_name, due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url)
 
-    print(insert_data_query)
+
+    cursor.execute(insert_data_query)
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
+
+def create_dynamic_model_cookies(table_name):
+    table_name='cookies_'+table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用cursor()方法获取操作游标
+    cursor = db.cursor()
+    # 创建表格
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS `{}` (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(100),
+            value TEXT,
+            domain VARCHAR(100),
+            path VARCHAR(100),
+            secure VARCHAR(10)
+        )
+        """.format(table_name)
+
+    cursor.execute(create_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
+
+def delete_dynamic_model_cookies(table_name):
+    table_name='cookies_'+table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    # 执行 SQL 语句
+    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    cursor.execute(drop_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+def insert_dynamic_model_cookies(table_name,name, value, domain, path, secure):
+    # 打开数据库连接
+    table_name='cookies_'+table_name
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    insert_data_query = """
+        INSERT INTO `{}` (name, value, domain, path, secure)
+        VALUES
+            ('{}', '{}', '{}', '{}', '{}');
+        """.format(table_name, name,value,domain,path,secure)
+
 
     cursor.execute(insert_data_query)
     db.commit()

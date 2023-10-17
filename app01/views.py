@@ -29,27 +29,27 @@ def mytest(request):
     # shuiyuan()
     # mysjtu_calendar()
     # get_minhang_24h_weather()
-    # canvas()
+    canvas()
     # reducedHotTopics1 = gpt_filter('zhihu',cue="我对军事政治不感兴趣")
     # reducedHotTopics2 = gpt_filter('github',cue=None)
     # reducedHotTopics3 = gpt_filter('bilibili',cue="我想获得小于10条内容")
     # reducedHotTopics4 = gpt_filter('weibo')
     # reducedHotTopics5 = gpt_filter('shuiyuan_zt-785')
-    # reducedHotTopics6 = gpt_filter('calendar_zt-785')
-    # reducedHotTopics7 = gpt_filter("dekt",cue=None)
-    # reducedHotTopics8 = gpt_filter("seiee_notion")
-    # reducedHotTopics9 = gpt_filter("minhang_weather")
-    # reducedHotTopics10 = gpt_filter('canvas_zt-785')
+    reducedHotTopics6 = gpt_filter('calendar_zt-785')
+    reducedHotTopics7 = gpt_filter("dekt",cue=None)
+    reducedHotTopics8 = gpt_filter("seiee_notion")
+    reducedHotTopics9 = gpt_filter("minhang_weather")
+    reducedHotTopics10 = gpt_filter('canvas_zt-785')
     reducedHotTopics1 = []
     reducedHotTopics2 = []
     reducedHotTopics3 = []
     reducedHotTopics4 = []
     reducedHotTopics5 = []
-    reducedHotTopics6 = []
-    reducedHotTopics7 = []
-    reducedHotTopics8 = []
-    reducedHotTopics9 = []
-    return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics1,"github":reducedHotTopics2,"bilibili":reducedHotTopics3,"weibo":reducedHotTopics4,"shuiyuan":reducedHotTopics5,"calendar":reducedHotTopics6,"dekt":reducedHotTopics7,"seiee_notion":reducedHotTopics8,"minhang_weather":reducedHotTopics9})
+    # reducedHotTopics6 = []
+    # reducedHotTopics7 = []
+    # reducedHotTopics8 = []
+    # reducedHotTopics9 = []
+    return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics1,"github":reducedHotTopics2,"bilibili":reducedHotTopics3,"weibo":reducedHotTopics4,"shuiyuan":reducedHotTopics5,"calendar":reducedHotTopics6,"dekt":reducedHotTopics7,"seiee_notion":reducedHotTopics8,"minhang_weather":reducedHotTopics9,"canvas":reducedHotTopics10})
 
 
 def tpl(request):

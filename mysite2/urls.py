@@ -20,12 +20,8 @@ from app01 import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tpl/', views.tpl),
     path('mytest/',views.mytest),
-    path('something/', views.something),
-    path('login/', views.login),
-    path('info/add/', views.info_add),
-    path('info/delete/', views.info_delete),
     path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
+    path('loginpage/', views.loginpage),
 
 ]

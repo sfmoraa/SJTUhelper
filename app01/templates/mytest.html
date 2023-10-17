@@ -115,5 +115,21 @@
         </script>
     {% endfor %}
 </table>
+<table border="1">
+    {% for obj in canvas %}
+        <h3>{{ obj.0 }}</h3>
+       <h3>截止时间：{{ obj.1 }}</h3>
+
+        <h3>是否提交：{{ obj.2 }}
+        <h3>课程号：{{ obj.3 }}           课程名称{{ obj.4 }}</h3>
+
+        <a href="{{obj.7}}">
+        {% autoescape off %}
+            {{ obj.6 }}
+            {% endautoescape %}
+        </a>
+        <h3>作业内容：{{ obj.5 }}</h3>
+    {% endfor %}
+</table>
 </body>
 </html>
