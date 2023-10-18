@@ -1,6 +1,4 @@
-import csv
 import random
-
 import requests
 import openai
 import pandas as pd
@@ -9,15 +7,16 @@ from lxml import etree
 from time import time, localtime, strftime, mktime, strptime
 from PIL import Image, ImageEnhance
 import pytesseract
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 import json
 import os
 import http.cookiejar
 from app01.models import *
 from django.utils.safestring import mark_safe
+
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
+
+
 def gpt_35_api_stream(messages: list):
     try:
         response = openai.ChatCompletion.create(
@@ -94,7 +93,6 @@ def get_zhihu_hot_topic(cookie):
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Kmyhtml, like Gecko) Chrome/113.0.5672.127  Safari/537.36',
         'cookie': cookie
     }
-    rst = []
     response = requests.get(zhihu_url, headers=zhihu_headers)
     text = response.text
     myhtml = etree.HTML(text)
@@ -109,38 +107,26 @@ def get_zhihu_hot_topic(cookie):
             picture_element = etree.tostring(picture_path[0], encoding='unicode')
         else:
             picture_element = ''
-        # print(number, title, href, picture_element)
         zhihu.objects.create(number=number, title=title, href=href, picture_element=picture_element)
-        # rst.append([number, title, href, picture_element])
-    # pd.DataFrame(columns=['number', 'title', 'href', 'picture_element'], data=rst).to_csv('zhihuHotTopics.csv', encoding='gbk')
 
 
 def get_bilibili_ranking():
     bilibili_url = 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all'
-    rst = []
     items = requests.get(bilibili_url).json()['data']['list']
     bilibili.objects.all().delete()
     for index, item in enumerate(items):
         bilibili.objects.create(rank=index + 1, pic_href=item['pic'], title=item['title'], tname=item['tname'], link=item['short_link_v2'])
-    #     rst.append([index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2']])
-    #     print(index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2'])
-    # pd.DataFrame(columns=['rank', 'pic_href', 'title', 'tname', 'link'], data=rst).to_csv('bilibiliRanking.csv')
-
-
-def get_gold_price():
-    pass
 
 
 def gpt_filter(site, cue=None):
     if site == "zhihu":
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
-        # current_topics = pd.read_csv('zhihuHotTopics.csv', encoding='gbk')
         current_topics = zhihu.objects.all()
         topics = ""
         for a in current_topics:
             topics += '（' + a.number + '） ' + a.title + '；'
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。话题如下：{topics}'}, ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -156,11 +142,11 @@ def gpt_filter(site, cue=None):
             cue = "与python相关的"
         current_topics = github.objects.all()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.title + '；'
-            i=i+1
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。话题如下：{topics}'}, ]
+            topics += '(' + str(i) + ') ' + a.title + '；'
+            i = i + 1
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -179,9 +165,9 @@ def gpt_filter(site, cue=None):
         topics = ""
 
         for a in current_topics:
-            topics += '('+str(a.rank)+') '+a.tname + '；'
+            topics += '(' + str(a.rank) + ') ' + a.tname + '；'
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -191,19 +177,19 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href,current_topics[index-1].link])
+                content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href, current_topics[index - 1].link])
             return content
     elif site == 'weibo':
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         current_topics = weibo.objects.all()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.title + '；'
-            i+=1
+            topics += '(' + str(i) + ') ' + a.title + '；'
+            i += 1
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -213,19 +199,19 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index-1].link])
+                content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index - 1].link])
             return content
     elif site == 'dekt':
         if cue is None:
             cue = "电院青志队组织的或者校青志队组织的活动"
         current_topics = dektinfo.objects.all()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.category+":"+a.activity_name + '；'
-            i+=1
+            topics += '(' + str(i) + ') ' + a.category + ":" + a.activity_name + '；'
+            i += 1
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -235,20 +221,21 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].category, current_topics[index - 1].item_id, current_topics[index-1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time, current_topics[index - 1].enroll_start_time, current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
-            content.sort(key=lambda x:x[5])
+                content.append([current_topics[index - 1].category, current_topics[index - 1].item_id, current_topics[index - 1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time, current_topics[index - 1].enroll_start_time,
+                                current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
+            content.sort(key=lambda x: x[5])
             return content
     elif site == 'seiee_notion':
         if cue is None:
             cue = "和学生工作相关的内容"
         current_topics = seieeNotification.objects.all()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.name+'；'
-            i+=1
+            topics += '(' + str(i) + ') ' + a.name + '；'
+            i += 1
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -258,7 +245,7 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index-1].href])
+                content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index - 1].href])
             return content
     elif site == 'minhang_weather':
         if cue is None:
@@ -268,28 +255,28 @@ def gpt_filter(site, cue=None):
         # i=1
         content = []
         for a in current_topics:
-        #     topics += '('+str(i)+') '+a.weather_text+'；'
-        #     i+=1
-        # print(topics)
-        # messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
-        # ans = gpt_35_api_stream(messages)
-        # if ans[0] != True:
-        #     print("gpt调用异常！！！！！", ans)
-        #     return 0
-        # else:
-        #     content = []
-        #     numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
+            #     topics += '('+str(i)+') '+a.weather_text+'；'
+            #     i+=1
+            # print(topics)
+            # messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'} ]
+            # ans = gpt_35_api_stream(messages)
+            # if ans[0] != True:
+            #     print("gpt调用异常！！！！！", ans)
+            #     return 0
+            # else:
+            #     content = []
+            #     numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             # for index in numbers:
             #     content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index-1].href])
             # return content
-            content.append([a.Name_of_weather_picture,a.weather_text,a.temperature,a.wind_direction,a.wind_strength,a.hour])
+            content.append([a.Name_of_weather_picture, a.weather_text, a.temperature, a.wind_direction, a.wind_strength, a.hour])
         return content
     elif 'shuiyuan' in site:
         if cue is None:
             cue = "学业考试相关，八卦相关的"
         topics = ""
-        current_topics=[]
+        current_topics = []
         db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
         # 使用cursor()方法获取操作游标
         cursor = db.cursor()
@@ -303,9 +290,9 @@ def gpt_filter(site, cue=None):
                 break
             topics += '(' + str(i) + ') ' + str(row[2].encode('utf-8')) + '；'
             current_topics.append(row)
-            i+=1
+            i += 1
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我的筛选标准是“{cue}”，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。请注意只输出编号的数字，例如，输出“1,4,6”。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -315,13 +302,13 @@ def gpt_filter(site, cue=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1][1], current_topics[index-1][2], current_topics[index-1][3], current_topics[index-1][4], current_topics[index-1][5], current_topics[index-1][6], current_topics[index-1][7], current_topics[index-1][8]])
+                content.append([current_topics[index - 1][1], current_topics[index - 1][2], current_topics[index - 1][3], current_topics[index - 1][4], current_topics[index - 1][5], current_topics[index - 1][6], current_topics[index - 1][7], current_topics[index - 1][8]])
             return content
     elif 'calendar' in site:
         if cue is None:
             cue = "学业"
         topics = ""
-        current_topics=[]
+        current_topics = []
         db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
         # 使用cursor()方法获取操作游标
         cursor = db.cursor()
@@ -334,16 +321,16 @@ def gpt_filter(site, cue=None):
                 break
 
             current_topics.append(row)
-        content=[]
-        length=len(current_topics)+1
-        for index in range(1,length):
-            content.append([current_topics[index - 1][1], current_topics[index-1][2], current_topics[index-1][3], current_topics[index-1][4], current_topics[index-1][5]])
+        content = []
+        length = len(current_topics) + 1
+        for index in range(1, length):
+            content.append([current_topics[index - 1][1], current_topics[index - 1][2], current_topics[index - 1][3], current_topics[index - 1][4], current_topics[index - 1][5]])
         content.sort(key=lambda x: x[1])  # 根据第一个字符串进行排序
         return content
     elif 'canvas' in site:
         if cue is None:
             cue = "学业"
-        current_topics=[]
+        current_topics = []
         db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
         # 使用cursor()方法获取操作游标
         cursor = db.cursor()
@@ -361,86 +348,14 @@ def gpt_filter(site, cue=None):
             current_topics.append(row)
         current_topics.sort(key=lambda x: x[0])  # 根据第一个字符串进行排序
         return current_topics
-def get_weibo_hot_topic():
-    weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    rst = []
-    items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
-    weibo.objects.all().delete()
-    for index, item in enumerate(items):
-        weibo.objects.create(rank_pic_href=item['pic'],title=item['desc'],link=item['scheme'])
-    #     rst.append([item['pic'], item['desc'], item['scheme']])
-    #     print([item['pic'], item['desc'], item['scheme']])
-    # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
 
-
-def get_minhang_24h_weather():
-    minhang_weather_url="https://www.tianqi.com/minhang/"
-    myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
-    response=requests.get(minhang_weather_url,headers=myheaders)
-    myhtml = etree.HTML(response.text)
-
-    weather_pic_headers = {
-        "authority": "static.tianqistatic.com",
-        "method": "GET",
-        "path": "/static/tianqi2018/ico2/b1.png",
-        "scheme": "https",
-        "Accept": "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-        "If-Modified-Since": "Mon, 30 Mar 2020 16:17:18 GMT",
-        "If-None-Match": '"5e821b8e-13c8"',
-        "Referer": "https://www.tianqi.com/",
-        "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": '"Windows"',
-        "Sec-Fetch-Dest": "image",
-        "Sec-Fetch-Mode": "no-cors",
-        "Sec-Fetch-Site": "cross-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
-    }
-    weather_pics_path = './weather_pics'
-    existing_weather_pics = os.listdir(weather_pics_path)
-    rst=[[],[],[],[],[],[]]    # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
-    sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
-    for item in sections:
-        for pic in item.xpath("./ul[1]/li"):
-            pic_url=pic.xpath("./img/@src")[0]
-            pic_name=re.search(r'\/([^\/]*)$', pic_url).group(1)
-            if pic_name not in existing_weather_pics:
-                response = requests.get("https:"+pic_url, headers=weather_pic_headers)
-                if response.status_code == 200:
-                    with open('./weather_pics/'+pic_name, 'wb') as file:
-                        file.write(response.content)
-                        print('图片保存成功')
-                else:
-                    print('请求失败:', response.status_code)
-                existing_weather_pics = os.listdir(weather_pics_path)
-            rst[0].append(pic_name)
-        for weather in item.xpath("./ul[2]/li"):
-            rst[1].append(weather.xpath("./text()")[0])
-        for temperature in item.xpath("./div/ul/li"):
-            rst[2].append(temperature.xpath("./span/text()")[0])
-        for wind_direction in item.xpath("./ul[3]/li"):
-            rst[3].append(wind_direction.xpath("./text()")[0])
-        for wind_strength in item.xpath("./ul[4]/li"):
-            rst[4].append(wind_strength.xpath("./text()")[0])
-        for hour in item.xpath("./ul[5]/li"):
-            rst[5].append(hour.xpath("./text()")[0])
-    minhang_24h_weather.objects.all().delete()
-    reformed_rst=[[rst[0][i],rst[1][i],rst[2][i],rst[3][i],rst[4][i],rst[5][i]]for i in range(len(rst[0]))]
-    for i in range(len(rst[0])):
-        minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i],weather_text=rst[1][i],temperature=rst[2][i],wind_direction=rst[3][i],wind_strength=rst[4][i],hour=rst[5][i])
 
 def get_weibo_hot_topic():
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    rst = []
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
     weibo.objects.all().delete()
     for index, item in enumerate(items):
         weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
-    #     rst.append([item['pic'], item['desc'], item['scheme']])
-    #     print([item['pic'], item['desc'], item['scheme']])
-    # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
 
 
 def get_minhang_24h_weather():
@@ -448,7 +363,6 @@ def get_minhang_24h_weather():
     myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
     response = requests.get(minhang_weather_url, headers=myheaders)
     myhtml = etree.HTML(response.text)
-
     weather_pic_headers = {
         "authority": "static.tianqistatic.com",
         "method": "GET",
@@ -497,7 +411,6 @@ def get_minhang_24h_weather():
         for hour in item.xpath("./ul[5]/li"):
             rst[5].append(hour.xpath("./text()")[0])
     minhang_24h_weather.objects.all().delete()
-    reformed_rst = [[rst[0][i], rst[1][i], rst[2][i], rst[3][i], rst[4][i], rst[5][i]] for i in range(len(rst[0]))]
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
 
@@ -584,9 +497,7 @@ def process_captcha_and_GA(resp, session, username, password):
             'pass': password, 'captcha': code, 'v': "", 'uuid': uuid}
     GA_cookie = _get_GA()
     session.cookies.update(GA_cookie)
-
     return session, data
-    """*************************** G A ******************************"""
 
 
 global_GA_cookie = None
@@ -639,14 +550,8 @@ def save_cookies(username):
     create_dynamic_model_cookies(username)
     delete_dynamic_model_cookies(username)
     create_dynamic_model_cookies(username)
-    # cookies_list = []
     for cookie in global_GA_cookie:
-        # cookies_list.append([cookie.name, cookie.value, cookie.domain, cookie.path, cookie.secure])
-        insert_dynamic_model_cookies(table_name=username,name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
-    # with open(f"PERSONAL_{username}_cookies.csv", 'w', newline='') as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(['Name', 'Value', 'Domain', 'Path', 'Secure'])
-    #     writer.writerows(cookies_list)
+        insert_dynamic_model_cookies(table_name=username, name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
 
 
 def _get_GA():
@@ -742,35 +647,50 @@ def _get_GA():
     return global_GA_cookie
 
 
-def dekt():
-    username = input('Username: ')
-    password = input('Password: ')
-    dekt_login_url = 'https://jaccount.sjtu.edu.cn/oauth2/authorize?response_type=code&client_id=sowyD3hGhP6f6O92bevg&redirect_uri=https://dekt.sjtu.edu.cn/h5/index&state=&scope=basic'
+def dekt(username=None, password=None):
+    global global_GA_cookie
     myheaders_for_dekt = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "dekt.sjtu.edu.cn"}
-    oauth_session_cookies, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
-    dekt_session = requests.Session()
-    dekt_session.cookies.update(oauth_session_cookies)
+    dekt_login_url = 'https://jaccount.sjtu.edu.cn/oauth2/authorize?response_type=code&client_id=sowyD3hGhP6f6O92bevg&redirect_uri=https://dekt.sjtu.edu.cn/h5/index&state=&scope=basic'
+    if global_GA_cookie is None:
+        print("now trying to log into [dekt]")
+        if username is None or password is None:
+            raise ValueError("未输入用户名和密码！")
+        global_GA_cookie, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
+        save_cookies(username)
+        dekt_session = requests.Session()
+        dekt_session.cookies.update(global_GA_cookie)
+    else:
+        print("already logged in, entering [dekt]")
+        oauth_session = requests.Session()
+        dekt_session = requests.Session()
+        oauth_session.cookies.update(global_GA_cookie)
+        dekt_session.cookies.update(global_GA_cookie)
+        jump_url = oauth_session.get(dekt_login_url, headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}).request.url
+
     myheaders_for_dekt['Content-Type'] = "application/json"
     resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
-    if resp_from_dekt.json()['code']==1:
+    if resp_from_dekt.json()['code'] == 1:
         global_GA_cookie = None
         print("Cookies expired! Please login again!")
-        dekt()
+        raise ValueError("重定向到登录页面！")
         return
     token = resp_from_dekt.json()['data']['token']
     myheaders_for_dekt.update({'Jtoken': resp_from_dekt.json()['data']['jtoken'], 'Curuserid': "null"})
-    rst = []
     resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
+
+    '''***************************************  亟待修正：需添加跳转url列  **********************************************'''
+
     for item in resp_from_hszl.json()['rows']:
         if item['enrollStartTime'] is not None:
             enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
         else:
             enrollStartTime = "/"
-        dektinfo.objects.create(category="红色之旅", item_id=str(item['id']), activity_name=item['activityName'], enroll_start_time=enrollStartTime, enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                                                                                     ), active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                                                                                 ), activity_picurl=item['activityPicurl'])
+        dektinfo.objects.create(category="红色之旅", item_id=str(item['id']), activity_name=item['activityName'], enroll_start_time=enrollStartTime, enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
+                                active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                           ), active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                       ), activity_picurl=item['activityPicurl'])
     resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_ldjy.json()['rows']:
@@ -778,10 +698,10 @@ def dekt():
             enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
         else:
             enrollStartTime = "/"
-        dektinfo.objects.create(category="劳动教育", item_id=str(item['id']),activity_name=item['activityName'], enroll_start_time=enrollStartTime, enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-                                                                                             ), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-                                                                                                         ), active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                                                                                     ), activity_picurl=item['activityPicurl'])
+        dektinfo.objects.create(category="劳动教育", item_id=str(item['id']), activity_name=item['activityName'], enroll_start_time=enrollStartTime, enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
+                                                                                                                                                                          ), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
+                                                                                                                                                                                                        ), active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
+                                                                                                                                                                                                                                    ), activity_picurl=item['activityPicurl'])
     resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     for item in resp_from_zygy.json()['rows']:
@@ -966,7 +886,7 @@ def dekt():
     return 1
 
 
-def canvas():
+def canvas(username=None, password=None):
     global global_GA_cookie
     try:
         df = pd.read_csv('course_id_name_dict.csv')
@@ -976,12 +896,10 @@ def canvas():
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
     myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
     oc_session = requests.Session()
-    username = input('Username: ')
-    password = input('Password: ')
-
     if global_GA_cookie is None:
         print("now trying to log into [canvas]")
-
+        if username is None or password is None:
+            raise ValueError("未输入用户名和密码！")
         oc_session.get(canvas_login_url, headers=myheaders_for_oc)
         resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
         global_GA_cookie, jump_url = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
@@ -992,7 +910,7 @@ def canvas():
         print("already logged in, entering [canvas]")
         oc_session.cookies.update(global_GA_cookie)
         resp = oc_session.get(canvas_login_url, headers=myheaders_for_oc)
-        resp = resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
+        resp = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
         oauth_session = requests.Session()
         oauth_session.cookies.update(global_GA_cookie)
         initial_url = resp.headers['Location']
@@ -1009,9 +927,9 @@ def canvas():
     resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
     planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
     if planner_data.status_code != 200:
-        global_GA_cookie=None
+        global_GA_cookie = None
         print("Cookies expired! Please login again!")
-        canvas()
+        raise ValueError("重定向到登录页面！")
         return
     json_data = json.loads(planner_data.text[9:])
     create_dynamic_model_canvas(username)
@@ -1043,11 +961,7 @@ def canvas():
             name = item['plannable']['name']
         else:
             name = item['plannable']['title']
-            # rst.append([due_at, submit, item['plannable_id'], course_id_name_dict[item['course_id']], descript, name, item['plannable']['html_url']])
-        insert_dynamic_model_canvas(table_name=username, due_at=due_at, submit=submit,plannable_id=item['plannable_id'],course_id_name_dict=course_id_name_dict[item['course_id']],descript=descript, _name=name,html_url=item['plannable']['html_url'])
-        # rst = sorted(rst, key=lambda x: x[0])
-        # pd.DataFrame.from_dict(course_id_name_dict, orient='index').to_csv('course_id_name_dict.csv')
-        # pd.DataFrame(columns=['due_time', 'submission_status', 'id', 'course_name', 'description', 'name', 'url'], data=rst).to_csv("PERSONAL_canvas.csv")
+        insert_dynamic_model_canvas(table_name=username, due_at=due_at, submit=submit, plannable_id=item['plannable_id'], course_id_name_dict=course_id_name_dict[item['course_id']], descript=descript, _name=name, html_url=item['plannable']['html_url'])
         print("canvas success!!!")
 
 
@@ -1072,7 +986,7 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
     print(shuiyuan_category_dict)
 
 
-def shuiyuan():
+def shuiyuan(username=None, password=None):
     global global_GA_cookie
     shuiyuan_login_url = "https://shuiyuan.sjtu.edu.cn/session/csrf"
     shuiyuan_session = requests.Session()
@@ -1099,8 +1013,8 @@ def shuiyuan():
 
     if global_GA_cookie is None:
         print("now trying to log into [shuiyuan]")
-        username = input('Username: ')
-        password = input('Password: ')
+        if username is None or password is None:
+            raise ValueError("未输入用户名和密码！")
         global_GA_cookie, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
         save_cookies(username)
     else:
@@ -1112,10 +1026,10 @@ def shuiyuan():
     shuiyuan_session.cookies.update(global_GA_cookie)
     resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
-    if resp_from_latest.status_code !=200:
+    if resp_from_latest.status_code != 200:
         global_GA_cookie = None
         print("Cookies expired! Please login again!")
-        shuiyuan()
+        raise ValueError("重定向到登录页面！")
         return
     infos = resp_from_latest.json()['topic_list']['topics']
     create_dynamic_model_shuiyuan(username)
@@ -1137,7 +1051,7 @@ def shuiyuan():
     return 1
 
 
-def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今天而言
+def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # beginfrom和endat均是相对今天而言
     global global_GA_cookie
     mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
     default_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "my.sjtu.edu.cn"}
@@ -1145,8 +1059,8 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
     oauth_session = requests.Session()
     if global_GA_cookie is None:
         print("now trying to log into [mysjtu]")
-        username = input('Username: ')
-        password = input('Password: ')
+        if username is None or password is None:
+            raise ValueError("未输入用户名和密码！")
         mysjtu_session = requests.Session()
         resp_from_mysjtu = mysjtu_session.get(mysjtu_url, headers=default_headers, allow_redirects=False)
         resp_from_mysjtu = mysjtu_session.get("https://my.sjtu.edu.cn" + resp_from_mysjtu.headers['Location'], headers=default_headers, allow_redirects=False)
@@ -1166,11 +1080,11 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
         mysjtu_session.cookies.update(oauth_session.cookies)
         mysjtu_session.get(resp_from_oauth2_authorize.headers['Location'], headers=default_headers)
 
-
     else:
         print("already logged in, entering [mysjtu]")
         oauth_session.cookies.update(global_GA_cookie)
-        # username = 数据库内用户名
+        if username is None:
+            username="数据库内用户名"
 
     calendar_session = requests.Session()
     calendar_session.cookies.update(global_GA_cookie)
@@ -1188,19 +1102,19 @@ def mysjtu_calendar(beginfrom=0, endat=7):  # beginfrom和endat均是相对今�
             initial_url = redirect_url
         else:
             break
-    aa = calendar_session.get(redirect_url, headers=calendar_headers)
+    calendar_session.get(redirect_url, headers=calendar_headers)
     next_week_calendar_url = "https://calendar.sjtu.edu.cn/api/event/list?startDate=" + strftime("%Y-%m-%d", localtime(time() + (beginfrom * 24 * 60 * 60))) + "+00:00&endDate=" + strftime("%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
     if calendar_list.status_code != 200:
         global_GA_cookie = None
         print("Cookies expired! Please login again!")
-        mysjtu_calendar()
+        raise ValueError("重定向到登录页面！")
         return
     create_dynamic_model_calendar(username)
     delete_dynamic_model_calendar(username)
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
-        insert_dynamic_model_calendar(table_name=username,title=event["title"],starttime=event["startTime"],endtime=event["endTime"],location=event["location"],json_detail_url="https://calendar.sjtu.edu.cn/api/event/detail?id=" + event['eventId'])
+        insert_dynamic_model_calendar(table_name=username, title=event["title"], starttime=event["startTime"], endtime=event["endTime"], location=event["location"], json_detail_url="https://calendar.sjtu.edu.cn/api/event/detail?id=" + event['eventId'])
     print("calendar success!!!")
     return calendar_session.cookies
 
@@ -1261,7 +1175,6 @@ def delete_schedule(required_cookies, task_id):
 
 def seiee_notification(getpages=1):
     seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
-    rst = []
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "www.seiee.sjtu.edu.cn"}
     seiee_session = requests.Session()
     seiee_session.get(seiee_url, headers=myheaders)
@@ -1275,5 +1188,4 @@ def seiee_notification(getpages=1):
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':
-
     print("over")

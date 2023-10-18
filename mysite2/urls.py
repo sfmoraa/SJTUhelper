@@ -23,5 +23,9 @@ urlpatterns = [
     path('mytest/',views.mytest),
     path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
     path('loginpage/', views.loginpage),
-
+    path('show_canvas/', views.show_canvas),
+    path('show_dekt/', views.show_dekt),
+    path('show_shuiyuan/', views.show_shuiyuan),
+    path('show_calendar/', views.show_calendar),
+    path('sjtu_login/',views.sjtu_login)
 ]
