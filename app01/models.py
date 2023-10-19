@@ -1,6 +1,8 @@
 from django.db import models, OperationalError
 import pymysql
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
+
 print("models running")
 class zhihu(models.Model):
     number=models.CharField(max_length=10,default='')
@@ -27,13 +29,14 @@ class weibo(models.Model):
 
 class dektinfo(models.Model):
     category = models.CharField(max_length=100)
+    category_url = models.TextField()
     item_id = models.CharField(max_length=100)
     activity_name = models.CharField(max_length=100)
     enroll_start_time = models.DateTimeField()
     enroll_end_time = models.DateTimeField()
     active_start_time = models.DateTimeField()
     active_end_time = models.DateTimeField()
-    activity_picurl = models.CharField(max_length=200)
+    activity_picurl = models.TextField()
 
     def __str__(self):
         return self.activity_name
@@ -340,3 +343,28 @@ def insert_dynamic_model_cookies(table_name,name, value, domain, path, secure):
     cursor.close()
     db.close()
 
+def transfer_from_database_to_list(tablename):
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    sql = "select * from `{}`".format(tablename)
+    cursor.execute(sql)
+    content=[]
+    if 'canvas' not in tablename:
+        while True:
+            row = cursor.fetchone()
+            if not row:
+                break
+            content.append(row)
+        return content
+    else:
+        while True:
+            row = cursor.fetchone()
+            if not row:
+                break
+            fifth_element = row[5]  # 获取第五个元素
+            safe_fifth_element = mark_safe(fifth_element)  # 对第五个元素应用mark_safe函数
+            row = list(row)  # 将元组转换为列表，以便修改第五个元素
+            row[5] = safe_fifth_element  # 更新第五个元素为安全的HTML
+            content.append(row)
+        return content

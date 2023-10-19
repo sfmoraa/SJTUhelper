@@ -54,37 +54,9 @@
     {% endfor %}
 
 </table>
-<table border="1">
-    {% for obj in shuiyuan %}
-        <h3>{{ obj.1 }}{{ obj.5 }}</h3>
-        <a href="{{obj.0}}">
 
-        <h3>{{ obj.7 }}</h3>
-        </a>
-    {% endfor %}
 
-</table>
-<table border="1">
-    {% for obj in calendar %}
-        <h3>课程：{{ obj.0 }}         地点：{{ obj.3 }}</h3>
-        <a href="{{obj.4}}">
 
-        <h3>{{ obj.1}}{{ obj.2 }}</h3>
-        </a>
-    {% endfor %}
-
-</table>
-<table border="1">
-    {% for obj in dekt %}
-        <h3>{{ obj.0 }}{{ obj.2 }}</h3>
-        <h3>活动报名开始时间：{{ obj.5 }}    结束时间：{{ obj.6 }}</h3>
-        <h3>活动开始时间：{{ obj.3 }}       结束时间：{{ obj.4 }}</h3>
-        {% autoescape off %}
-        <img src="{{ obj.7 }}" alt="Image">
-        {% endautoescape %}
-    {% endfor %}
-
-</table>
 <table border="1">
     {% for obj in seiee_notion %}
         <h3>{{ obj.0 }}</h3>
@@ -115,21 +87,6 @@
         </script>
     {% endfor %}
 </table>
-<table border="1">
-    {% for obj in canvas %}
-        <h3>{{ obj.0 }}</h3>
-       <h3>截止时间：{{ obj.1 }}</h3>
 
-        <h3>是否提交：{{ obj.2 }}
-        <h3>课程号：{{ obj.3 }}           课程名称{{ obj.4 }}</h3>
-
-        <a href="{{obj.7}}">
-        {% autoescape off %}
-            {{ obj.6 }}
-            {% endautoescape %}
-        </a>
-        <h3>作业内容：{{ obj.5 }}</h3>
-    {% endfor %}
-</table>
 </body>
 </html>
