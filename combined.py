@@ -510,10 +510,9 @@ def process_captcha_and_GA(resp, session, username, password):
     session.cookies.update(GA_cookie)
 
     return session, data
-    """*************************** G A ******************************"""
 
 
-global_GA_cookie = None
+
 
 
 
@@ -555,44 +554,17 @@ def load_cookies(username):
     return cookiejar
 
 
-def save_cookies(username):
-    global global_GA_cookie
+def save_cookies(username,cookies):
     create_dynamic_model_cookies(username)
     delete_dynamic_model_cookies(username)
     create_dynamic_model_cookies(username)
-    # cookies_list = []
-    for cookie in global_GA_cookie:
-        # cookies_list.append([cookie.name, cookie.value, cookie.domain, cookie.path, cookie.secure])
+    for cookie in cookies:
         insert_dynamic_model_cookies(table_name=username,name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
-    # with open(f"PERSONAL_{username}_cookies.csv", 'w', newline='') as csv_file:
-    #     writer = csv.writer(csv_file)
-    #     writer.writerow(['Name', 'Value', 'Domain', 'Path', 'Secure'])
-    #     writer.writerows(cookies_list)
 
 
 def _get_GA():
-    ''' original version
-    global global_GA_cookie
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-    url = "https://www.google-analytics.com/analytics.js"
-    driver.get(url)
-    # analytics_script = driver.execute_script("return document.documentElement.innerHTML")
-    # decoded_code = html.unescape(analytics_script)
-    # modified_script = decoded_code[125:-14] + "\nga('create', 'UA-XXXX-Y');"
-    # driver.execute_script(modified_script)
-    with open("js/GA.js", "r") as GA:
-        print("executing GA ......")
-        driver.execute_script(GA.read())
-    global_GA_cookie = driver.get_cookies()
-    global_GA_cookie.append({'name': '_ga_QP6YR9D8CK', 'path': '/', 'value': "GS1.3." + str(int(time())) + ".31.0." + str(int(time())) + ".0.0.0"})
-    driver.quit()
-    return global_GA_cookie
-    '''
-    global global_GA_cookie
-    global_GA_cookie = http.cookiejar.CookieJar()
-    global_GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga',
+    GA_cookie = http.cookiejar.CookieJar()
+    GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga',
                                                       value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
                                                       port=None,
                                                       port_specified=False,
@@ -609,7 +581,7 @@ def _get_GA():
                                                       rest={'HttpOnly': None},
                                                       rfc2109=False
                                                       ))
-    global_GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gid',
+    GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gid',
                                                       value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
                                                       port=None,
                                                       port_specified=False,
@@ -626,7 +598,7 @@ def _get_GA():
                                                       rest={'HttpOnly': None},
                                                       rfc2109=False
                                                       ))
-    global_GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gat',
+    GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gat',
                                                       value='1',
                                                       port=None,
                                                       port_specified=False,
@@ -643,7 +615,7 @@ def _get_GA():
                                                       rest={'HttpOnly': None},
                                                       rfc2109=False
                                                       ))
-    global_GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga_QP6YR9D8CK',
+    GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga_QP6YR9D8CK',
                                                       value='GS1.3.' + str(int(time())) + '.1.0.' + str(int(time())) + '.0.0.0',
                                                       port=None,
                                                       port_specified=False,
@@ -660,35 +632,35 @@ def _get_GA():
                                                       rest={'HttpOnly': None},
                                                       rfc2109=False
                                                       ))
-    return global_GA_cookie
+    return GA_cookie
 
 
 def dekt(username=None, password=None):
-    global_GA_cookie=load_cookies('cookies_'+username)
+    user_cookie=load_cookies('cookies_'+username)
     myheaders_for_dekt = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "dekt.sjtu.edu.cn"}
     dekt_login_url = 'https://jaccount.sjtu.edu.cn/oauth2/authorize?response_type=code&client_id=sowyD3hGhP6f6O92bevg&redirect_uri=https://dekt.sjtu.edu.cn/h5/index&state=&scope=basic'
 
-    if global_GA_cookie is None:
+    if user_cookie is None:
         print("now trying to log into [dekt]")
         if username is None or password is None:
             raise ValueError("未输入用户名和密码！")
-        global_GA_cookie, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
-        save_cookies(username)
+        user_cookie, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
+        save_cookies(username,user_cookie)
         dekt_session = requests.Session()
-        dekt_session.cookies.update(global_GA_cookie)
+        dekt_session.cookies.update(user_cookie)
     else:
         print("already logged in, entering [dekt]")
         oauth_session = requests.Session()
         dekt_session = requests.Session()
-        oauth_session.cookies.update(global_GA_cookie)
-        dekt_session.cookies.update(global_GA_cookie)
+        oauth_session.cookies.update(user_cookie)
+        dekt_session.cookies.update(user_cookie)
         jump_url = oauth_session.get(dekt_login_url, headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}).request.url
 
     myheaders_for_dekt['Content-Type'] = "application/json"
     resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
     if resp_from_dekt.json()['code'] == 1:
-        global_GA_cookie = None
+        delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -979,8 +951,7 @@ def dekt(username=None, password=None):
 
 
 def canvas(username=None, password=None):
-    global  global_GA_cookie
-    global_GA_cookie=load_cookies('cookies_'+username)
+    user_cookie=load_cookies('cookies_'+username)
     try:
         df = pd.read_csv('course_id_name_dict.csv')
         course_id_name_dict = df.set_index(df.columns[0]).to_dict()[df.columns[1]]
@@ -989,24 +960,24 @@ def canvas(username=None, password=None):
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
     myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
     oc_session = requests.Session()
-    if global_GA_cookie is None:
+    if user_cookie is None:
         print("now trying to log into [canvas]")
         if username is None or password is None:
             return False
             raise ValueError("未输入用户名和密码！")
         oc_session.get(canvas_login_url, headers=myheaders_for_oc)
         resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
-        global_GA_cookie, jump_url = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
-        save_cookies(username)
-        oc_session.cookies.update(global_GA_cookie)
+        user_cookie, jump_url = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
+        save_cookies(username,user_cookie)
+        oc_session.cookies.update(user_cookie)
 
     else:
         print("already logged in, entering [canvas]")
-        oc_session.cookies.update(global_GA_cookie)
+        oc_session.cookies.update(user_cookie)
         resp = oc_session.get(canvas_login_url, headers=myheaders_for_oc)
         resp = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
         oauth_session = requests.Session()
-        oauth_session.cookies.update(global_GA_cookie)
+        oauth_session.cookies.update(user_cookie)
         initial_url = resp.headers['Location']
         while True:
             response = oauth_session.get(initial_url, headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}, allow_redirects=False)
@@ -1021,7 +992,7 @@ def canvas(username=None, password=None):
     resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
     planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
     if planner_data.status_code != 200:
-        global_GA_cookie = None
+        delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     json_data = json.loads(planner_data.text[9:])
@@ -1080,7 +1051,7 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
 
 
 def shuiyuan(username=None, password=None):
-    global_GA_cookie=load_cookies('cookies_'+username)
+    user_cookie=load_cookies('cookies_'+username)
     shuiyuan_login_url = "https://shuiyuan.sjtu.edu.cn/session/csrf"
     shuiyuan_session = requests.Session()
     default_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "shuiyuan.sjtu.edu.cn"}
@@ -1104,23 +1075,23 @@ def shuiyuan(username=None, password=None):
     data = {'authenticity_token': shuiyuan_resp1.text[9:-2]}
     resp_from_auth_jaccount = shuiyuan_session.post("https://shuiyuan.sjtu.edu.cn/auth/jaccount", headers=default_headers, data=data, allow_redirects=False)
 
-    if global_GA_cookie is None:
+    if user_cookie is None:
         print("now trying to log into [shuiyuan]")
         if username is None or password is None:
             raise ValueError("未输入用户名和密码！")
-        global_GA_cookie, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
-        save_cookies(username)
+        user_cookie, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
+        save_cookies(username,user_cookie)
     else:
         print("already logged in, entering [shuiyuan]")
         oauth_session = requests.Session()
-        oauth_session.cookies.update(global_GA_cookie)
+        oauth_session.cookies.update(user_cookie)
         jump_url = oauth_session.get("https://shuiyuan.sjtu.edu.cn/auth/jaccount", headers={'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "jaccount.sjtu.edu.cn"}).request.url
 
-    shuiyuan_session.cookies.update(global_GA_cookie)
+    shuiyuan_session.cookies.update(user_cookie)
     resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
     if resp_from_latest.status_code != 200:
-        global_GA_cookie = None
+        delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -1147,7 +1118,7 @@ def shuiyuan(username=None, password=None):
 
 
 def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # beginfrom和endat均是相对今天而言
-    global_GA_cookie=load_cookies('cookies_'+username)
+    user_cookie=load_cookies('cookies_'+username)
     mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
     default_headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
@@ -1156,7 +1127,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # begi
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
             'Host': "jaccount.sjtu.edu.cn"}
     oauth_session = requests.Session()
-    if global_GA_cookie is None:
+    if user_cookie is None:
         print("now trying to log into [mysjtu]")
         if username is None or password is None:
             raise ValueError("未输入用户名和密码！")
@@ -1180,19 +1151,19 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # begi
             except Exception:
                 print("oops!retrying...")
                 continue
-        global_GA_cookie = oauth_session.cookies
-        save_cookies(username)
+        user_cookie = oauth_session.cookies
+        save_cookies(username,user_cookie)
         mysjtu_session.cookies.update(oauth_session.cookies)
         mysjtu_session.get(resp_from_oauth2_authorize.headers['Location'], headers=default_headers)
 
     else:
         print("already logged in, entering [mysjtu]")
-        oauth_session.cookies.update(global_GA_cookie)
+        oauth_session.cookies.update(user_cookie)
         if username is None:
             username = "数据库内用户名"
 
     calendar_session = requests.Session()
-    calendar_session.cookies.update(global_GA_cookie)
+    calendar_session.cookies.update(user_cookie)
     calendar_headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
             'Host': "calendar.sjtu.edu.cn"}
@@ -1218,7 +1189,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # begi
             "%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
     if calendar_list.status_code != 200:
-        global_GA_cookie = None
+        delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -1306,6 +1277,20 @@ def seiee_notification(getpages=1):
         sections = myhtml.xpath("//li")
         for notice in sections:
             seieeNotification.objects.create(name=notice.xpath(".//div[@class='name']")[0].text.strip(), date=notice.xpath(".//span")[0].text.strip() + "-" + notice.xpath(".//p")[0].text.strip(), href=notice.xpath(".//a")[0].get('href'))
+
+
+def validate_account(username, password):
+    canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
+    myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
+    oc_session = requests.Session()
+    oc_session.get(canvas_login_url, headers=myheaders_for_oc)
+    resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
+    msg, type = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
+    if type ==0 or type==1:
+        return False,msg
+    else:
+        return True,"Success"
+
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':
