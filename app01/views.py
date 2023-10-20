@@ -219,7 +219,7 @@ def activate(request, uidb64, token):
 def log_out(request):
     uername=request.user.username
     auth.logout(request)
-    return HttpResponse("用户%s已经成功退出".format(uername))
+    return HttpResponse("用户{}已经成功退出".format(uername))
 
 
 

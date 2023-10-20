@@ -83,7 +83,7 @@ def delete_dynamic_model_collection(table_name):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS "+"`{}`".format(table_name)+";"
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
@@ -142,7 +142,7 @@ def delete_dynamic_model_shuiyuan(table_name):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
@@ -198,7 +198,8 @@ def delete_dynamic_model_calendar(table_name):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
+
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
@@ -257,7 +258,8 @@ def delete_dynamic_model_canvas(table_name):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
+
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
@@ -317,7 +319,8 @@ def delete_dynamic_model_cookies(table_name):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
+
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
