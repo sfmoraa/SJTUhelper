@@ -555,9 +555,9 @@ def load_cookies(username):
 
 
 def save_cookies(username,cookies):
-    create_dynamic_model_cookies(username)
     delete_dynamic_model_cookies(username)
     create_dynamic_model_cookies(username)
+    print("create success!!!!!!!!!!!!!!!!!")
     for cookie in cookies:
         insert_dynamic_model_cookies(table_name=username,name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
 
@@ -635,8 +635,12 @@ def _get_GA():
     return GA_cookie
 
 
-def dekt(username=None, password=None):
-    user_cookie=load_cookies('cookies_'+username)
+def dekt(username=None, password=None,lock=None):
+    user_cookie = None
+    if password is None:
+        lock.acquire()
+        user_cookie = load_cookies('cookies_' + username)
+        lock.release()
     myheaders_for_dekt = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "dekt.sjtu.edu.cn"}
     dekt_login_url = 'https://jaccount.sjtu.edu.cn/oauth2/authorize?response_type=code&client_id=sowyD3hGhP6f6O92bevg&redirect_uri=https://dekt.sjtu.edu.cn/h5/index&state=&scope=basic'
 
@@ -645,7 +649,9 @@ def dekt(username=None, password=None):
         if username is None or password is None:
             raise ValueError("未输入用户名和密码！")
         user_cookie, jump_url = auto_jaccount_authorize(dekt_login_url, username, password)
-        save_cookies(username,user_cookie)
+        lock.acquire()
+        save_cookies(username, user_cookie)
+        lock.release()
         dekt_session = requests.Session()
         dekt_session.cookies.update(user_cookie)
     else:
@@ -950,8 +956,12 @@ def dekt(username=None, password=None):
     return 1
 
 
-def canvas(username=None, password=None):
-    user_cookie=load_cookies('cookies_'+username)
+def canvas(username=None, password=None,lock=None):
+    user_cookie = None
+    if password is None:
+        lock.acquire()
+        user_cookie = load_cookies('cookies_' + username)
+        lock.release()
     try:
         df = pd.read_csv('course_id_name_dict.csv')
         course_id_name_dict = df.set_index(df.columns[0]).to_dict()[df.columns[1]]
@@ -968,7 +978,9 @@ def canvas(username=None, password=None):
         oc_session.get(canvas_login_url, headers=myheaders_for_oc)
         resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
         user_cookie, jump_url = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
-        save_cookies(username,user_cookie)
+        lock.acquire()
+        save_cookies(username, user_cookie)
+        lock.release()
         oc_session.cookies.update(user_cookie)
 
     else:
@@ -1050,8 +1062,12 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
     print(shuiyuan_category_dict)
 
 
-def shuiyuan(username=None, password=None):
-    user_cookie=load_cookies('cookies_'+username)
+def shuiyuan(username=None, password=None,lock=None):
+    user_cookie = None
+    if password is None:
+        lock.acquire()
+        user_cookie = load_cookies('cookies_' + username)
+        lock.release()
     shuiyuan_login_url = "https://shuiyuan.sjtu.edu.cn/session/csrf"
     shuiyuan_session = requests.Session()
     default_headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "shuiyuan.sjtu.edu.cn"}
@@ -1080,7 +1096,9 @@ def shuiyuan(username=None, password=None):
         if username is None or password is None:
             raise ValueError("未输入用户名和密码！")
         user_cookie, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
+        lock.acquire()
         save_cookies(username,user_cookie)
+        lock.release()
     else:
         print("already logged in, entering [shuiyuan]")
         oauth_session = requests.Session()
@@ -1117,8 +1135,12 @@ def shuiyuan(username=None, password=None):
 
 
 
-def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # beginfrom和endat均是相对今天而言
-    user_cookie=load_cookies('cookies_'+username)
+def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None):  # beginfrom和endat均是相对今天而言
+    user_cookie = None
+    if password is None:
+        lock.acquire()
+        user_cookie = load_cookies('cookies_' + username)
+        lock.release()
     mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
     default_headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
@@ -1152,7 +1174,9 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7):  # begi
                 print("oops!retrying...")
                 continue
         user_cookie = oauth_session.cookies
-        save_cookies(username,user_cookie)
+        lock.acquire()
+        save_cookies(username, user_cookie)
+        lock.release()
         mysjtu_session.cookies.update(oauth_session.cookies)
         mysjtu_session.get(resp_from_oauth2_authorize.headers['Location'], headers=default_headers)
 

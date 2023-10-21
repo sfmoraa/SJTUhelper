@@ -6,7 +6,7 @@ from django.contrib import auth
 print("views running")
 from combined import *
 import threading
-
+lock=threading.Lock()
 # Create your views here.
 def index(request):
     return HttpResponse("欢迎使用")
@@ -25,13 +25,13 @@ def sjtu_login(request):
     request.user.save()
     check_box = request.POST.get('check_box')
     '''*******************数据库添加表单：request.user（当前使用SJTUhelper的用户）；jaccount_user（jaccount用户名）；cookies（暂空）*******************'''
-    thread1 = threading.Thread(target=canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd})
+    thread1 = threading.Thread(target=canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd,'lock':lock})
     thread1.start()
-    thread2 = threading.Thread(target=dekt, kwargs={'username': jaccount_user, 'password': jaccount_pwd})
+    thread2 = threading.Thread(target=dekt, kwargs={'username': jaccount_user, 'password': jaccount_pwd,'lock':lock})
     thread2.start()
-    thread3 = threading.Thread(target=shuiyuan, kwargs={'username': jaccount_user, 'password': jaccount_pwd})
+    thread3 = threading.Thread(target=shuiyuan, kwargs={'username': jaccount_user, 'password': jaccount_pwd,'lock':lock})
     thread3.start()
-    thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd})
+    thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd,'lock':lock})
     thread4.start()
     return redirect("http://127.0.0.1:8000/sjtu_login/")  # 重定向到主页
 
@@ -68,7 +68,7 @@ def show_dekt(request):
         return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
     print(jaccountname)
     # 后台运行更新函数，前台直接读取数据先行显示
-    thread = threading.Thread(target=dekt,kwargs={"username":jaccountname})
+    thread = threading.Thread(target=dekt,kwargs={"username":jaccountname,'lock':lock})
     thread.start()
     data_list=gpt_filter("dekt", cue=None)
     # 读取该用户dekt信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
@@ -90,7 +90,7 @@ def show_shuiyuan(request):
         return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
     print(jaccountname)
     # 后台运行更新函数，前台直接读取数据先行显示
-    thread = threading.Thread(target=shuiyuan,args={jaccountname})
+    thread = threading.Thread(target=shuiyuan,kwargs={'username':jaccountname,'lock':lock})
     thread.start()
     data_list=gpt_filter("shuiyuan_{}".format(jaccountname))
     # 读取该用户水源信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
@@ -106,7 +106,7 @@ def show_calendar(request):
     # 得知该用户对应的甲亢用户名
     jaccountname=request.user.first_name
     # 后台运行更新函数，前台直接读取数据先行显示
-    thread = threading.Thread(target=mysjtu_calendar,kwargs={"username":jaccountname})
+    thread = threading.Thread(target=mysjtu_calendar,kwargs={"username":jaccountname,'lock':lock})
     thread.start()
     data_list = gpt_filter("calendar_{}".format(jaccountname))
     # 读取该用户日程信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
@@ -125,19 +125,19 @@ def mytest(request):
     #
     # seiee_notification()
     # get_minhang_24h_weather()
-    # reducedHotTopics1 = gpt_filter('zhihu',cue="我对军事政治不感兴趣")
-    # reducedHotTopics2 = gpt_filter('github',cue=None)
-    # reducedHotTopics3 = gpt_filter('bilibili',cue="我想获得小于10条内容")
-    # reducedHotTopics4 = gpt_filter('weibo')
-    #
-    # reducedHotTopics8 = gpt_filter("seiee_notion")
-    # reducedHotTopics9 = gpt_filter("minhang_weather")
-    reducedHotTopics1 = []
-    reducedHotTopics2 = []
-    reducedHotTopics3 = []
-    reducedHotTopics4 = []
-    reducedHotTopics8 = []
-    reducedHotTopics9 = []
+    reducedHotTopics1 = gpt_filter('zhihu',cue="我对军事政治不感兴趣")
+    reducedHotTopics2 = gpt_filter('github',cue=None)
+    reducedHotTopics3 = gpt_filter('bilibili',cue="我想获得小于10条内容")
+    reducedHotTopics4 = gpt_filter('weibo')
+
+    reducedHotTopics8 = gpt_filter("seiee_notion")
+    reducedHotTopics9 = gpt_filter("minhang_weather")
+    # reducedHotTopics1 = []
+    # reducedHotTopics2 = []
+    # reducedHotTopics3 = []
+    # reducedHotTopics4 = []
+    # reducedHotTopics8 = []
+    # reducedHotTopics9 = []
 
     return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics1,"github":reducedHotTopics2,"bilibili":reducedHotTopics3,"weibo":reducedHotTopics4,"seiee_notion":reducedHotTopics8,"minhang_weather":reducedHotTopics9})
 
