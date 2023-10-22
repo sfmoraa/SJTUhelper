@@ -29,5 +29,5 @@ urlpatterns = [
     path('show_shuiyuan/', views.show_shuiyuan),
     path('show_calendar/', views.show_calendar),
     path('sjtu_login/',views.sjtu_login),
-    path('create_schedule/',views.create_schedule)
+    path('create_schedule/',views.create__schedule)
 ]

@@ -64,13 +64,13 @@ def get_timestamp():
     return str(round(time() * 1000))
 
 
-def get_github_trending():
+def get_github_trending(lock=None):
     github_url = 'https://github.com/trending'
-    rst = []
     response = requests.get(github_url)
     text = response.text
     myhtml = etree.HTML(text)
     sections = myhtml.xpath("//article[@class='Box-row']")
+    lock.acquire()
     github.objects.all().delete()
     for repository in sections:
         author = repository.xpath("./h2/a/span//text()")[0].strip()[:-2]
@@ -84,19 +84,18 @@ def get_github_trending():
         # rst.append([author, title, description, href])
         github.objects.create(author=author, title=title, description=description, href=href)
     # pd.DataFrame(columns=['author', 'title', 'description', 'href'], data=rst).to_csv('githubTrending.csv')
-
-
-def get_zhihu_hot_topic(cookie):
+    lock.release()
+def get_zhihu_hot_topic(cookie,lock=None):
     zhihu_url = 'https://www.zhihu.com/hot'
     zhihu_headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Kmyhtml, like Gecko) Chrome/113.0.5672.127  Safari/537.36',
         'cookie': cookie
     }
-    rst = []
     response = requests.get(zhihu_url, headers=zhihu_headers)
     text = response.text
     myhtml = etree.HTML(text)
     sections = myhtml.xpath("//section[@class='HotItem']")
+    lock.acquire()
     zhihu.objects.all().delete()
     for question in sections:
         number = question.xpath("./div[@class='HotItem-index']//text()")[0].strip()
@@ -111,28 +110,29 @@ def get_zhihu_hot_topic(cookie):
         zhihu.objects.create(number=number, title=title, href=href, picture_element=picture_element)
         # rst.append([number, title, href, picture_element])
     # pd.DataFrame(columns=['number', 'title', 'href', 'picture_element'], data=rst).to_csv('zhihuHotTopics.csv', encoding='gbk')
+    lock.release()
 
-
-def get_bilibili_ranking():
+def get_bilibili_ranking(lock=None):
     bilibili_url = 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all'
-    rst = []
     items = requests.get(bilibili_url).json()['data']['list']
+    lock.acquire()
     bilibili.objects.all().delete()
     for index, item in enumerate(items):
         bilibili.objects.create(rank=index + 1, pic_href=item['pic'], title=item['title'], tname=item['tname'], link=item['short_link_v2'])
     #     rst.append([index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2']])
     #     print(index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2'])
     # pd.DataFrame(columns=['rank', 'pic_href', 'title', 'tname', 'link'], data=rst).to_csv('bilibiliRanking.csv')
-
-
+    lock.release()
 def get_gold_price():
     pass
 
 
-def gpt_filter(site, cue=None,mode=None):
+def gpt_filter(site, cue=None,mode=None,lock=None):
     if site == "zhihu":
         if mode is not None:
+            lock.acquire()
             current_topics = zhihu.objects.all()
+            lock.release()
             content = []
             for index in range(len(current_topics)):
                 content.append([current_topics[index].number, current_topics[index].title, current_topics[index].href, current_topics[index].picture_element])
@@ -141,7 +141,9 @@ def gpt_filter(site, cue=None,mode=None):
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         # current_topics = pd.read_csv('zhihuHotTopics.csv', encoding='gbk')
+        lock.acquire()
         current_topics = zhihu.objects.all()
+        lock.release()
         topics = ""
         for a in current_topics:
             topics += '（' + a.number + '） ' + a.title + '；'
@@ -158,14 +160,18 @@ def gpt_filter(site, cue=None,mode=None):
             return content
     elif site == 'github':
         if mode is not None:
+            lock.acquire()
             current_topics = github.objects.all()
+            lock.release()
             content = []
             for index in range(len(current_topics)):
                 content.append([current_topics[index].author, current_topics[index].title, current_topics[index].description, current_topics[index].href])
             return content
         if cue is None:
             cue = "与python相关的"
+        lock.acquire()
         current_topics = github.objects.all()
+        lock.release()
         topics = ""
         i=1
         for a in current_topics:
@@ -185,14 +191,18 @@ def gpt_filter(site, cue=None,mode=None):
             return content
     elif site == 'bilibili':
         if mode is not None:
+            lock.acquire()
             current_topics = bilibili.objects.all()
+            lock.release()
             content = []
             for index in range(len(current_topics)):
                 content.append([current_topics[index].rank, current_topics[index].title, current_topics[index].tname, current_topics[index].pic_href,current_topics[index].link])
             return content
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
+        lock.acquire()
         current_topics = bilibili.objects.all()
+        lock.release()
         topics = ""
 
         for a in current_topics:
@@ -212,14 +222,18 @@ def gpt_filter(site, cue=None,mode=None):
             return content
     elif site == 'weibo':
         if mode is not None:
+            lock.acquire()
             current_topics = weibo.objects.all()
+            lock.release()
             content = []
             for index in range(len(current_topics)):
                 content.append([current_topics[index].title, current_topics[index].rank_pic_href, current_topics[index].link])
             return content
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
+        lock.acquire()
         current_topics = weibo.objects.all()
+        lock.release()
         topics = ""
         i=1
         for a in current_topics:
@@ -240,7 +254,9 @@ def gpt_filter(site, cue=None,mode=None):
             return content
     elif site == 'dekt':
         if mode is not None:
+            lock.acquire()
             current_topics = dektinfo.objects.all()
+            lock.release()
             content = []
             for index in range(len(current_topics)):
                 content.append([index, current_topics[index].category, current_topics[index].category_url, current_topics[index].item_id, current_topics[index].activity_name, current_topics[index].active_start_time, current_topics[index].active_end_time,
@@ -249,7 +265,9 @@ def gpt_filter(site, cue=None,mode=None):
             return content
         if cue is None:
             cue = "电院青志队组织的或者校青志队组织的活动"
+        lock.acquire()
         current_topics = dektinfo.objects.all()
+        lock.release()
         topics = ""
         i=1
         for a in current_topics:
@@ -272,48 +290,57 @@ def gpt_filter(site, cue=None,mode=None):
     elif site == 'seiee_notion':
         if cue is None:
             cue = "和学生工作相关的内容"
+        lock.acquire()
         current_topics = seieeNotification.objects.all()
-
+        lock.release()
         return current_topics
     elif site == 'minhang_weather':
+        lock.acquire()
         current_topics = minhang_24h_weather.objects.all()
+        lock.release()
         content = []
         for a in current_topics:
             content.append([a.Name_of_weather_picture,a.weather_text,a.temperature,a.wind_direction,a.wind_strength,a.hour])
         return content
     elif 'shuiyuan' in site:
+        lock.acquire()
         current_topics=transfer_from_database_to_list(site)
+        lock.release()
         current_topics.sort(key=lambda x: x[0])
         return current_topics
     elif 'calendar' in site:
         if cue is None:
             cue = "学业"
         topics = ""
-        current_topics=transfer_from_database_to_list(site)
+        lock.acquire()
+        current_topics = transfer_from_database_to_list(site)
+        lock.release()
         current_topics.sort(key=lambda x: x[0])  # 根据第一个字符串进行排序
         return current_topics
     elif 'canvas' in site:
         if cue is None:
             cue = "学业"
-        current_topics=transfer_from_database_to_list(site)
+        lock.acquire()
+        current_topics = transfer_from_database_to_list(site)
+        lock.release()
         current_topics.sort(key=lambda x: x[0])  # 根据第一个字符串进行排序
         return current_topics
 
 
 
-def get_weibo_hot_topic():
+def get_weibo_hot_topic(lock=None):
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    rst = []
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
+    lock.acquire()
     weibo.objects.all().delete()
     for index, item in enumerate(items):
         weibo.objects.create(rank_pic_href=item['pic'],title=item['desc'],link=item['scheme'])
     #     rst.append([item['pic'], item['desc'], item['scheme']])
     #     print([item['pic'], item['desc'], item['scheme']])
     # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
+    lock.release()
 
-
-def get_minhang_24h_weather():
+def get_minhang_24h_weather(lock=None):
     minhang_weather_url="https://www.tianqi.com/minhang/"
     myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
     response=requests.get(minhang_weather_url,headers=myheaders)
@@ -366,24 +393,25 @@ def get_minhang_24h_weather():
             rst[4].append(wind_strength.xpath("./text()")[0])
         for hour in item.xpath("./ul[5]/li"):
             rst[5].append(hour.xpath("./text()")[0])
+    lock.acquire()
     minhang_24h_weather.objects.all().delete()
     reformed_rst=[[rst[0][i],rst[1][i],rst[2][i],rst[3][i],rst[4][i],rst[5][i]]for i in range(len(rst[0]))]
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i],weather_text=rst[1][i],temperature=rst[2][i],wind_direction=rst[3][i],wind_strength=rst[4][i],hour=rst[5][i])
-
-def get_weibo_hot_topic():
+    lock.release()
+def get_weibo_hot_topic(lock=None):
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    rst = []
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
+    lock.acquire()
     weibo.objects.all().delete()
     for index, item in enumerate(items):
         weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
     #     rst.append([item['pic'], item['desc'], item['scheme']])
     #     print([item['pic'], item['desc'], item['scheme']])
     # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
+    lock.release()
 
-
-def get_minhang_24h_weather():
+def get_minhang_24h_weather(lock=None):
     minhang_weather_url = "https://www.tianqi.com/minhang/"
     myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
     response = requests.get(minhang_weather_url, headers=myheaders)
@@ -436,11 +464,12 @@ def get_minhang_24h_weather():
             rst[4].append(wind_strength.xpath("./text()")[0])
         for hour in item.xpath("./ul[5]/li"):
             rst[5].append(hour.xpath("./text()")[0])
+    lock.acquire()
     minhang_24h_weather.objects.all().delete()
     reformed_rst = [[rst[0][i], rst[1][i], rst[2][i], rst[3][i], rst[4][i], rst[5][i]] for i in range(len(rst[0]))]
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
-
+    lock.release()
 
 '''*************SJTU板块*************'''
 
@@ -654,7 +683,7 @@ def _get_GA():
     return GA_cookie
 
 
-def dekt(username=None, password=None,lock=None):
+def dekt(username=None, password=None,lock=None,lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -695,6 +724,7 @@ def dekt(username=None, password=None,lock=None):
     myheaders_for_dekt.update({'Jtoken': resp_from_dekt.json()['data']['jtoken'], 'Curuserid': "null"})
     resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
+    lock1.acquire()
     dektinfo.objects.all().delete()
     for item in resp_from_hszl.json()['rows']:
         if item['enrollStartTime'] is not None:
@@ -974,10 +1004,11 @@ def dekt(username=None, password=None,lock=None):
         #                                                                                                                                                                                                                ), item['activityPicurl']])
     # pd.DataFrame(columns=['种类', 'url', 'id', '名称', '报名开始时间', '报名结束时间', '活动开始时间', '活动结束时间', '配图url'], data=rst).to_csv("dekt.csv")
     print("dekt success!!!")
+    lock1.release()
     return 1
 
 
-def canvas(username=None, password=None,lock=None):
+def canvas(username=None, password=None,lock=None,lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1028,7 +1059,7 @@ def canvas(username=None, password=None,lock=None):
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     json_data = json.loads(planner_data.text[9:])
-    create_dynamic_model_canvas(username)
+    lock1.acquire()
     delete_dynamic_model_canvas(username)
     create_dynamic_model_canvas(username)
     for item in json_data:
@@ -1058,6 +1089,7 @@ def canvas(username=None, password=None,lock=None):
         else:
             name = item['plannable']['title']
         insert_dynamic_model_canvas(table_name=username, due_at=due_at, submit=submit, plannable_id=item['plannable_id'], course_id_name_dict=course_id_name_dict[item['course_id']], descript=descript, _name=name, html_url=item['plannable']['html_url'])
+    lock1.release()
     print("canvas success!!!")
 
 
@@ -1082,7 +1114,7 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
     print(shuiyuan_category_dict)
 
 
-def shuiyuan(username=None, password=None,lock=None):
+def shuiyuan(username=None, password=None,lock=None,lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1134,7 +1166,7 @@ def shuiyuan(username=None, password=None,lock=None):
         raise ValueError("重定向到登录页面！")
         return
     infos = resp_from_latest.json()['topic_list']['topics']
-    create_dynamic_model_shuiyuan(username)
+    lock1.acquire()
     delete_dynamic_model_shuiyuan(username)
     create_dynamic_model_shuiyuan(username)
     for index, item in enumerate(infos):
@@ -1149,13 +1181,14 @@ def shuiyuan(username=None, password=None,lock=None):
         insert_dynamic_model_shuiyuan(table_name=username, ref=ref, title=item['title'], posts_count=item['posts_count'], reply_count=item['reply_count'], unseen=item['unseen'], shuiyuan_category_dict=shuiyuan_category_dict[str(item['category_id'])], tags=item['tags'], views=item['views'])
     # 仅当category字典需要更新时才调用此函数
     # update_shuiyuan_category(shuiyuan_session,default_headers)
+    lock1.release()
     print("shuiyuan success!!!")
     return 1
 
 
 
 
-def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None):  # beginfrom和endat均是相对今天而言
+def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None,lock1=None):  # beginfrom和endat均是相对今天而言
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1237,7 +1270,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
-    create_dynamic_model_calendar(username)
+    lock1.acquire()
     delete_dynamic_model_calendar(username)
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
@@ -1253,7 +1286,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
     create_dynamic_model_cookies(username+'store')
     for cookie in calendar_session.cookies:
         insert_dynamic_model_cookies(table_name=username+'store',name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
-
+    lock1.release()
 
 """************************* 数据格式说明 *******************************
 变量名                 含义                       类型          格式
@@ -1309,9 +1342,10 @@ def delete_schedule(required_cookies, task_id):
         print(resp['msg'])
 
 
-def seiee_notification(getpages=1):
+def seiee_notification(getpages=1,lock=None):
     seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
-    rst = []
+    lock.acquire()
+    seieeNotification.objects.all().delete()
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "www.seiee.sjtu.edu.cn"}
     seiee_session = requests.Session()
     seiee_session.get(seiee_url, headers=myheaders)
@@ -1321,7 +1355,7 @@ def seiee_notification(getpages=1):
         sections = myhtml.xpath("//li")
         for notice in sections:
             seieeNotification.objects.create(name=notice.xpath(".//div[@class='name']")[0].text.strip(), date=notice.xpath(".//span")[0].text.strip() + "-" + notice.xpath(".//p")[0].text.strip(), href=notice.xpath(".//a")[0].get('href'))
-
+    lock.release()
 
 def validate_account(username, password):
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
