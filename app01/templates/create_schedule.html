@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>创建日程</title>
+    <style>
+      .form-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .form-row label {
+        margin-right: 10px;
+      }
+    </style>
+    <script>
+      window.addEventListener('DOMContentLoaded', (event) => {
+        // 设置开始日期和时间的默认值
+        document.getElementById('start-date').valueAsDate = new Date();
+        let currentTime = new Date();
+        let currentHour = currentTime.getHours().toString().padStart(2, '0');
+        let currentMinute = currentTime.getMinutes().toString().padStart(2, '0');
+        document.getElementById('start-time').value = `${currentHour}:${currentMinute}`;
+
+        // 设置结束日期和时间的默认值
+        let endDate = new Date();
+        endDate.setHours(endDate.getHours() + 1);
+        document.getElementById('end-date').valueAsDate = endDate;
+        let endHour = endDate.getHours().toString().padStart(2, '0');
+        let endMinute = endDate.getMinutes().toString().padStart(2, '0');
+        document.getElementById('end-time').value = `${endHour}:${endMinute}`;
+      });
+    </script>
+  </head>
+  <body>
+    <h1>创建日程</h1>
+    <form>
+      <div class="form-row">
+        <label for="type">类型：</label>
+        <select id="type" name="type">
+          <option value="会议">会议</option>
+          <option value="课程">课程</option>
+          <option value="私人">私人</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="title">标题：</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+
+      <div class="form-row">
+        <label for="start-date">开始日期：</label>
+        <input type="date" id="start-date" name="start-date" required>
+
+        <label for="start-time">开始时间：</label>
+        <input type="time" id="start-time" name="start-time" required>
+      </div>
+
+      <div class="form-row">
+        <label for="end-date">结束日期：</label>
+        <input type="date" id="end-date" name="end-date" required>
+
+        <label for="end-time">结束时间：</label>
+        <input type="time" id="end-time" name="end-time" required>
+      </div>
+
+      <div class="form-row">
+        <label for="location">地点：</label>
+        <input type="text" id="location" name="location">
+      </div>
+
+      <div class="form-row">
+        <label for="availability">可用性：</label>
+        <select id="availability" name="availability">
+          <option value="在忙">在忙</option>
+          <option value="空闲">空闲</option>
+          <option value="不在办公室">不在办公室</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="reminder">提醒：</label>
+        <select id="reminder" name="reminder">
+          <option value="-1">无提醒</option>
+          <option value="0">日程开始时</option>
+          <option value="5">5分钟前</option>
+          <option value="10">10分钟前</option>
+          <option value="15">15分钟前</option>
+          <option value="30">30分钟前</option>
+          <option value="60">1小时前</option>
+          <option value="1440">1天前</option>
+          <option value="10080">1周前</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="description">描述：</label>
+        <textarea id="description" name="description"></textarea>
+      </div>
+
+      <input type="submit" value="提交">
+    </form>
+  </body>
+</html>

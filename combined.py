@@ -129,8 +129,15 @@ def get_gold_price():
     pass
 
 
-def gpt_filter(site, cue=None):
+def gpt_filter(site, cue=None,mode=None):
     if site == "zhihu":
+        if mode is not None:
+            current_topics = zhihu.objects.all()
+            content = []
+            for index in range(len(current_topics)):
+                content.append([current_topics[index].number, current_topics[index].title, current_topics[index].href, current_topics[index].picture_element])
+            return content
+
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         # current_topics = pd.read_csv('zhihuHotTopics.csv', encoding='gbk')
@@ -150,6 +157,12 @@ def gpt_filter(site, cue=None):
                 content.append([current_topics[index - 1].number, current_topics[index - 1].title, current_topics[index - 1].href, current_topics[index - 1].picture_element])
             return content
     elif site == 'github':
+        if mode is not None:
+            current_topics = github.objects.all()
+            content = []
+            for index in range(len(current_topics)):
+                content.append([current_topics[index].author, current_topics[index].title, current_topics[index].description, current_topics[index].href])
+            return content
         if cue is None:
             cue = "与python相关的"
         current_topics = github.objects.all()
@@ -171,6 +184,12 @@ def gpt_filter(site, cue=None):
                 content.append([current_topics[index - 1].author, current_topics[index - 1].title, current_topics[index - 1].description, current_topics[index - 1].href])
             return content
     elif site == 'bilibili':
+        if mode is not None:
+            current_topics = bilibili.objects.all()
+            content = []
+            for index in range(len(current_topics)):
+                content.append([current_topics[index].rank, current_topics[index].title, current_topics[index].tname, current_topics[index].pic_href,current_topics[index].link])
+            return content
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         current_topics = bilibili.objects.all()
@@ -192,6 +211,12 @@ def gpt_filter(site, cue=None):
                 content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href,current_topics[index-1].link])
             return content
     elif site == 'weibo':
+        if mode is not None:
+            current_topics = weibo.objects.all()
+            content = []
+            for index in range(len(current_topics)):
+                content.append([current_topics[index].title, current_topics[index].rank_pic_href, current_topics[index].link])
+            return content
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         current_topics = weibo.objects.all()
@@ -214,6 +239,14 @@ def gpt_filter(site, cue=None):
                 content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index-1].link])
             return content
     elif site == 'dekt':
+        if mode is not None:
+            current_topics = dektinfo.objects.all()
+            content = []
+            for index in range(len(current_topics)):
+                content.append([index, current_topics[index].category, current_topics[index].category_url, current_topics[index].item_id, current_topics[index].activity_name, current_topics[index].active_start_time, current_topics[index].active_end_time,
+                                current_topics[index].enroll_start_time, current_topics[index].enroll_end_time, current_topics[index].activity_picurl])
+            content.sort(key=lambda x: x[0])
+            return content
         if cue is None:
             cue = "电院青志队组织的或者校青志队组织的活动"
         current_topics = dektinfo.objects.all()
@@ -243,32 +276,12 @@ def gpt_filter(site, cue=None):
 
         return current_topics
     elif site == 'minhang_weather':
-        if cue is None:
-            cue = "和学生工作相关的内容"
         current_topics = minhang_24h_weather.objects.all()
-        # topics = ""
-        # i=1
         content = []
         for a in current_topics:
-        #     topics += '('+str(i)+') '+a.weather_text+'；'
-        #     i+=1
-        # print(topics)
-        # messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字。话题如下：{topics}'} ]
-        # ans = gpt_35_api_stream(messages)
-        # if ans[0] != True:
-        #     print("gpt调用异常！！！！！", ans)
-        #     return 0
-        # else:
-        #     content = []
-        #     numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
-            # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
-            # for index in numbers:
-            #     content.append([current_topics[index - 1].name, current_topics[index - 1].date, current_topics[index-1].href])
-            # return content
             content.append([a.Name_of_weather_picture,a.weather_text,a.temperature,a.wind_direction,a.wind_strength,a.hour])
         return content
     elif 'shuiyuan' in site:
-
         current_topics=transfer_from_database_to_list(site)
         current_topics.sort(key=lambda x: x[0])
         return current_topics
@@ -285,6 +298,9 @@ def gpt_filter(site, cue=None):
         current_topics=transfer_from_database_to_list(site)
         current_topics.sort(key=lambda x: x[0])  # 根据第一个字符串进行排序
         return current_topics
+
+
+
 def get_weibo_hot_topic():
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     rst = []
@@ -467,20 +483,21 @@ def auto_jaccount_authorize(location, username, password):
                 pass
             elif err_type.group(1) == '0':
                 print("Wrong username or password! Recheck!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'])
-                exit(114514)
+                return "Wrong username or password! Recheck!",1
             elif err_type.group(1) == '1':
-                print("Wrong Captcha, retrying!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'])
+                print("Wrong Captcha, retrying!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'],"\r",end='')
                 continue
             elif err_type.group(1) == '16':
                 print("Wrong too many times, please wait a moment")
+                return "Wrong too many times, please wait a moment",0
             else:
                 print("Other error", resp_from_ulogin.headers['Location'])
                 continue
             resp_from_jalogin = oauth_session.get("https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
             resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
             break
-        except Exception:
-            print("oops!retrying...")
+        except Exception as e:
+            print("oops!retrying...",str(e))
             continue
     return oauth_session.cookies, resp_from_oauth2_authorize.headers['Location']
 
@@ -522,7 +539,10 @@ def load_cookies(username):
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
     cursor = db.cursor()
-    sql = "select * from `{}`".format(username)
+    cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables  WHERE table_name = '{}');".format(username))
+    if cursor.fetchone()[0]==0:
+        return None
+    sql = "SELECT * FROM `{}`".format(username)
     # 4.执行sql语句
     cursor.execute(sql)
     i = 1
@@ -532,16 +552,16 @@ def load_cookies(username):
             break
         cookie = http.cookiejar.Cookie(
                 version=0,
-                name=row[0],
-                value=row[1],
+                name=row[1],
+                value=row[2],
                 port=None,
                 port_specified=False,
-                domain=row[2],
+                domain=row[3],
                 domain_specified=True,
                 domain_initial_dot=False,
-                path=row[3],
+                path=row[4],
                 path_specified=True,
-                secure=bool(row[4]),
+                secure=bool(row[5]),
                 expires=None,
                 discard=False,
                 comment=None,
@@ -557,7 +577,6 @@ def load_cookies(username):
 def save_cookies(username,cookies):
     delete_dynamic_model_cookies(username)
     create_dynamic_model_cookies(username)
-    print("create success!!!!!!!!!!!!!!!!!")
     for cookie in cookies:
         insert_dynamic_model_cookies(table_name=username,name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
 
@@ -666,7 +685,9 @@ def dekt(username=None, password=None,lock=None):
     resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
     if resp_from_dekt.json()['code'] == 1:
+        lock.acquire()
         delete_dynamic_model_cookies(username)
+        lock.release()
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -1004,7 +1025,6 @@ def canvas(username=None, password=None,lock=None):
     resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
     planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
     if planner_data.status_code != 200:
-        delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     json_data = json.loads(planner_data.text[9:])
@@ -1038,7 +1058,7 @@ def canvas(username=None, password=None,lock=None):
         else:
             name = item['plannable']['title']
         insert_dynamic_model_canvas(table_name=username, due_at=due_at, submit=submit, plannable_id=item['plannable_id'], course_id_name_dict=course_id_name_dict[item['course_id']], descript=descript, _name=name, html_url=item['plannable']['html_url'])
-        print("canvas success!!!")
+    print("canvas success!!!")
 
 
 shuiyuan_category_dict = {'60': '校友之家', '53': '水源站务', '61': '课业学习', '68': '音乐之声', '54': '站务公告', '70': '二〇新声', '46': '宠物花草', '51': '极客时间', '41': 'g_jwc', '49': 'g_library', '50': '青年之声', '66': '硬件产品', '55': 'g_nic', '64': '滋滋猪鸡', '71': 'g_piano', '62': '溯·源', '69': '心情驿站', '45': '热点新闻', '2': '我的帖子',
@@ -1318,5 +1338,5 @@ def validate_account(username, password):
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':
-
+    seiee_notification()
     print("over")
