@@ -6,7 +6,7 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>complete responsive coffee shop website design tutorial</title>
+   <title>SJTU_helper</title>
 
    <!-- font awesome cdn link  -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -29,12 +29,12 @@
    <div class="container">
 
       <div class="row align-items-center">
-          <a href="#" class="logo mr-auto"> <i class="fas fa-mug-hot"></i> coffee </a>
+          <a href="#" class="logo mr-auto"> <i class="fas fa-user-astronaut"></i> SJTUhelper </a>
 
           <div class="key" id="key">
               <form method="post">
                   {% csrf_token %}
-                  <label style="color: white">关键词:</label>
+                  <label style="color: black">关键词:</label>
                   <input type="text" name="key" style="width:70%" value={{ key }} />
 
                   <input type="submit" value="Submit">
@@ -90,32 +90,70 @@
 
 
 
-<div>
+<div style="flex-direction: row">
+
+
+
 
    <!-- options section starts here -->
    <div class="options">
-      <a href="zhihu" class="box"><img src="{% static 'img/zhihu.svg' %}"/><span>知乎</span></a>
-      <a href="#" class="box"><img src="{% static 'img/bilibili.svg' %}"/><span> B站</span></a>
-      <a href="#" class="box"><img src="{% static 'img/shuiyuan.jpg' %}"/><span>水源</span></a>
-      <a href="#" class="box"><img src="{% static 'img/weibo.jpg' %}"/><span>微博</span></a>
-      <a href="#" class="box"><img src="{% static 'img/jiaowoban.jpg' %}"/><span>交我办</span></a>
-      <a href="#" class="box"><img src="{% static 'img/github.svg' %}"/><span>github</span></a>
-      <a href="#" class="box"><img src="{% static 'img/tianqi.jpg' %}"/><span>天气</span></a>
-      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>dekt</span></a>
-      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>canvas</span></a>
+      <a href="../zhihu" class="box"><img src="{% static 'img/zhihu.svg' %}"/><span>知乎</span></a>
+      <a href="../github" class="box"><img src="{% static 'img/github.svg' %}"/><span>github</span></a>
+      <a href="../bilibili" class="box"><img src="{% static 'img/bilibili.svg' %}"/><span> B站</span></a>
+      <a href="../weibo" class="box"><img src="{% static 'img/weibo.jpg' %}"/><span>微博</span></a>
+
+      <a href="../shuiyuan" class="box"><img src="{% static 'img/shuiyuan.jpg' %}"/><span>水源</span></a>
+      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>电院信息</span></a>
+      <a href="../dekt" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>dekt</span></a>
+      <a href="../canvas" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>canvas</span></a>
+      <a href="#" class="box"><img src="{% static 'img/SJTU.png' %}"/><span>日程</span></a>
    </div>
 
 <!-- options section ends here -->
 
 
+
+
+
     <div class="container111">
 
 
+        <dl id="timemodule" class="timemodule">
+            <dt class="sidetitle">闵行天气</dt>
+            <dd>
+                <div>
+                    {% for obj in minhang_weather %}
+                        <div class="weather">
+                            {% autoescape off %}
+                                <img id="dynamic-image-{{ forloop.counter }}" src="" alt="Image" class="weather-img"/>
+                            {% endautoescape %}
+                            <a>{{ obj.5 }}  {{ obj.1 }} </a>
+                            <a>{{ obj.2 }}°C {{ obj.3 }} {{ obj.4 }}</a>
+
+                            <script>
+                                // JavaScript代码
+                                var image_name = "{{ obj.0 }}";  // 动态的图片名称
+
+                                // 获取图片元素
+                                var image_element = document.getElementById("dynamic-image-{{ forloop.counter }}");
+
+                                // 设置图片的src属性，使用动态的图片名称
+                                image_element.src = "{% static "img/" %}" + image_name;
+                            </script>
+                        </div>
+                    {% endfor %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="View More">
+                        <span style="color: red"> {{ error_msg }} </span>
+                    </form>
+                </div>
+            </dd>
+        </dl>
 
 
 
-
-        <h1>info list</h1>
 
         <div class="block-custom-large">
             {% for obj in zhihuHotTopic %}
@@ -123,7 +161,7 @@
                     <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
                             <div class="blog-slider__item swiper-slide">
                                 <a target="_blank">
-                                    <div class="blog-slider__img">
+                                    <div class="blog-slider__img" href="{{obj.2}}">
                                         <a href="{{obj.2}}">
                                             {% autoescape off %}
                                             {{ obj.3 }}
@@ -143,9 +181,289 @@
                         </div>
                 </div>
             {% endfor %}
+
+
+            {% for obj in github %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.3}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.3}}">
+                                        <a href="{{obj.3}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src={% static 'img/github.svg' %} />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.3}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.1 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            {{ obj.2 }}
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in bilibili %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.4}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.4}}">
+                                        <a href="{{obj.4}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src={{ obj.3 }} />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.4}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.1 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            tag:{{ obj.2 }}
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+            {% for obj in weibo %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.2}}">
+                                        <a href="{{obj.4}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src={{ obj.1 }} />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.2}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.0 }}
+                                        </div>
+
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in canvas_data_list %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.7}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.7}}">
+                                        <a href="{{obj.4}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src="{% static 'img/SJTU.png' %}" />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.7}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.6 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            <p>课程: {{ obj.4 }}</p>
+                                            <p>ddl: {{ obj.1 }}</p>
+                                            <p>是否已提交: {{ obj.2 }}</p>
+                                            <p>描述: {{ obj.5 }}</p>
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in dekt_data_list %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.2}}">
+                                        <a href="{{obj.2}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src={{ obj.9 }} />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.2}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.4 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            <p>板块: {{ obj.1 }}</p>
+                                            <p>报名开始时间: {{ obj.5 }}</p>
+                                            <p>报名结束时间: {{ obj.6 }}</p>
+                                            <p>活动开始时间: {{ obj.7 }}</p>
+                                            <p>活动结束时间: {{ obj.8 }}</p>
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in shuiyuan_data_list %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.1}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.1}}">
+                                        <a href="{{obj.4}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src="{% static 'img/shuiyuan.jpg' %}"  />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.1}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.2 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            <p>发帖数: {{ obj.3 }}</p>
+                                            <p>回复数: {{ obj.4 }}</p>
+                                            <p>是否还未看过: {{ obj.5 }}</p>
+                                            <p>类别: {{ obj.6 }}</p>
+                                            <p>标签: {{ obj.7 }}</p>
+                                            <p>浏览量: {{ obj.8 }}</p>
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in seiee_data_list %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper" href="{{obj.2}}">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img" href="{{obj.2}}">
+                                        <a href="{{obj.2}}">
+                                            {% autoescape off %}
+                                                <img alt="111" src="{% static 'img/SJTU.png' %}"  />
+                                            {% endautoescape %}</a>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank" href="{{obj.2}}"  >
+                                        <div class="blog-slider__title">
+                                            {{ obj.0 }}
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            <p>时间: {{ obj.1 }}</p>
+                                        </div>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
+
+            {% for obj in weather_all %}
+                <div class="blog-slider">
+                    <div class="blog-slider__wrp swiper-wrapper">
+                            <div class="blog-slider__item swiper-slide">
+                                <a target="_blank">
+                                    <div class="blog-slider__img">
+                                        {% autoescape off %}
+                                            <img id="dynamic-image-{{ forloop.counter }}" src="" alt="Image">
+                                        {% endautoescape %}
+                                            <script>
+                                                // JavaScript代码
+                                                var image_name = "{{ obj.0 }}";  // 动态的图片名称
+                                                // 获取图片元素
+                                                var image_element = document.getElementById("dynamic-image-{{ forloop.counter }}");
+                                                // 设置图片的src属性，使用动态的图片名称
+                                                image_element.src = "{% static "img/" %}" + image_name;
+                                            </script>
+                                    </div>
+                                 </a>
+                                <div class="blog-slider__content">
+                                    <span class="blog-slider__code">
+                                                        </span>
+                                    <a target="_blank"   >
+                                        <div class="blog-slider__title">
+                                            <p id="dynamic-date-{{ forloop.counter }}">{{ obj.5 }}</p>
+                                        </div>
+                                        <div class="blog-slider__content">
+                                            <p>天气：{{ obj.1 }}</p>
+                                            <p>温度：{{ obj.2 }}</p>
+                                            <p>风力：{{ obj.3 }}{{ obj.4 }}</p>
+                                        </div>
+                                        <script>
+                                            // 获取标题元素
+                                            var para_element = document.getElementById("dynamic-date-{{ forloop.counter }}");
+                                            // 设置标题的src属性，使用动态的图片名称
+                                            let NewDate = new Date(),Year = NewDate.getFullYear(),hh = NewDate.getHours(),mm = NewDate.getMinutes(),hhmmt = hh + '.' + mm,
+                                            dd = NewDate.getDay(),md = NewDate.getDate(),
+                                                months = new Date(NewDate.getFullYear(), NewDate.getMonth()+1, 0).getDate(),
+                                                yy = NewDate.getMonth(),d1="2024/02/10 00:00:00",dateBegin = new Date(d1),dateDiff = NewDate.getTime() - dateBegin.getTime(),dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)),leave1=dateDiff%(24*3600*1000),hours=Math.floor(leave1/(3600*1000)),dayDifft = 384+dayDiff,allreviews = document.querySelectorAll('.review');
+
+                                            para_element.innerHTML =dd+"111"+ {{ obj.5 }};
+                                        </script>
+                                    </a>
+
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            {% endfor %}
+
         </div>
 
-    
+
+
+
 
    </div>
 

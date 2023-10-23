@@ -1,0 +1,219 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SJTUhelper</title>
+    <link rel="stylesheet" href="../static/css/1.3.0/css/line-awesome.min.css">
+    <link rel="stylesheet" href="../static/css/1.3.0/css/line-awesome.css">
+    <link rel="stylesheet" href="../static/css/style_main/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+   <!-- bootstrap cdn link  -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
+    <link rel="stylesheet" href="{% static '/css/style_calendar.css' %}" />
+    <link rel="stylesheet" href="{% static '/css/style_calendar.css' %}" />
+
+</head>
+
+<body>
+    <input type="checkbox" name="" id="menu-toggle">
+    <div class="overlay">
+        <label for="menu-toggle" ></label>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-container">
+            <div class="brand">
+                <h2>
+                    <span class="lab la-staylinked"></span>
+                    SJTUhelper
+                </h2>
+            </div>
+
+            <div class="sidebar-avartar">
+                <div>
+                    <img src="../static/img/main/user.png" alt="">
+                </div>
+                <div class="avartar-info">
+                    <div class="avartar-text">
+                        <h4>Typh AdminSir</h4>
+
+                    </div>
+                    <span class="las la-angle-double-down"></span>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li>
+                        <a href="../zhihu" id="zhihu">
+                            <span class="las la-user"></span>
+                            <span>Zhihu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../github">
+                            <span class="las la-user"></span>
+                            <span>Github</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../bilibili">
+                            <span class="las la-user"></span>
+                            <span>BiliBili</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../weibo">
+                            <span class="las la-user"></span>
+                            <span>Weibo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../shuiyuan">
+                            <span class="las la-user"></span>
+                            <span>Shuiyuan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../canvas">
+                            <span class="las la-user"></span>
+                            <span>canvas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../dekt" id="dekt">
+                            <span class="las la-user"></span>
+                            <span>dekt</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../seiee" id="seiee">
+                            <span class="las la-user"></span>
+                            <span>seiee</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../calendar" id="calendar2" class="active">
+                            <span class="las la-user"></span>
+                            <span>calendar</span>
+                        </a>
+                    </li>
+
+
+
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <div class="header-title-wrapper">
+                <label for="menu-toggle">
+                    <span class="las la-bars"></span>
+                </label>
+                <div class="header-title">
+                    <h1>Analytics</h1>
+                    <p>Display analytics about your Channel <span class="las la-chart-line"></span></p>
+                </div>
+            </div>
+        </header>
+        <main>
+
+
+
+
+
+            <section>
+                <h3 class="section-head">Overview</h3>
+            </section>
+
+
+            <section>
+                <p>111111</p>
+                        <div class="card">
+					        <div class="card-body">
+						    <div class="table-responsive">
+							    <div id='calendar'></div>
+						    </div>
+					        </div>
+				        </div>
+
+            </section>
+
+        </main>
+    </div>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/locales-all.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+  const initialLocaleCode = 'zh-cn';
+  const calendarEl = document.getElementById('calendar');
+
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+    },
+    locale: initialLocaleCode,
+    buttonIcons: false, // show the prev/next text
+    weekNumbers: true,
+    navLinks: true, // can click day/week names to navigate views
+    editable: true,
+    dayMaxEvents: true, // allow "more" link when too many events
+    events: 'https://fullcalendar.io/demo-events.json?overload-day', //事件列表
+    dateClick: function (info, event) {
+      //点击日期
+      console.log('Clicked on: ' + info.dateStr);
+      console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+      console.log('Current view: ' + info.view.type);
+      console.log(info)
+      console.log(event)
+      addTags()
+      // change the day's background color just for fun
+      info.dayEl.style.backgroundColor = 'red';
+    },
+    eventClick: function (info, event) {
+      //点击日程
+      console.log('Event: ' + info.event.title);
+      console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+      console.log('View: ' + info.view.type);
+      console.log(info)
+      console.log(event)
+      // change the border color just for fun
+      info.el.style.borderColor = 'red';
+      removeTag()
+    }
+  });
+
+  calendar.render();
+
+  //增加日程
+  function addTags() {
+    const date = new Date('2020-08-20T09:00:00'); // will be in local time
+    const dateEnd = new Date('2020-08-20T10:00:00'); // will be in local time
+    calendar.addEvent({
+      id:'jam',
+      title: '增加日程测试',
+      start: date,
+      end: dateEnd,
+      allDay: false
+    });
+  }
+  //移出日程
+  function removeTag(){
+    const jam = calendar.getEventById('jam') // an event object!
+    jam.remove()
+  }
+});
+    </script>
+</body>
+</html>

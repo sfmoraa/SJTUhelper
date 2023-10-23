@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>INFO 列表</h1>
+
+<table border="1">
+    {% for obj in dekt_data_list %}
+        <h3>编号:{{ obj.0 }}</h3>
+        <h3>板块: {{ obj.1 }}</h3>
+        <img src={{ obj.9 }} >
+        <a href="{{obj.2}}">
+        {% autoescape off %}
+            {{ obj.4 }}
+            {% endautoescape %}
+        </a>
+        <h3>报名开始时间: {{ obj.5 }}</h3>
+        <h3>报名结束时间: {{ obj.6 }}</h3>
+        <h3>活动开始时间: {{ obj.7 }}</h3>
+        <h3>活动结束时间: {{ obj.8 }}</h3>
+    {% endfor %}
+</table>
+
+</table>
+</body>
+</html>

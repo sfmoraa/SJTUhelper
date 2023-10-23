@@ -16,25 +16,28 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
 from app01 import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('index/', views.index),
-    path('user/list/', views.user_list),
-    path('user/add/', views.user_add),
-    path('user/add/', views.user_add),
-    path('tpl/', views.tpl),
     path('mytest/',views.mytest),
-    path('something/', views.something),
-
-    path('login/', views.login),
-    path('orm/', views.orm),
-
-    path('info/list/', views.info_list),
-    path('info/add/', views.info_add),
-    path('info/delete/', views.info_delete),
-
-    path('main/',views.main)
+    path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
+    path('loginpage/', views.loginpage),
+    path('show_canvas/', views.show_canvas),
+    path('show_dekt/', views.show_dekt),
+    path('show_shuiyuan/', views.show_shuiyuan),
+    path('show_calendar/', views.show_calendar),
+    path('sjtu_login/',views.sjtu_login),
+    path('zhihu/',views.zhihu),
+    path('github/',views.github),
+    path('bilibili/',views.bilibili),
+    path('weibo/',views.weibo),
+    path('canvas/',views.canvas),
+    path('dekt/',views.dekt),
+    path('shuiyuan/',views.shuiyuan),
+    path('seiee/',views.seiee),
+    path('calendar/',views.calendar),
+    path('mainpage/',views.mainpage),
+    path('demo-index/',views.demoindex),
+    path('collection/',views.collection)
 ]

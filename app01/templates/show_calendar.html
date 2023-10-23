@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>INFO 列表</h1>
+
+<table border="1">
+    {% for obj in calendar_data_list %}
+        <h3>编号:{{ obj.0 }}</h3>
+        <h3>日程名: {{ obj.1 }}</h3>
+        <h3>开始时间: {{ obj.2 }}</h3>
+        <h3>结束时间: {{ obj.3}}</h3>
+        <h3>地点: {{ obj.4 }}</h3>
+    {% endfor %}
+</table>
+
+</table>
+</body>
+</html>

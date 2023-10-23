@@ -166,7 +166,7 @@ font-size:14px;
  
 /* 列表动画*/
 .blog-slider{
-      transform: translateX(400%);
+      transform: translateX(0%);
       transition: transform 0.4s ease;
     }
 .blog-slider.show{
@@ -311,7 +311,7 @@ span.blog-slider__code .del:before {
     padding: 10px 0 10px 0;
     border-radius: 15px;
     transition: all .3s;
-    margin-bottom: 15px; 
+    margin-bottom: 15px;
     background-image: linear-gradient(0deg,#fff,#f3f5f8);
     box-shadow: 8px 8px 20px 0 rgba(55,99,170,.1);
     border: 2px solid #fff;
@@ -351,7 +351,7 @@ span.blog-slider__code .del:before {
     border-radius: 15px;
     transform: translateX(-30px);
     overflow: hidden;
-    background-image: url(https://www.west.cn/Customercenter/UploadImages/milogo/2308/x5dwhovh4571w6m3.gif);
+    #background-image: url("../img/github.svg");
     background-repeat: no-repeat;
     /*/zb_users/theme/tpure/style/images/thumb.png
     background-size: cover;*/

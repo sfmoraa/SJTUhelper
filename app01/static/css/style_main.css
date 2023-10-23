@@ -11,10 +11,10 @@
 }
 
 body {
-  background: rgba(255,255,255,30%);
-  background: url("../img/background.jpg") no-repeat;
+  background: url("../img/landscape-7283516.jpg") no-repeat;
   background-size: cover;
 }
+
 
 html {
   font-size: 62.5%;
@@ -255,6 +255,7 @@ section {
 
 .options {
   position: fixed;
+  margin-left: 2%;
   margin-top: 10px;
   float: left;
   width: 100px;
@@ -267,6 +268,23 @@ section {
   border-radius: 10px;
   transition: .3s;
   #overflow: hidden;
+}
+.timemodule {
+  margin-top: 25%;
+  margin-left: 65%;
+  position: fixed;;
+  float: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(234, 244, 246);
+  border-radius: 10px;
+  transition: .3s;
+  #overflow: hidden;
+}
+.block-custom-large{
+  position: relative;
+  width: 80%;
 }
 
 .box {
@@ -310,10 +328,7 @@ section {
   margin-left: 200px;
 }
 
-.container111 h1{
-  text-align: center;
-  color: white;
-}
+
 
 .key{
   position: relative;
@@ -325,4 +340,15 @@ section {
   width: 100%;
 }
 
+.weather-img{
+  width: 20px;
+  height: 20px;
+}
+.weather a{
+  font-size: 20px;
+  font-family: "Microsoft YaHei";
+}
+.timemodule form{
+  text-align: center;
 
+}

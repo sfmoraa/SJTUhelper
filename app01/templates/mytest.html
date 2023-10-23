@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Title</title>
 </head>
 <body>
@@ -11,11 +12,124 @@
     {% for obj in zhihuHotTopic %}
         <h3>{{ obj.0 }}{{ obj.1 }}</h3>
         <a href="{{obj.2}}">
-            {% autoescape off %}
+        {% autoescape off %}
             {{ obj.3 }}
-            {% endautoescape %}</a>
+            {% endautoescape %}
+            </a>
     {% endfor %}
 
+</table>
+<table border="1">
+    {% for obj in github %}
+        <h3>{{ obj.0 }}</h3>
+        <h3> {{ obj.1 }}</h3>
+        <a href="{{obj.3}}">
+        {% autoescape off %}
+            {{ obj.2 }}
+            {% endautoescape %}
+        </a>
+    {% endfor %}
+</table>
+<table border="1">
+    {% for obj in bilibili %}
+        <h3>{{ obj.0 }}{{ obj.1 }}</h3>
+        <h3> {{ obj.2 }}</h3>
+        <a href="{{obj.4}}">
+        {% autoescape off %}
+        <img src="{{ obj.3 }}" alt="Image">
+        {% endautoescape %}
+        </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in weibo %}
+
+        <a href="{{obj.2}}">
+        {% autoescape off %}
+        <img src="{{ obj.1 }}" alt="Image">
+        {% endautoescape %}
+        <h3>{{ obj.0 }}</h3>
+        </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in shuiyuan %}
+        <h3>{{ obj.1 }}{{ obj.5 }}</h3>
+        <a href="{{obj.0}}">
+
+        <h3>{{ obj.7 }}</h3>
+        </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in calendar %}
+        <h3>课程：{{ obj.0 }}         地点：{{ obj.3 }}</h3>
+        <a href="{{obj.4}}">
+
+        <h3>{{ obj.1}}{{ obj.2 }}</h3>
+        </a>
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in dekt %}
+        <h3>{{ obj.0 }}{{ obj.2 }}</h3>
+        <h3>活动报名开始时间：{{ obj.5 }}    结束时间：{{ obj.6 }}</h3>
+        <h3>活动开始时间：{{ obj.3 }}       结束时间：{{ obj.4 }}</h3>
+        {% autoescape off %}
+        <img src="{{ obj.7 }}" alt="Image">
+        {% endautoescape %}
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in seiee_notion %}
+        <h3>{{ obj.0 }}</h3>
+        <a href="{{obj.2}}">
+
+        <h3>{{ obj.1}}</h3>
+        </a>
+
+    {% endfor %}
+
+</table>
+<table border="1">
+    {% for obj in minhang_weather %}
+        <h3>{{ obj.5 }}{{ obj.1 }}{{ obj.2 }}</h3>
+        <h3>{{ obj.3 }}{{ obj.4 }}</h3>
+        {% autoescape off %}
+        <img id="dynamic-image-{{ forloop.counter }}" src="" alt="Image">
+        {% endautoescape %}
+        <script>
+            // JavaScript代码
+            var image_name = "{{ obj.0 }}";  // 动态的图片名称
+
+            // 获取图片元素
+            var image_element = document.getElementById("dynamic-image-{{ forloop.counter }}");
+
+            // 设置图片的src属性，使用动态的图片名称
+            image_element.src = "{% static "img/" %}" + image_name;
+        </script>
+    {% endfor %}
+</table>
+<table border="1">
+    {% for obj in canvas %}
+        <h3>{{ obj.0 }}</h3>
+       <h3>截止时间：{{ obj.1 }}</h3>
+
+        <h3>是否提交：{{ obj.2 }}
+        <h3>课程号：{{ obj.3 }}           课程名称{{ obj.4 }}</h3>
+
+        <a href="{{obj.7}}">
+        {% autoescape off %}
+            {{ obj.6 }}
+            {% endautoescape %}
+        </a>
+        <h3>作业内容：{{ obj.5 }}</h3>
+    {% endfor %}
 </table>
 </body>
 </html>

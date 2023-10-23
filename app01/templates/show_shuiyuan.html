@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>INFO 列表</h1>
+
+<table border="1">
+    {% for obj in shuiyuan_data_list %}
+        <h3>编号:{{ obj.0 }}</h3>
+        <a href="{{obj.1}}">
+        {% autoescape off %}
+            标题：{{ obj.2 }}
+            {% endautoescape %}
+        </a>
+        <h3>发帖数: {{ obj.3 }}</h3>
+        <h3>回复数: {{ obj.4 }}</h3>
+        <h3>是否还未看过: {{ obj.5 }}</h3>
+        <h3>类别: {{ obj.6 }}</h3>
+        <h3>标签: {{ obj.7 }}</h3>
+        <h3>浏览量: {{ obj.8 }}</h3>
+    {% endfor %}
+</table>
+
+</table>
+</body>
+</html>

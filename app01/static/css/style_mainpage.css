@@ -1,0 +1,125 @@
+
+.container111{
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.key{
+  position: relative;
+  width: 70%;
+  font-size: 15px;
+  font-family: "Microsoft YaHei";
+  margin-left: 50px;
+}
+.key form{
+  position: relative;
+  width: 100%;
+}
+
+.weather-img{
+  width: 20px;
+  height: 20px;
+}
+.weather a{
+  font-size: 20px;
+}
+.timemodule form{
+  text-align: center;
+
+}
+.timemodule {
+  margin-left: 50%;
+  width: 20%;
+  position: fixed;;
+  float: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(234, 244, 246);
+  border-radius: 10px;
+  transition: .3s;
+  #overflow: hidden;
+}
+
+.weather-block{
+  float: right;
+  width: 25%;
+  height: 90%;
+  text-align: center;
+  background-color: rgb(234, 244, 246);
+  border-radius: 10px;
+  transition: .3s;
+  margin-left: 3%;
+  margin-right: 3%;
+  font-family: "Microsoft JhengHei";
+}
+
+.block-custom-large{
+  float: left;
+  width: 67%;
+  height: 100%;
+}
+
+.btn-uncollected{
+  margin-right: 10px;
+  float: right;
+  width: 35px;
+  height: 35px;
+  border-style: hidden;
+  border-radius: 7px;
+  background-color: transparent;
+}
+.btn-collected{
+  margin-right: 10px;
+  float: right;
+  width: 35px;
+  height: 35px;
+  border-style: hidden;
+  border-radius: 7px;
+  background-color: transparent;
+}
+.tagg{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 8px;
+  border-radius: 8px;
+}
+.tagg-text{
+  margin: 7px;
+  font-family: "Microsoft YaHei";
+  color: #5bc0de;
+}
+
+.red-dot{
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin-top: 5px;
+  margin-left: 5px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background-color:red;
+  display:block
+}
+.red-dot-disappear{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background-color:red;
+  display:none
+}
+.ddl{
+  padding-left: 10px;
+  margin-bottom: 10px;
+  height: 30px;
+  left: 0;
+  top: 0;
+}
+.ddl img{
+  width: 30px;
+  height: 30px;
+}

@@ -24,12 +24,11 @@ SECRET_KEY = 'django-insecure-(o(8&(6fd^&6u6s-dq8jlfv4=7*po_t1us&k2#@rxbx3&nbnv!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = []
+# 服务器改为ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -88,6 +87,7 @@ DATABASES = {
         'PASSWORD': 'root',
         'HOST': '127.0.0.1',
         'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
 
@@ -132,47 +132,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SIMPLEUI_HOME_INFO =False
 SIMPLEUI_ANALYSIS=False
 
-
-SIMPLEUI_CONFIG = {
-    # 是否使用系统默认菜单，自定义菜单时建议关闭。
-    'system_keep': False,
-
-    # 用于菜单排序和过滤, 不填此字段为默认排序和全部显示。空列表[] 为全部不显示.
-    'menu_display': ['用户信息管理','权限认证'],
-
-    # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时刷新展示菜单内容。
-    # 一般建议关闭。
-    'dynamic': False,
-    'menus': [
-        {
-            'app': 'auth',
-            'name': '权限认证',
-            'icon': 'fas fa-user-shield',
-            'models': [
-                {
-                    'name': '管理用户列表',
-                    'icon': 'fa fa-user-secret',
-                    'url': 'auth/user/'
-                },
-                {
-                    'name': '用户组',
-                    'icon': 'fa fa-th-list',
-                    'url': 'auth/group/'
-                }
-            ]
-        },
-
-        {
-            'name': '用户信息管理',
-            'icon': 'fa fa-user-md',
-            'models': [
-                {
-                    'name': '普通用户列表',
-                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
-                    'url': '/admin/user/users/',
-                    'icon': 'fa fa-user'
-                },
-            ]
-        },
-    ]
-}
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = '写上自己的邮箱'
+EMAIL_HOST_PASSWORD = '邮箱对应的密钥'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
