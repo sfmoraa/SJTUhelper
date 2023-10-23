@@ -44,10 +44,9 @@
 </table>
 <table border="1">
     {% for obj in weibo %}
-
         <a href="{{obj.2}}">
         {% autoescape off %}
-        <img src="{{ obj.1 }}" alt="Image">
+        <img src="{% static obj.1  %}" alt="Image">
         {% endautoescape %}
         <h3>{{ obj.0 }}</h3>
         </a>

@@ -1,3 +1,5 @@
+import time
+
 import requests
 from django.shortcuts import render, HttpResponse, redirect
 from app01.models import *
@@ -5,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib import auth
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_job
+from apscheduler.triggers.interval import IntervalTrigger
 
 print("views running")
 from combined import *
@@ -30,24 +33,22 @@ def index(request):
 
 ''' *********************** 定时任务 *********************** '''
 scheduler = BackgroundScheduler()
-scheduler.add_jobstore(DjangoJobStore(), "default")
+trigger = IntervalTrigger(seconds=60)
 
 
-@register_job(scheduler, "interval", seconds=60, id="update_data")
 def test_job():
+    print("running!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
     get_zhihu_hot_topic(lock=lock_zhihu,
                         cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
     get_github_trending(lock=lock_github)
-    get_bilibili_ranking(lock=lock_bilibili)
     get_weibo_hot_topic(lock=lock_weibo)
     get_minhang_24h_weather(lock=lock_weather)
-    print("updated!")
+    get_bilibili_ranking(lock=lock_bilibili)
+    print("updated!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
 
-already_jobs = scheduler.get_jobs()
-for job in already_jobs:
-    if job.id == "update_data":
-        scheduler.remove_job("update_data")
+scheduler.add_job(test_job, trigger=trigger, id="update_data")
+
 scheduler.start()
 
 
@@ -90,7 +91,7 @@ def create__schedule(request):
         required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
         lock_cookies.release()
         schedule_type = request.POST.get('type')
-        schedule_type_id = [table[2] for table in tablesid if tablesid[1] == schedule_type]
+        schedule_type_id = [table[2] for table in tablesid if table[1] == schedule_type][0]
         title = request.POST.get('title')
         start_date = request.POST.get('start-date')
         start_time = request.POST.get('start-time')
@@ -100,7 +101,7 @@ def create__schedule(request):
         availability = request.POST.get('availability')
         reminder = int(request.POST.get('reminder'))
         description = request.POST.get('description')
-        create_schedule(required_cookies,title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
+        create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
         return HttpResponse("Create done！！！！！！！！！！！！！！！！！！！")
 
 
@@ -177,10 +178,10 @@ def show_calendar(request):
     # 后台运行更新函数，前台直接读取数据先行显示
     thread = threading.Thread(target=mysjtu_calendar, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread.start()
-    data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar,mode=1)
-    schedule_data_json=[]
+    data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar, mode=1)
+    schedule_data_json = []
     for schedule in data_list:
-        schedule_data_json.append([schedule[1]+"["+schedule[4]+"]",schedule[2],schedule[3],schedule[5],schedule[6]])
+        schedule_data_json.append([schedule[1] + "[" + schedule[4] + "]", schedule[2], schedule[3], schedule[5], schedule[6]])
     print("json data to be used:", json.dumps(schedule_data_json))
     return render(request, "show_calendar.html", {"calendar_data_list": data_list})
 
@@ -188,20 +189,18 @@ def show_calendar(request):
 def mytest(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
-
-    reducedHotTopics1 = gpt_filter('zhihu', cue="我对军事政治不感兴趣", lock=lock_zhihu)
-    reducedHotTopics2 = gpt_filter('github', cue=None, lock=lock_github)
-    reducedHotTopics3 = gpt_filter('bilibili', cue="我想获得小于10条内容", lock=lock_bilibili)
-    reducedHotTopics4 = gpt_filter('weibo', lock=lock_weibo)
-    reducedHotTopics8 = gpt_filter("seiee_notion", lock=lock_seiee)
-    reducedHotTopics9 = gpt_filter("minhang_weather", lock=lock_weather)
-    # reducedHotTopics1 = []
-    # reducedHotTopics2 = []
-    # reducedHotTopics3 = []
+    # reducedHotTopics1 = gpt_filter('zhihu', cue="我对军事政治不感兴趣", lock=lock_zhihu)
+    # reducedHotTopics2 = gpt_filter('github', cue=None, lock=lock_github)
+    # reducedHotTopics3 = gpt_filter('bilibili', cue="我想获得小于10条内容", lock=lock_bilibili)
+    reducedHotTopics4 = gpt_filter('weibo', lock=lock_weibo, mode=1)
+    # reducedHotTopics8 = gpt_filter("seiee_notion", lock=lock_seiee)
+    # reducedHotTopics9 = gpt_filter("minhang_weather", lock=lock_weather)
+    reducedHotTopics1 = []
+    reducedHotTopics2 = []
+    reducedHotTopics3 = []
     # reducedHotTopics4 = []
-    # reducedHotTopics8 = []
-    # reducedHotTopics9 = []
-
+    reducedHotTopics8 = []
+    reducedHotTopics9 = []
     return render(request, "mytest.html", {"zhihuHotTopic": reducedHotTopics1, "github": reducedHotTopics2, "bilibili": reducedHotTopics3, "weibo": reducedHotTopics4, "seiee_notion": reducedHotTopics8, "minhang_weather": reducedHotTopics9})
 
 

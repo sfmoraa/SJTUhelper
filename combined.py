@@ -1,5 +1,4 @@
 import random
-
 import requests
 import openai
 import pandas as pd
@@ -8,8 +7,7 @@ from lxml import etree
 from time import time, localtime, strftime, mktime, strptime
 from PIL import Image, ImageEnhance
 import pytesseract
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import shutil
 import json
 import os
 import http.cookiejar
@@ -18,7 +16,7 @@ from app01.models import *
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
 
-
+weibo_count=0
 def gpt_35_api_stream(messages: list):
     try:
         response = openai.ChatCompletion.create(
@@ -337,16 +335,41 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
 
 
 def get_weibo_hot_topic(lock=None):
+    global weibo_count
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
+    weibo_session=requests.Session()
+    weibo_items=[]
+    current_turn_folder_path="app01/static/img/weibo/" + str(weibo_count) + "/"
+    shutil.rmtree(current_turn_folder_path)
+    os.mkdir(current_turn_folder_path)
+    for index, item in enumerate(items):
+        resp_from_weibo=weibo_session.get("https://m.weibo.cn/api/container/getIndex?"+item['scheme'][26:]+"&page_type=searchall")
+        try:
+            resp=weibo_session.get(resp_from_weibo.json()['data']["cardlistInfo"]["cardlist_head_cards"][0]['head_data']["portrait_url"])
+        except Exception as e:
+            resp=weibo_session.get(item["pic"])
+        pic_path = current_turn_folder_path + str(index) + ".jpg"
+        with open(pic_path, 'wb') as f:
+            f.write(resp.content)
+        pic_path = pic_path[13:]
+        weibo_items.append([pic_path,item['desc'],item['scheme']])
     lock.acquire()
     weibo.objects.all().delete()
-    for index, item in enumerate(items):
-        weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
+    for item in weibo_items:
+        weibo.objects.create(rank_pic_href=item[0], title=item[1], link=item[2])
+    lock.release()
+    weibo_count=(weibo_count+1)%3
+
+
+    # lock.acquire()
+    # weibo.objects.all().delete()
+    # for index, item in enumerate(items):
+    #     weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
     #     rst.append([item['pic'], item['desc'], item['scheme']])
     #     print([item['pic'], item['desc'], item['scheme']])
     # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
-    lock.release()
+    # lock.release()
 
 
 def get_minhang_24h_weather(lock=None):
@@ -408,81 +431,6 @@ def get_minhang_24h_weather(lock=None):
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
     lock.release()
-
-
-def get_weibo_hot_topic(lock=None):
-    weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
-    lock.acquire()
-    weibo.objects.all().delete()
-    for index, item in enumerate(items):
-        weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
-    #     rst.append([item['pic'], item['desc'], item['scheme']])
-    #     print([item['pic'], item['desc'], item['scheme']])
-    # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
-    lock.release()
-
-
-def get_minhang_24h_weather(lock=None):
-    minhang_weather_url = "https://www.tianqi.com/minhang/"
-    myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
-    response = requests.get(minhang_weather_url, headers=myheaders)
-    myhtml = etree.HTML(response.text)
-
-    weather_pic_headers = {
-        "authority": "static.tianqistatic.com",
-        "method": "GET",
-        "path": "/static/tianqi2018/ico2/b1.png",
-        "scheme": "https",
-        "Accept": "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-        "If-Modified-Since": "Mon, 30 Mar 2020 16:17:18 GMT",
-        "If-None-Match": '"5e821b8e-13c8"',
-        "Referer": "https://www.tianqi.com/",
-        "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": '"Windows"',
-        "Sec-Fetch-Dest": "image",
-        "Sec-Fetch-Mode": "no-cors",
-        "Sec-Fetch-Site": "cross-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
-    }
-    weather_pics_path = './weather_pics'
-    existing_weather_pics = os.listdir(weather_pics_path)
-    rst = [[], [], [], [], [], []]  # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
-    sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
-    for item in sections:
-        for pic in item.xpath("./ul[1]/li"):
-            pic_url = pic.xpath("./img/@src")[0]
-            pic_name = re.search(r'\/([^\/]*)$', pic_url).group(1)
-            if pic_name not in existing_weather_pics:
-                response = requests.get("https:" + pic_url, headers=weather_pic_headers)
-                if response.status_code == 200:
-                    with open('./weather_pics/' + pic_name, 'wb') as file:
-                        file.write(response.content)
-                        print('图片保存成功')
-                else:
-                    print('请求失败:', response.status_code)
-                existing_weather_pics = os.listdir(weather_pics_path)
-            rst[0].append(pic_name)
-        for weather in item.xpath("./ul[2]/li"):
-            rst[1].append(weather.xpath("./text()")[0])
-        for temperature in item.xpath("./div/ul/li"):
-            rst[2].append(temperature.xpath("./span/text()")[0])
-        for wind_direction in item.xpath("./ul[3]/li"):
-            rst[3].append(wind_direction.xpath("./text()")[0])
-        for wind_strength in item.xpath("./ul[4]/li"):
-            rst[4].append(wind_strength.xpath("./text()")[0])
-        for hour in item.xpath("./ul[5]/li"):
-            rst[5].append(hour.xpath("./text()")[0])
-    lock.acquire()
-    minhang_24h_weather.objects.all().delete()
-    reformed_rst = [[rst[0][i], rst[1][i], rst[2][i], rst[3][i], rst[4][i], rst[5][i]] for i in range(len(rst[0]))]
-    for i in range(len(rst[0])):
-        minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
-    lock.release()
-
 
 '''*************SJTU板块*************'''
 
@@ -1333,8 +1281,7 @@ def create_schedule(required_cookies, title, startTime, endTime, status, reminde
     else:
         schedule_data['reminderOn'] = True
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn", 'Content-Type': "application/json;charset=UTF-8"}
-    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False)
-    resp = resp.json()
+    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False).json()
     if resp['success'] != True:
         print("Creation failure due to", resp['msg'])
         return 0
