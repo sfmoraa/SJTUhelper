@@ -4,28 +4,36 @@ from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 
 print("models running")
+
+
 class zhihu(models.Model):
-    number=models.CharField(max_length=10,default='')
-    title=models.CharField(max_length=500,default='')
-    href=models.CharField(max_length=500,default='')
-    picture_element=models.URLField(max_length=1000,default='')
+    number = models.CharField(max_length=10, default='')
+    title = models.CharField(max_length=500, default='')
+    href = models.CharField(max_length=500, default='')
+    picture_element = models.URLField(max_length=1000, default='')
+
 
 class github(models.Model):
-    author=models.CharField(max_length=20)
-    title=models.CharField(max_length=500)
-    description=models.CharField(max_length=500)
-    href=models.URLField(max_length=500)
+    author = models.CharField(max_length=20)
+    title = models.CharField(max_length=500)
+    description = models.CharField(max_length=500)
+    href = models.URLField(max_length=500)
+
+
+
 class bilibili(models.Model):
-    rank=models.IntegerField(default=1)
-    pic_href=models.CharField(max_length=500,default='')
-    title=models.CharField(max_length=500,default='')
-    tname=models.CharField(max_length=100,default='')
-    link=models.URLField(max_length=500,default='')
+    rank = models.IntegerField(default=1)
+    pic_href = models.CharField(max_length=500, default='')
+    title = models.CharField(max_length=500, default='')
+    tname = models.CharField(max_length=100, default='')
+    link = models.URLField(max_length=500, default='')
+
 
 class weibo(models.Model):
-    rank_pic_href=models.CharField(max_length=500)
-    title=models.CharField(max_length=500)
-    link=models.URLField(max_length=10000)
+    rank_pic_href = models.CharField(max_length=500)
+    title = models.CharField(max_length=500)
+    link = models.URLField(max_length=10000)
+
 
 class dektinfo(models.Model):
     category = models.CharField(max_length=100)
@@ -40,20 +48,25 @@ class dektinfo(models.Model):
 
     def __str__(self):
         return self.activity_name
+
+
 class seieeNotification(models.Model):
-    name=models.CharField(max_length=100)
-    date=models.CharField(max_length=100)
-    href=models.URLField(max_length=100)
+    name = models.CharField(max_length=100)
+    date = models.CharField(max_length=100)
+    href = models.URLField(max_length=100)
+
 
 class minhang_24h_weather(models.Model):
-    Name_of_weather_picture=models.CharField(max_length=100)
-    weather_text=models.CharField(max_length=100)
-    temperature=models.CharField(max_length=100)
-    wind_direction=models.CharField(max_length=100)
-    wind_strength=models.CharField(max_length=100)
-    hour=models.CharField(max_length=100)
+    Name_of_weather_picture = models.CharField(max_length=100)
+    weather_text = models.CharField(max_length=100)
+    temperature = models.CharField(max_length=100)
+    wind_direction = models.CharField(max_length=100)
+    wind_strength = models.CharField(max_length=100)
+    hour = models.CharField(max_length=100)
+
+
 def create_dynamic_model_collection(table_name):
-    table_name='collection_'+table_name
+    table_name = 'collection_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
@@ -77,22 +90,24 @@ def create_dynamic_model_collection(table_name):
 
 
 def delete_dynamic_model_collection(table_name):
-    table_name='collection_'+table_name
+    table_name = 'collection_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     # 执行 SQL 语句
-    drop_table_query = "DROP TABLE IF EXISTS "+"`{}`".format(table_name)+";"
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
     cursor.execute(drop_table_query)
     # 提交事务
     db.commit()
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
-def insert_dynamic_model_collection(table_name,source, title,image_url,link_url):
+
+
+def insert_dynamic_model_collection(table_name, source, title, image_url, link_url):
     # 打开数据库连接
-    table_name='collection_'+table_name
+    table_name = 'collection_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
@@ -107,8 +122,9 @@ def insert_dynamic_model_collection(table_name,source, title,image_url,link_url)
     cursor.close()
     db.close()
 
+
 def create_dynamic_model_shuiyuan(table_name):
-    table_name='shuiyuan_'+table_name
+    table_name = 'shuiyuan_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
@@ -136,7 +152,7 @@ def create_dynamic_model_shuiyuan(table_name):
 
 
 def delete_dynamic_model_shuiyuan(table_name):
-    table_name='shuiyuan_'+table_name
+    table_name = 'shuiyuan_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
@@ -149,9 +165,11 @@ def delete_dynamic_model_shuiyuan(table_name):
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
-def insert_dynamic_model_shuiyuan(table_name,ref, title,posts_count,reply_count,unseen,shuiyuan_category_dict,tags,views):
+
+
+def insert_dynamic_model_shuiyuan(table_name, ref, title, posts_count, reply_count, unseen, shuiyuan_category_dict, tags, views):
     # 打开数据库连接
-    table_name='shuiyuan_'+table_name
+    table_name = 'shuiyuan_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
@@ -159,15 +177,16 @@ def insert_dynamic_model_shuiyuan(table_name,ref, title,posts_count,reply_count,
         INSERT INTO `{}` (`ref`, `title`, `posts_count`, `reply_count`, `unseen`, `shuiyuan_category_dict`, `tags`, `views`)
         VALUES
             ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');
-        """.format(table_name, ref, title, posts_count, reply_count,unseen,shuiyuan_category_dict,tags,views)
+        """.format(table_name, ref, title, posts_count, reply_count, unseen, shuiyuan_category_dict, tags, views)
     cursor.execute(insert_data_query)
     db.commit()
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
 
+
 def create_dynamic_model_calendar(table_name):
-    table_name='calendar_'+table_name
+    table_name = 'calendar_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
@@ -180,7 +199,8 @@ def create_dynamic_model_calendar(table_name):
             starttime VARCHAR(100),
             endtime VARCHAR(100),
             location VARCHAR(100),
-            json_detail_url VARCHAR(100)
+            json_detail_url VARCHAR(100),
+            allday VARCHAR(10)
         )
         """.format(table_name)
     cursor.execute(create_table_query)
@@ -192,7 +212,7 @@ def create_dynamic_model_calendar(table_name):
 
 
 def delete_dynamic_model_calendar(table_name):
-    table_name='calendar_'+table_name
+    table_name = 'calendar_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
@@ -206,25 +226,28 @@ def delete_dynamic_model_calendar(table_name):
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
-def insert_dynamic_model_calendar(table_name,title,starttime,endtime,location,json_detail_url):
+
+
+def insert_dynamic_model_calendar(table_name, title, starttime, endtime, location, json_detail_url,allday):
     # 打开数据库连接
-    table_name='calendar_'+table_name
+    table_name = 'calendar_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     insert_data_query = """
-        INSERT INTO `{}` (title, starttime, endtime, location, json_detail_url)
+        INSERT INTO `{}` (title, starttime, endtime, location, json_detail_url, allday)
         VALUES
-            ('{}', '{}', '{}', '{}', '{}');
-        """.format(table_name, title, starttime, endtime, location, json_detail_url)
+            ('{}', '{}', '{}', '{}', '{}', '{}');
+        """.format(table_name, title, starttime, endtime, location, json_detail_url,allday)
     cursor.execute(insert_data_query)
     db.commit()
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
 
+
 def create_dynamic_model_canvas(table_name):
-    table_name='canvas_'+table_name
+    table_name = 'canvas_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
@@ -252,7 +275,7 @@ def create_dynamic_model_canvas(table_name):
 
 
 def delete_dynamic_model_canvas(table_name):
-    table_name='canvas_'+table_name
+    table_name = 'canvas_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
@@ -266,9 +289,11 @@ def delete_dynamic_model_canvas(table_name):
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
-def insert_dynamic_model_canvas(table_name,due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url):
+
+
+def insert_dynamic_model_canvas(table_name, due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url):
     # 打开数据库连接
-    table_name='canvas_'+table_name
+    table_name = 'canvas_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
@@ -278,7 +303,6 @@ def insert_dynamic_model_canvas(table_name,due_at, submit, plannable_id, course_
             ('{}', '{}', '{}', '{}', '{}', '{}', '{}');
         """.format(table_name, due_at, submit, plannable_id, course_id_name_dict, descript, _name, html_url)
 
-
     cursor.execute(insert_data_query)
     db.commit()
     # 关闭游标和数据库连接
@@ -287,7 +311,7 @@ def insert_dynamic_model_canvas(table_name,due_at, submit, plannable_id, course_
 
 
 def create_dynamic_model_cookies(table_name):
-    table_name='cookies_'+table_name
+    table_name = 'cookies_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
@@ -313,7 +337,7 @@ def create_dynamic_model_cookies(table_name):
 
 
 def delete_dynamic_model_cookies(table_name):
-    table_name='cookies_'+table_name
+    table_name = 'cookies_' + table_name
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
@@ -327,9 +351,11 @@ def delete_dynamic_model_cookies(table_name):
     # 关闭游标和数据库连接
     cursor.close()
     db.close()
-def insert_dynamic_model_cookies(table_name,name, value, domain, path, secure):
+
+
+def insert_dynamic_model_cookies(table_name, name, value, domain, path, secure):
     # 打开数据库连接
-    table_name='cookies_'+table_name
+    table_name = 'cookies_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
@@ -337,8 +363,7 @@ def insert_dynamic_model_cookies(table_name,name, value, domain, path, secure):
         INSERT INTO `{}` (name, value, domain, path, secure)
         VALUES
             ('{}', '{}', '{}', '{}', '{}');
-        """.format(table_name, name,value,domain,path,secure)
-
+        """.format(table_name, name, value, domain, path, secure)
 
     cursor.execute(insert_data_query)
     db.commit()
@@ -346,13 +371,14 @@ def insert_dynamic_model_cookies(table_name,name, value, domain, path, secure):
     cursor.close()
     db.close()
 
+
 def transfer_from_database_to_list(tablename):
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
     sql = "select * from `{}`".format(tablename)
     cursor.execute(sql)
-    content=[]
+    content = []
     if 'canvas' not in tablename:
         while True:
             row = cursor.fetchone()
@@ -371,3 +397,60 @@ def transfer_from_database_to_list(tablename):
             row[5] = safe_fifth_element  # 更新第五个元素为安全的HTML
             content.append(row)
         return content
+def create_dynamic_model_tablesid(table_name):
+    table_name = 'tablesid_' + table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用cursor()方法获取操作游标
+    cursor = db.cursor()
+    # 创建表格
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS `{}` (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(100),
+            value TEXT
+        )
+        """.format(table_name)
+
+    cursor.execute(create_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
+
+def delete_dynamic_model_tablesid(table_name):
+    table_name = 'tablesid_' + table_name
+    # 打开数据库连接
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    # 执行 SQL 语句
+    drop_table_query = "DROP TABLE IF EXISTS " + "`{}`".format(table_name) + ";"
+
+    cursor.execute(drop_table_query)
+    # 提交事务
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()
+
+
+def insert_dynamic_model_tablesid(table_name, name, value):
+    # 打开数据库连接
+    table_name = 'tablesid_' + table_name
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+    insert_data_query = """
+        INSERT INTO `{}` (name, value)
+        VALUES
+            ('{}', '{}');
+        """.format(table_name, name, value)
+
+    cursor.execute(insert_data_query)
+    db.commit()
+    # 关闭游标和数据库连接
+    cursor.close()
+    db.close()

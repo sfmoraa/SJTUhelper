@@ -40,9 +40,9 @@
       <div class="form-row">
         <label for="type">类型：</label>
         <select id="type" name="type">
-          <option value="会议">会议</option>
-          <option value="课程">课程</option>
-          <option value="私人">私人</option>
+            {% for table in tableid %}
+          <option value={{ table }}>{{table }}</option>
+          {% endfor %}
         </select>
       </div>
 

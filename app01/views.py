@@ -35,7 +35,8 @@ scheduler.add_jobstore(DjangoJobStore(), "default")
 
 @register_job(scheduler, "interval", seconds=60, id="update_data")
 def test_job():
-    get_zhihu_hot_topic(lock=lock_zhihu,cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
+    get_zhihu_hot_topic(lock=lock_zhihu,
+                        cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
     get_github_trending(lock=lock_github)
     get_bilibili_ranking(lock=lock_bilibili)
     get_weibo_hot_topic(lock=lock_weibo)
@@ -79,14 +80,17 @@ def sjtu_login(request):
 def create__schedule(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
     if request.method == "GET":
-        return render(request, "create_schedule.html")
+        return render(request, "create_schedule.html", {"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
     elif request.method == "POST":
-        jaccountname = request.user.first_name
+
         lock_cookies.acquire()
         required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
         lock_cookies.release()
         schedule_type = request.POST.get('type')
+        schedule_type_id = [table[2] for table in tablesid if tablesid[1] == schedule_type]
         title = request.POST.get('title')
         start_date = request.POST.get('start-date')
         start_time = request.POST.get('start-time')
@@ -96,7 +100,7 @@ def create__schedule(request):
         availability = request.POST.get('availability')
         reminder = int(request.POST.get('reminder'))
         description = request.POST.get('description')
-        create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type, recurrence=None)
+        create_schedule(required_cookies,title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
         return HttpResponse("Create done！！！！！！！！！！！！！！！！！！！")
 
 
@@ -173,10 +177,11 @@ def show_calendar(request):
     # 后台运行更新函数，前台直接读取数据先行显示
     thread = threading.Thread(target=mysjtu_calendar, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread.start()
-    data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar)
-    # 读取该用户日程信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
-    # data_list = [[0, '数字信号处理（E）', '2023-10-07 08:00', '2023-10-07 09:40', '东中院1-107', 'https://calendar.sjtu.edu.cn/api/event/detail?id=31438366-a9bd-4866-8497-516097393ddc'],
-    #              [1, '安全开发模型及安全编程', '2023-10-07 10:00', '2023-10-07 11:40', '东中院3-204', 'https://calendar.sjtu.edu.cn/api/event/detail?id=579f0cd9-78c4-4da1-b2b0-3ad1204f754e']]
+    data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar,mode=1)
+    schedule_data_json=[]
+    for schedule in data_list:
+        schedule_data_json.append([schedule[1]+"["+schedule[4]+"]",schedule[2],schedule[3],schedule[5],schedule[6]])
+    print("json data to be used:", json.dumps(schedule_data_json))
     return render(request, "show_calendar.html", {"calendar_data_list": data_list})
 
 

@@ -14,8 +14,11 @@ import json
 import os
 import http.cookiejar
 from app01.models import *
+
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
+
+
 def gpt_35_api_stream(messages: list):
     try:
         response = openai.ChatCompletion.create(
@@ -85,7 +88,9 @@ def get_github_trending(lock=None):
         github.objects.create(author=author, title=title, description=description, href=href)
     # pd.DataFrame(columns=['author', 'title', 'description', 'href'], data=rst).to_csv('githubTrending.csv')
     lock.release()
-def get_zhihu_hot_topic(cookie,lock=None):
+
+
+def get_zhihu_hot_topic(cookie, lock=None):
     zhihu_url = 'https://www.zhihu.com/hot'
     zhihu_headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Kmyhtml, like Gecko) Chrome/113.0.5672.127  Safari/537.36',
@@ -112,6 +117,7 @@ def get_zhihu_hot_topic(cookie,lock=None):
     # pd.DataFrame(columns=['number', 'title', 'href', 'picture_element'], data=rst).to_csv('zhihuHotTopics.csv', encoding='gbk')
     lock.release()
 
+
 def get_bilibili_ranking(lock=None):
     bilibili_url = 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all'
     items = requests.get(bilibili_url).json()['data']['list']
@@ -123,11 +129,13 @@ def get_bilibili_ranking(lock=None):
     #     print(index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2'])
     # pd.DataFrame(columns=['rank', 'pic_href', 'title', 'tname', 'link'], data=rst).to_csv('bilibiliRanking.csv')
     lock.release()
+
+
 def get_gold_price():
     pass
 
 
-def gpt_filter(site, cue=None,mode=None,lock=None):
+def gpt_filter(site, cue=None, mode=None, lock=None):
     if site == "zhihu":
         if mode is not None:
             lock.acquire()
@@ -173,10 +181,10 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         current_topics = github.objects.all()
         lock.release()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.title + '；'
-            i=i+1
+            topics += '(' + str(i) + ') ' + a.title + '；'
+            i = i + 1
         messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
@@ -196,7 +204,7 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
             lock.release()
             content = []
             for index in range(len(current_topics)):
-                content.append([current_topics[index].rank, current_topics[index].title, current_topics[index].tname, current_topics[index].pic_href,current_topics[index].link])
+                content.append([current_topics[index].rank, current_topics[index].title, current_topics[index].tname, current_topics[index].pic_href, current_topics[index].link])
             return content
         if cue is None:
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
@@ -206,7 +214,7 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         topics = ""
 
         for a in current_topics:
-            topics += '('+str(a.rank)+') '+a.tname + '；'
+            topics += '(' + str(a.rank) + ') ' + a.tname + '；'
         print(topics)
         messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
@@ -218,7 +226,7 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href,current_topics[index-1].link])
+                content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href, current_topics[index - 1].link])
             return content
     elif site == 'weibo':
         if mode is not None:
@@ -235,10 +243,10 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         current_topics = weibo.objects.all()
         lock.release()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.title + '；'
-            i+=1
+            topics += '(' + str(i) + ') ' + a.title + '；'
+            i += 1
         print(topics)
         messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号。话题如下：{topics}'}, ]
         ans = gpt_35_api_stream(messages)
@@ -250,7 +258,7 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index-1].link])
+                content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index - 1].link])
             return content
     elif site == 'dekt':
         if mode is not None:
@@ -269,12 +277,12 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         current_topics = dektinfo.objects.all()
         lock.release()
         topics = ""
-        i=1
+        i = 1
         for a in current_topics:
-            topics += '('+str(i)+') '+a.category+":"+a.activity_name + '；'
-            i+=1
+            topics += '(' + str(i) + ') ' + a.category + ":" + a.activity_name + '；'
+            i += 1
         print(topics)
-        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字,比如1，2，10。话题如下：{topics}。编号时不要加括号,并且只输出编号对应的数字,比如1，2，10。'} ]
+        messages = [{'role': 'user', 'content': f'我现在在进行话题筛选，我希望关注{cue}，请在我接下来给出的若干带编号的话题中选出符合我提出的标准中任一条的话题，将筛选后的话题的编号进行输出,编号时不要加括号,并且只输出编号对应的数字,比如1，2，10。话题如下：{topics}。编号时不要加括号,并且只输出编号对应的数字,比如1，2，10。'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -284,8 +292,9 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
             numbers = [int(num) for num in re.split('[，；。、,.]', ans[1]) if num.strip().isdigit()]
             # numbers = [int(match.group(1)) for match in re.finditer(r'\((\d+)\)', ans[1])]
             for index in numbers:
-                content.append([index,current_topics[index - 1].category,current_topics[index-1].category_url, current_topics[index - 1].item_id, current_topics[index-1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time, current_topics[index - 1].enroll_start_time, current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
-            content.sort(key=lambda x:x[0])
+                content.append([index, current_topics[index - 1].category, current_topics[index - 1].category_url, current_topics[index - 1].item_id, current_topics[index - 1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time,
+                                current_topics[index - 1].enroll_start_time, current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
+            content.sort(key=lambda x: x[0])
             return content
     elif site == 'seiee_notion':
         if cue is None:
@@ -300,11 +309,11 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         lock.release()
         content = []
         for a in current_topics:
-            content.append([a.Name_of_weather_picture,a.weather_text,a.temperature,a.wind_direction,a.wind_strength,a.hour])
+            content.append([a.Name_of_weather_picture, a.weather_text, a.temperature, a.wind_direction, a.wind_strength, a.hour])
         return content
     elif 'shuiyuan' in site:
         lock.acquire()
-        current_topics=transfer_from_database_to_list(site)
+        current_topics = transfer_from_database_to_list(site)
         lock.release()
         current_topics.sort(key=lambda x: x[0])
         return current_topics
@@ -327,78 +336,6 @@ def gpt_filter(site, cue=None,mode=None,lock=None):
         return current_topics
 
 
-
-def get_weibo_hot_topic(lock=None):
-    weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
-    items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
-    lock.acquire()
-    weibo.objects.all().delete()
-    for index, item in enumerate(items):
-        weibo.objects.create(rank_pic_href=item['pic'],title=item['desc'],link=item['scheme'])
-    #     rst.append([item['pic'], item['desc'], item['scheme']])
-    #     print([item['pic'], item['desc'], item['scheme']])
-    # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
-    lock.release()
-
-def get_minhang_24h_weather(lock=None):
-    minhang_weather_url="https://www.tianqi.com/minhang/"
-    myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
-    response=requests.get(minhang_weather_url,headers=myheaders)
-    myhtml = etree.HTML(response.text)
-
-    weather_pic_headers = {
-        "authority": "static.tianqistatic.com",
-        "method": "GET",
-        "path": "/static/tianqi2018/ico2/b1.png",
-        "scheme": "https",
-        "Accept": "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-        "If-Modified-Since": "Mon, 30 Mar 2020 16:17:18 GMT",
-        "If-None-Match": '"5e821b8e-13c8"',
-        "Referer": "https://www.tianqi.com/",
-        "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": '"Windows"',
-        "Sec-Fetch-Dest": "image",
-        "Sec-Fetch-Mode": "no-cors",
-        "Sec-Fetch-Site": "cross-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
-    }
-    weather_pics_path = './weather_pics'
-    existing_weather_pics = os.listdir(weather_pics_path)
-    rst=[[],[],[],[],[],[]]    # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
-    sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
-    for item in sections:
-        for pic in item.xpath("./ul[1]/li"):
-            pic_url=pic.xpath("./img/@src")[0]
-            pic_name=re.search(r'\/([^\/]*)$', pic_url).group(1)
-            if pic_name not in existing_weather_pics:
-                response = requests.get("https:"+pic_url, headers=weather_pic_headers)
-                if response.status_code == 200:
-                    with open('./weather_pics/'+pic_name, 'wb') as file:
-                        file.write(response.content)
-                        print('图片保存成功')
-                else:
-                    print('请求失败:', response.status_code)
-                existing_weather_pics = os.listdir(weather_pics_path)
-            rst[0].append(pic_name)
-        for weather in item.xpath("./ul[2]/li"):
-            rst[1].append(weather.xpath("./text()")[0])
-        for temperature in item.xpath("./div/ul/li"):
-            rst[2].append(temperature.xpath("./span/text()")[0])
-        for wind_direction in item.xpath("./ul[3]/li"):
-            rst[3].append(wind_direction.xpath("./text()")[0])
-        for wind_strength in item.xpath("./ul[4]/li"):
-            rst[4].append(wind_strength.xpath("./text()")[0])
-        for hour in item.xpath("./ul[5]/li"):
-            rst[5].append(hour.xpath("./text()")[0])
-    lock.acquire()
-    minhang_24h_weather.objects.all().delete()
-    reformed_rst=[[rst[0][i],rst[1][i],rst[2][i],rst[3][i],rst[4][i],rst[5][i]]for i in range(len(rst[0]))]
-    for i in range(len(rst[0])):
-        minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i],weather_text=rst[1][i],temperature=rst[2][i],wind_direction=rst[3][i],wind_strength=rst[4][i],hour=rst[5][i])
-    lock.release()
 def get_weibo_hot_topic(lock=None):
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
@@ -410,6 +347,7 @@ def get_weibo_hot_topic(lock=None):
     #     print([item['pic'], item['desc'], item['scheme']])
     # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
     lock.release()
+
 
 def get_minhang_24h_weather(lock=None):
     minhang_weather_url = "https://www.tianqi.com/minhang/"
@@ -471,6 +409,81 @@ def get_minhang_24h_weather(lock=None):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
     lock.release()
 
+
+def get_weibo_hot_topic(lock=None):
+    weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
+    items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
+    lock.acquire()
+    weibo.objects.all().delete()
+    for index, item in enumerate(items):
+        weibo.objects.create(rank_pic_href=item['pic'], title=item['desc'], link=item['scheme'])
+    #     rst.append([item['pic'], item['desc'], item['scheme']])
+    #     print([item['pic'], item['desc'], item['scheme']])
+    # pd.DataFrame(columns=['rank_pic_href', 'title', 'link'], data=rst).to_csv('weiboRanking.csv')
+    lock.release()
+
+
+def get_minhang_24h_weather(lock=None):
+    minhang_weather_url = "https://www.tianqi.com/minhang/"
+    myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
+    response = requests.get(minhang_weather_url, headers=myheaders)
+    myhtml = etree.HTML(response.text)
+
+    weather_pic_headers = {
+        "authority": "static.tianqistatic.com",
+        "method": "GET",
+        "path": "/static/tianqi2018/ico2/b1.png",
+        "scheme": "https",
+        "Accept": "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+        "If-Modified-Since": "Mon, 30 Mar 2020 16:17:18 GMT",
+        "If-None-Match": '"5e821b8e-13c8"',
+        "Referer": "https://www.tianqi.com/",
+        "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "cross-site",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
+    }
+    weather_pics_path = './weather_pics'
+    existing_weather_pics = os.listdir(weather_pics_path)
+    rst = [[], [], [], [], [], []]  # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
+    sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
+    for item in sections:
+        for pic in item.xpath("./ul[1]/li"):
+            pic_url = pic.xpath("./img/@src")[0]
+            pic_name = re.search(r'\/([^\/]*)$', pic_url).group(1)
+            if pic_name not in existing_weather_pics:
+                response = requests.get("https:" + pic_url, headers=weather_pic_headers)
+                if response.status_code == 200:
+                    with open('./weather_pics/' + pic_name, 'wb') as file:
+                        file.write(response.content)
+                        print('图片保存成功')
+                else:
+                    print('请求失败:', response.status_code)
+                existing_weather_pics = os.listdir(weather_pics_path)
+            rst[0].append(pic_name)
+        for weather in item.xpath("./ul[2]/li"):
+            rst[1].append(weather.xpath("./text()")[0])
+        for temperature in item.xpath("./div/ul/li"):
+            rst[2].append(temperature.xpath("./span/text()")[0])
+        for wind_direction in item.xpath("./ul[3]/li"):
+            rst[3].append(wind_direction.xpath("./text()")[0])
+        for wind_strength in item.xpath("./ul[4]/li"):
+            rst[4].append(wind_strength.xpath("./text()")[0])
+        for hour in item.xpath("./ul[5]/li"):
+            rst[5].append(hour.xpath("./text()")[0])
+    lock.acquire()
+    minhang_24h_weather.objects.all().delete()
+    reformed_rst = [[rst[0][i], rst[1][i], rst[2][i], rst[3][i], rst[4][i], rst[5][i]] for i in range(len(rst[0]))]
+    for i in range(len(rst[0])):
+        minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
+    lock.release()
+
+
 '''*************SJTU板块*************'''
 
 
@@ -512,13 +525,13 @@ def auto_jaccount_authorize(location, username, password):
                 pass
             elif err_type.group(1) == '0':
                 print("Wrong username or password! Recheck!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'])
-                return "Wrong username or password! Recheck!",1
+                return "Wrong username or password! Recheck!", 1
             elif err_type.group(1) == '1':
-                print("Wrong Captcha, retrying!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'],"\r",end='')
+                print("Wrong Captcha, retrying!", "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'], "\r", end='')
                 continue
             elif err_type.group(1) == '16':
                 print("Wrong too many times, please wait a moment")
-                return "Wrong too many times, please wait a moment",0
+                return "Wrong too many times, please wait a moment", 0
             else:
                 print("Other error", resp_from_ulogin.headers['Location'])
                 continue
@@ -526,7 +539,7 @@ def auto_jaccount_authorize(location, username, password):
             resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'], headers=myheaders_for_oauth, allow_redirects=False)
             break
         except Exception as e:
-            print("oops!retrying...",str(e))
+            print("oops!retrying...", str(e))
             continue
     return oauth_session.cookies, resp_from_oauth2_authorize.headers['Location']
 
@@ -558,18 +571,13 @@ def process_captcha_and_GA(resp, session, username, password):
     return session, data
 
 
-
-
-
-
 def load_cookies(username):
-
     cookiejar = http.cookiejar.CookieJar()
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用cursor()方法获取操作游标
     cursor = db.cursor()
     cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables  WHERE table_name = '{}');".format(username))
-    if cursor.fetchone()[0]==0:
+    if cursor.fetchone()[0] == 0:
         return None
     sql = "SELECT * FROM `{}`".format(username)
     # 4.执行sql语句
@@ -580,110 +588,110 @@ def load_cookies(username):
         if not row:
             break
         cookie = http.cookiejar.Cookie(
-                version=0,
-                name=row[1],
-                value=row[2],
-                port=None,
-                port_specified=False,
-                domain=row[3],
-                domain_specified=True,
-                domain_initial_dot=False,
-                path=row[4],
-                path_specified=True,
-                secure=bool(row[5]),
-                expires=None,
-                discard=False,
-                comment=None,
-                comment_url=None,
-                rest=None,
-                rfc2109=False
+            version=0,
+            name=row[1],
+            value=row[2],
+            port=None,
+            port_specified=False,
+            domain=row[3],
+            domain_specified=True,
+            domain_initial_dot=False,
+            path=row[4],
+            path_specified=True,
+            secure=bool(row[5]),
+            expires=None,
+            discard=False,
+            comment=None,
+            comment_url=None,
+            rest=None,
+            rfc2109=False
         )
         cookiejar.set_cookie(cookie)
 
     return cookiejar
 
 
-def save_cookies(username,cookies):
+def save_cookies(username, cookies):
     delete_dynamic_model_cookies(username)
     create_dynamic_model_cookies(username)
     for cookie in cookies:
-        insert_dynamic_model_cookies(table_name=username,name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
+        insert_dynamic_model_cookies(table_name=username, name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
 
 
 def _get_GA():
     GA_cookie = http.cookiejar.CookieJar()
     GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga',
-                                                      value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
-                                                      port=None,
-                                                      port_specified=False,
-                                                      domain='.sjtu.edu.cn',
-                                                      domain_specified=True,
-                                                      domain_initial_dot=False,
-                                                      path='/',
-                                                      path_specified=True,
-                                                      secure=False,
-                                                      expires=None,
-                                                      discard=True,
-                                                      comment=None,
-                                                      comment_url=None,
-                                                      rest={'HttpOnly': None},
-                                                      rfc2109=False
-                                                      ))
+                                               value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
+                                               port=None,
+                                               port_specified=False,
+                                               domain='.sjtu.edu.cn',
+                                               domain_specified=True,
+                                               domain_initial_dot=False,
+                                               path='/',
+                                               path_specified=True,
+                                               secure=False,
+                                               expires=None,
+                                               discard=True,
+                                               comment=None,
+                                               comment_url=None,
+                                               rest={'HttpOnly': None},
+                                               rfc2109=False
+                                               ))
     GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gid',
-                                                      value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
-                                                      port=None,
-                                                      port_specified=False,
-                                                      domain='.sjtu.edu.cn',
-                                                      domain_specified=True,
-                                                      domain_initial_dot=False,
-                                                      path='/',
-                                                      path_specified=True,
-                                                      secure=False,
-                                                      expires=None,
-                                                      discard=True,
-                                                      comment=None,
-                                                      comment_url=None,
-                                                      rest={'HttpOnly': None},
-                                                      rfc2109=False
-                                                      ))
+                                               value='GA1.3.' + str(random.randrange(100000000, 1000000000)) + '.' + str(int(time())),
+                                               port=None,
+                                               port_specified=False,
+                                               domain='.sjtu.edu.cn',
+                                               domain_specified=True,
+                                               domain_initial_dot=False,
+                                               path='/',
+                                               path_specified=True,
+                                               secure=False,
+                                               expires=None,
+                                               discard=True,
+                                               comment=None,
+                                               comment_url=None,
+                                               rest={'HttpOnly': None},
+                                               rfc2109=False
+                                               ))
     GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_gat',
-                                                      value='1',
-                                                      port=None,
-                                                      port_specified=False,
-                                                      domain='.sjtu.edu.cn',
-                                                      domain_specified=True,
-                                                      domain_initial_dot=False,
-                                                      path='/',
-                                                      path_specified=True,
-                                                      secure=False,
-                                                      expires=None,
-                                                      discard=True,
-                                                      comment=None,
-                                                      comment_url=None,
-                                                      rest={'HttpOnly': None},
-                                                      rfc2109=False
-                                                      ))
+                                               value='1',
+                                               port=None,
+                                               port_specified=False,
+                                               domain='.sjtu.edu.cn',
+                                               domain_specified=True,
+                                               domain_initial_dot=False,
+                                               path='/',
+                                               path_specified=True,
+                                               secure=False,
+                                               expires=None,
+                                               discard=True,
+                                               comment=None,
+                                               comment_url=None,
+                                               rest={'HttpOnly': None},
+                                               rfc2109=False
+                                               ))
     GA_cookie.set_cookie(http.cookiejar.Cookie(version=0, name='_ga_QP6YR9D8CK',
-                                                      value='GS1.3.' + str(int(time())) + '.1.0.' + str(int(time())) + '.0.0.0',
-                                                      port=None,
-                                                      port_specified=False,
-                                                      domain='.sjtu.edu.cn',
-                                                      domain_specified=True,
-                                                      domain_initial_dot=False,
-                                                      path='/',
-                                                      path_specified=True,
-                                                      secure=False,
-                                                      expires=None,
-                                                      discard=True,
-                                                      comment=None,
-                                                      comment_url=None,
-                                                      rest={'HttpOnly': None},
-                                                      rfc2109=False
-                                                      ))
+                                               value='GS1.3.' + str(int(time())) + '.1.0.' + str(int(time())) + '.0.0.0',
+                                               port=None,
+                                               port_specified=False,
+                                               domain='.sjtu.edu.cn',
+                                               domain_specified=True,
+                                               domain_initial_dot=False,
+                                               path='/',
+                                               path_specified=True,
+                                               secure=False,
+                                               expires=None,
+                                               discard=True,
+                                               comment=None,
+                                               comment_url=None,
+                                               rest={'HttpOnly': None},
+                                               rfc2109=False
+                                               ))
     return GA_cookie
 
 
-def dekt(username=None, password=None,lock=None,lock1=None):
+def dekt(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -732,7 +740,8 @@ def dekt(username=None, password=None,lock=None,lock1=None):
         else:
             enrollStartTime = "/"
 
-        dektinfo.objects.create(category="红色之旅",category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1", item_id=str(item['activityCode']), activity_name=item['activityName'], enroll_start_time=enrollStartTime, enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
+        dektinfo.objects.create(category="红色之旅", category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1", item_id=str(item['activityCode']), activity_name=item['activityName'], enroll_start_time=enrollStartTime,
+                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
                                 active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
                                                          ), activity_picurl=item['activityPicurl'])
 
@@ -743,7 +752,7 @@ def dekt(username=None, password=None,lock=None,lock1=None):
             enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
         else:
             enrollStartTime = "/"
-        dektinfo.objects.create(category="劳动教育",category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1",
+        dektinfo.objects.create(category="劳动教育", category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1",
                                 item_id=str(item['activityCode']), activity_name=item['activityName'],
                                 enroll_start_time=enrollStartTime,
                                 enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
@@ -1008,7 +1017,7 @@ def dekt(username=None, password=None,lock=None,lock1=None):
     return 1
 
 
-def canvas(username=None, password=None,lock=None,lock1=None):
+def canvas(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1114,7 +1123,7 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
     print(shuiyuan_category_dict)
 
 
-def shuiyuan(username=None, password=None,lock=None,lock1=None):
+def shuiyuan(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1149,7 +1158,7 @@ def shuiyuan(username=None, password=None,lock=None,lock1=None):
             raise ValueError("未输入用户名和密码！")
         user_cookie, jump_url = auto_jaccount_authorize(resp_from_auth_jaccount.headers['Location'], username, password)
         lock.acquire()
-        save_cookies(username,user_cookie)
+        save_cookies(username, user_cookie)
         lock.release()
     else:
         print("already logged in, entering [shuiyuan]")
@@ -1186,9 +1195,7 @@ def shuiyuan(username=None, password=None,lock=None,lock1=None):
     return 1
 
 
-
-
-def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None,lock1=None):  # beginfrom和endat均是相对今天而言
+def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1196,11 +1203,11 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
         lock.release()
     mysjtu_url = "https://my.sjtu.edu.cn/ui/calendar/"
     default_headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
-            'Host': "my.sjtu.edu.cn"}
+        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
+        'Host': "my.sjtu.edu.cn"}
     myheaders_for_oauth = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
-            'Host': "jaccount.sjtu.edu.cn"}
+        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
+        'Host': "jaccount.sjtu.edu.cn"}
     oauth_session = requests.Session()
     if user_cookie is None:
         print("now trying to log into [mysjtu]")
@@ -1209,19 +1216,19 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
         mysjtu_session = requests.Session()
         resp_from_mysjtu = mysjtu_session.get(mysjtu_url, headers=default_headers, allow_redirects=False)
         resp_from_mysjtu = mysjtu_session.get("https://my.sjtu.edu.cn" + resp_from_mysjtu.headers['Location'],
-                                                  headers=default_headers, allow_redirects=False)
+                                              headers=default_headers, allow_redirects=False)
         while True:
             try:
                 resp_from_oauth = oauth_session.get(resp_from_mysjtu.headers['Location'],
-                                                        headers=myheaders_for_oauth)
+                                                    headers=myheaders_for_oauth)
                 oauth_session, data = process_captcha_and_GA(resp_from_oauth, oauth_session, username, password)
                 resp_from_ulogin = oauth_session.post('https://jaccount.sjtu.edu.cn/jaccount/ulogin',
-                                                          headers=myheaders_for_oauth, data=data, allow_redirects=False)
+                                                      headers=myheaders_for_oauth, data=data, allow_redirects=False)
                 resp_from_jalogin = oauth_session.get(
-                        "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'],
-                        headers=myheaders_for_oauth, allow_redirects=False)
+                    "https://jaccount.sjtu.edu.cn" + resp_from_ulogin.headers['Location'],
+                    headers=myheaders_for_oauth, allow_redirects=False)
                 resp_from_oauth2_authorize = oauth_session.get(resp_from_jalogin.headers['Location'],
-                                                                   headers=myheaders_for_oauth, allow_redirects=False)
+                                                               headers=myheaders_for_oauth, allow_redirects=False)
                 break
             except Exception:
                 print("oops!retrying...")
@@ -1232,7 +1239,6 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
         lock.release()
         mysjtu_session.cookies.update(oauth_session.cookies)
         mysjtu_session.get(resp_from_oauth2_authorize.headers['Location'], headers=default_headers)
-
     else:
         print("already logged in, entering [mysjtu]")
         oauth_session.cookies.update(user_cookie)
@@ -1242,13 +1248,13 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
     calendar_session = requests.Session()
     calendar_session.cookies.update(user_cookie)
     calendar_headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
-            'Host': "calendar.sjtu.edu.cn"}
+        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36",
+        'Host': "calendar.sjtu.edu.cn"}
     aa = calendar_session.get("https://calendar.sjtu.edu.cn/?tenantUserId=" + username, headers=calendar_headers,
-                                  allow_redirects=False)
+                              allow_redirects=False)
     aa = calendar_session.get(aa.headers['Location'], headers=calendar_headers, allow_redirects=False)
     initial_url = aa.headers['Location']
-        # 自动跳转，当跳转到calendar.sjtu.edu.cn/login下时终止并切换会话
+    # 自动跳转，当跳转到calendar.sjtu.edu.cn/login下时终止并切换会话
     while True:
         response = oauth_session.get(initial_url, headers=myheaders_for_oauth, allow_redirects=False)
         if response.status_code == 302:
@@ -1259,34 +1265,46 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7,lock=None
         else:
             break
     calendar_session.get(redirect_url, headers=calendar_headers)
+    # get tables_id
+    get_tables_id = calendar_session.get("https://calendar.sjtu.edu.cn/api/calendar/list", headers=calendar_headers).json()['data']['my']
+    tables = []
+    for table in get_tables_id:
+        tables.append([table['name'], table['id']])
+    delete_dynamic_model_tablesid(username)
+    create_dynamic_model_tablesid(username)
+    for table in tables:
+        insert_dynamic_model_tablesid(table_name=username, name=table[0], value=table[1])
+
     next_week_calendar_url = "https://calendar.sjtu.edu.cn/api/event/list?startDate=" + strftime("%Y-%m-%d",
-                                                                                                     localtime(
-                                                                                                         time() + (
-                                                                                                                     beginfrom * 24 * 60 * 60))) + "+00:00&endDate=" + strftime(
-            "%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
+                                                                                                 localtime(
+                                                                                                     time() + (
+                                                                                                             beginfrom * 24 * 60 * 60))) + "+00:00&endDate=" + strftime(
+        "%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
     if calendar_list.status_code != 200:
         delete_dynamic_model_cookies(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
-        return
     lock1.acquire()
     delete_dynamic_model_calendar(username)
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username, title=event["title"], starttime=event["startTime"],
-                                          endtime=event["endTime"], location=event["location"],
-                                          json_detail_url="https://calendar.sjtu.edu.cn/api/event/detail?id=" + event[
-                                              'eventId'])
+                                      endtime=event["endTime"], location=event["location"],
+                                      json_detail_url=event['eventId'],allday=event['allDay'])
     print("calendar success!!!")
 
     # return calendar_session.cookies
-    create_dynamic_model_cookies(username+'store')
-    delete_dynamic_model_cookies(username+'store')
-    create_dynamic_model_cookies(username+'store')
+    create_dynamic_model_cookies(username + 'store')
+    delete_dynamic_model_cookies(username + 'store')
+    create_dynamic_model_cookies(username + 'store')
     for cookie in calendar_session.cookies:
-        insert_dynamic_model_cookies(table_name=username+'store',name=cookie.name,value=cookie.value,domain=cookie.domain,path=cookie.path,secure=cookie.secure)
+        insert_dynamic_model_cookies(table_name=username + 'store', name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
     lock1.release()
+
+    return
+
+
 
 """************************* 数据格式说明 *******************************
 变量名                 含义                       类型          格式
@@ -1308,22 +1326,15 @@ recurrence          日程重复状态                 None 或 字典   字典�
 
 # required_cookies应包括 _ga 与 _ga_QP6YR9D8CK 与 JSESSIONID
 def create_schedule(required_cookies, title, startTime, endTime, status, reminderMinutes=-1, allDay=False, location="", description="", schedule_type="私人", recurrence=None):
-    schedule_data = {"allDay": allDay, "body": description, "endTime": endTime, "importance": "LOW", "location": location, "reminderMinutes": reminderMinutes, "recurrence": recurrence, "status": status, "recurrenceEndDate": "", "startTime": startTime, "title": title, "extremity": False}
-    if schedule_type == "课程":
-        schedule_data['calendarId'] = "67fb2fa3-c3bf-46e0-99be-2e07ea2725b7"
-    elif schedule_type == "会议":
-        schedule_data['calendarId'] = "b469c560-cd67-47f4-8c15-22684a3eb71d"
-    elif schedule_type == "私人":
-        schedule_data['calendarId'] = "028bac3d-5032-45ce-bcf5-a4da21a28cb1"
-    else:
-        print("日程种类错误")
-        return 0
+    schedule_data = {"allDay": allDay, "body": description, "endTime": endTime, "importance": "LOW", "location": location, "reminderMinutes": reminderMinutes, "recurrence": recurrence, "status": status, "recurrenceEndDate": "", "startTime": startTime, "title": title, "extremity": False,
+                     'calendarId': schedule_type}
     if reminderMinutes == -1:
         schedule_data['reminderOn'] = False
     else:
         schedule_data['reminderOn'] = True
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn", 'Content-Type': "application/json;charset=UTF-8"}
-    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False).json()
+    resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False)
+    resp = resp.json()
     if resp['success'] != True:
         print("Creation failure due to", resp['msg'])
         return 0
@@ -1342,7 +1353,7 @@ def delete_schedule(required_cookies, task_id):
         print(resp['msg'])
 
 
-def seiee_notification(getpages=1,lock=None):
+def seiee_notification(getpages=1, lock=None):
     seiee_url = 'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw.html'
     lock.acquire()
     seieeNotification.objects.all().delete()
@@ -1357,6 +1368,7 @@ def seiee_notification(getpages=1,lock=None):
             seieeNotification.objects.create(name=notice.xpath(".//div[@class='name']")[0].text.strip(), date=notice.xpath(".//span")[0].text.strip() + "-" + notice.xpath(".//p")[0].text.strip(), href=notice.xpath(".//a")[0].get('href'))
     lock.release()
 
+
 def validate_account(username, password):
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
     myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
@@ -1364,10 +1376,10 @@ def validate_account(username, password):
     oc_session.get(canvas_login_url, headers=myheaders_for_oc)
     resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
     msg, type = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
-    if type ==0 or type==1:
-        return False,msg
+    if type == 0 or type == 1:
+        return False, msg
     else:
-        return True,"Success"
+        return True, "Success"
 
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
