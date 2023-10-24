@@ -16,7 +16,9 @@ from app01.models import *
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
 
-weibo_count=0
+weibo_count = 0
+
+
 def gpt_35_api_stream(messages: list):
     try:
         response = openai.ChatCompletion.create(
@@ -127,10 +129,6 @@ def get_bilibili_ranking(lock=None):
     #     print(index + 1, item['pic'], item['title'], item['tname'], item['short_link_v2'])
     # pd.DataFrame(columns=['rank', 'pic_href', 'title', 'tname', 'link'], data=rst).to_csv('bilibiliRanking.csv')
     lock.release()
-
-
-def get_gold_price():
-    pass
 
 
 def gpt_filter(site, cue=None, mode=None, lock=None):
@@ -338,29 +336,28 @@ def get_weibo_hot_topic(lock=None):
     global weibo_count
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
-    weibo_session=requests.Session()
-    weibo_items=[]
-    current_turn_folder_path="app01/static/img/weibo/" + str(weibo_count) + "/"
+    weibo_session = requests.Session()
+    weibo_items = []
+    current_turn_folder_path = "app01/static/img/weibo/" + str(weibo_count) + "/"
     shutil.rmtree(current_turn_folder_path)
     os.mkdir(current_turn_folder_path)
     for index, item in enumerate(items):
-        resp_from_weibo=weibo_session.get("https://m.weibo.cn/api/container/getIndex?"+item['scheme'][26:]+"&page_type=searchall")
+        resp_from_weibo = weibo_session.get("https://m.weibo.cn/api/container/getIndex?" + item['scheme'][26:] + "&page_type=searchall")
         try:
-            resp=weibo_session.get(resp_from_weibo.json()['data']["cardlistInfo"]["cardlist_head_cards"][0]['head_data']["portrait_url"])
+            resp = weibo_session.get(resp_from_weibo.json()['data']["cardlistInfo"]["cardlist_head_cards"][0]['head_data']["portrait_url"])
         except Exception as e:
-            resp=weibo_session.get(item["pic"])
+            resp = weibo_session.get(item["pic"])
         pic_path = current_turn_folder_path + str(index) + ".jpg"
         with open(pic_path, 'wb') as f:
             f.write(resp.content)
         pic_path = pic_path[13:]
-        weibo_items.append([pic_path,item['desc'],item['scheme']])
+        weibo_items.append([pic_path, item['desc'], item['scheme']])
     lock.acquire()
     weibo.objects.all().delete()
     for item in weibo_items:
         weibo.objects.create(rank_pic_href=item[0], title=item[1], link=item[2])
     lock.release()
-    weibo_count=(weibo_count+1)%3
-
+    weibo_count = (weibo_count + 1) % 3
 
     # lock.acquire()
     # weibo.objects.all().delete()
@@ -431,6 +428,7 @@ def get_minhang_24h_weather(lock=None):
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
     lock.release()
+
 
 '''*************SJTU板块*************'''
 
@@ -639,6 +637,28 @@ def _get_GA():
     return GA_cookie
 
 
+def dekt_save_data(resp_from_section,category,category_url):
+    current_time = time()*1000
+    status_enroll="【报名中】"
+    status_activity="活动未开始"
+    for item in resp_from_section.json()['rows']:
+        if item['enrollStartTime'] is not None:
+            if item['enrollStartTime']>current_time:
+                status_enroll="报名未开始"
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+        else:
+            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(0))
+        if item['enrollEndTime']<current_time:
+            status_enroll="报名已结束"
+        if item['activeStartTime']<current_time:
+            status_activity="活动进行中"
+        if item['activeEndTime']<current_time:
+            status_activity="活动已结束"
+        dektinfo.objects.create(category=category, category_url=category_url, item_id=status_enroll+"|"+status_activity, activity_name=item['activityName'], enroll_start_time=enrollStartTime,
+                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
+                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)), activity_picurl=item['activityPicurl'])
+
+
 def dekt(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
@@ -678,290 +698,38 @@ def dekt(username=None, password=None, lock=None, lock1=None):
         return
     token = resp_from_dekt.json()['data']['token']
     myheaders_for_dekt.update({'Jtoken': resp_from_dekt.json()['data']['jtoken'], 'Curuserid': "null"})
-    resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
+
+    resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
     lock1.acquire()
     dektinfo.objects.all().delete()
-    for item in resp_from_hszl.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-
-        dektinfo.objects.create(category="红色之旅", category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1", item_id=str(item['activityCode']), activity_name=item['activityName'], enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-
-    resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_ldjy.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="劳动教育", category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-
-    resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_zygy.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="志愿公益",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["志愿公益", 'https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A', str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_wthd.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="文体活动",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["文体活动", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_kjcx.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="科技创新",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["科技创新", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_jtjz.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="讲坛讲座",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["讲坛讲座", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                     data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "1", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_qt.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="其他",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=qt&categoryName=%E5%85%B6%E4%BB%96",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                         localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-    resp_from_hszl = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_hszl.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-
-        dektinfo.objects.create(category="红色之旅",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["红色之旅", "https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-        #             strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                      ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                  ), item['activityPicurl']])
-    resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_ldjy.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="劳动教育",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["劳动教育", "https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                             ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                         ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                     ), item['activityPicurl']])
-    resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_zygy.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="志愿公益",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["志愿公益", 'https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A', str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_wthd.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="文体活动",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["文体活动", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_kjcx.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="科技创新",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["科技创新", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_jtjz.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-
-        dektinfo.objects.create(category="讲坛讲座",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["讲坛讲座", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                                              ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                                          ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                                      ), item['activityPicurl']])
-    resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccount", headers=myheaders_for_dekt,
-                                     data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "2", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    for item in resp_from_qt.json()['rows']:
-        if item['enrollStartTime'] is not None:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
-        else:
-            enrollStartTime = "/"
-        dektinfo.objects.create(category="其他",
-                                category_url="https://dekt.sjtu.edu.cn/h5/activities?categoryCode=qt&categoryName=%E5%85%B6%E4%BB%96",
-                                item_id=str(item['activityCode']), activity_name=item['activityName'],
-                                enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)),
-                                active_start_time=strftime('%Y-%m-%d %H:%M:%S',
-                                                           localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-                                                         ), activity_picurl=item['activityPicurl'])
-        # rst.append(["其他", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=qt&categoryName=%E5%85%B6%E4%BB%96", str(item['activityCode']), item['activityName'], enrollStartTime, strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)
-        #                                                                                                                                                                                        ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)
-        #                                                                                                                                                                                                    ), strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)
-        #                                                                                                                                                                                                                ), item['activityPicurl']])
-    # pd.DataFrame(columns=['种类', 'url', 'id', '名称', '报名开始时间', '报名结束时间', '活动开始时间', '活动结束时间', '配图url'], data=rst).to_csv("dekt.csv")
-    print("dekt success!!!")
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"hszl done")
+    dekt_save_data(resp_from_hszl,"红色之旅","https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1")
+    resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"ldjy done")
+    dekt_save_data(resp_from_ldjy,"劳动教育","https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1")
+    resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"zygy done")
+    dekt_save_data(resp_from_zygy,"志愿公益","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A")
+    resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"wthd done")
+    dekt_save_data(resp_from_wthd,"文体活动","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8")
+    resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"kjcx done")
+    dekt_save_data(resp_from_kjcx,"科技创新","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0")
+    resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+                                       data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"jtjz done")
+    dekt_save_data(resp_from_jtjz,"讲坛讲座","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7")
+    # resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
+    #                                  data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
+    # dekt_save_data(resp_from_qt,"其他","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=qt&categoryName=%E5%85%B6%E4%BB%96")
     lock1.release()
+    print("dekt success!!!")
     return 1
 
 
@@ -1239,7 +1007,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7, lock=Non
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username, title=event["title"], starttime=event["startTime"],
                                       endtime=event["endTime"], location=event["location"],
-                                      json_detail_url=event['eventId'],allday=event['allDay'])
+                                      json_detail_url=event['eventId'], allday=event['allDay'])
     print("calendar success!!!")
 
     # return calendar_session.cookies
@@ -1251,7 +1019,6 @@ def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7, lock=Non
     lock1.release()
 
     return
-
 
 
 """************************* 数据格式说明 *******************************
@@ -1282,7 +1049,7 @@ def create_schedule(required_cookies, title, startTime, endTime, status, reminde
         schedule_data['reminderOn'] = True
     myheaders = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "calendar.sjtu.edu.cn", 'Content-Type': "application/json;charset=UTF-8"}
     resp = requests.post("https://calendar.sjtu.edu.cn/api/event/create", headers=myheaders, data=json.dumps(schedule_data), cookies=required_cookies, allow_redirects=False).json()
-    if resp['success'] != True:
+    if not resp['success']:
         print("Creation failure due to", resp['msg'])
         return 0
     else:

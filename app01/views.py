@@ -6,7 +6,6 @@ from app01.models import *
 from django.contrib.auth.models import User
 from django.contrib import auth
 from apscheduler.schedulers.background import BackgroundScheduler
-from django_apscheduler.jobstores import DjangoJobStore, register_job
 from apscheduler.triggers.interval import IntervalTrigger
 
 print("views running")
@@ -32,23 +31,36 @@ def index(request):
 
 
 ''' *********************** 定时任务 *********************** '''
-scheduler = BackgroundScheduler()
-trigger = IntervalTrigger(seconds=60)
 
 
 def test_job():
     print("running!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
-    get_zhihu_hot_topic(lock=lock_zhihu,
-                        cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
-    get_github_trending(lock=lock_github)
-    get_weibo_hot_topic(lock=lock_weibo)
-    get_minhang_24h_weather(lock=lock_weather)
-    get_bilibili_ranking(lock=lock_bilibili)
+    try:
+        get_zhihu_hot_topic(lock=lock_zhihu,cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
+    except:
+        print("get_zhihu_hot_topic FAILED")
+    try:
+        get_github_trending(lock=lock_github)
+    except:
+        print("gget_github_trending FAILED")
+    try:
+        get_weibo_hot_topic(lock=lock_weibo)
+    except:
+        print("get_weibo_hot_topic FAILED")
+    try:
+        get_minhang_24h_weather(lock=lock_weather)
+    except:
+        print("get_minhang_24h_weather FAILED")
+    try:
+        get_bilibili_ranking(lock=lock_bilibili)
+    except:
+        print("get_bilibili_ranking FAILED")
     print("updated!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
 
+scheduler = BackgroundScheduler()
+trigger = IntervalTrigger(seconds=60)
 scheduler.add_job(test_job, trigger=trigger, id="update_data")
-
 scheduler.start()
 
 
@@ -59,13 +71,13 @@ def sjtu_login(request):
         return render(request, "sjtu_login.html")
     jaccount_user = request.POST.get("user")
     jaccount_pwd = request.POST.get("pwd")
-    request.user.first_name = jaccount_user
-    request.user.save()
-    check_box = request.POST.get('check_box')
     status, msg = validate_account(jaccount_user, jaccount_pwd)
     if not status:
         print("FAILED due to", msg)
         return redirect("http://127.0.0.1:8000/sjtu_login/")  # 重定向到主页，后续添加错误信息
+    request.user.first_name = jaccount_user
+    request.user.save()
+    check_box = request.POST.get('check_box')
     '''*******************数据库添加表单：request.user（当前使用SJTUhelper的用户）；jaccount_user（jaccount用户名）；cookies（暂空）*******************'''
     thread1 = threading.Thread(target=canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread1.start()
@@ -108,15 +120,11 @@ def create__schedule(request):
 def show_canvas(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
-    # 得知当前用户是谁
-    print(request.user)
-    # 得知该用户对应的甲亢用户名
     jaccountname = request.user.first_name
     if jaccountname is None:
         return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(jaccountname)
-    # 后台运行更新函数，前台直接读取数据先行显示
-    thread = threading.Thread(target=canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock': lock_canvas})
+    print(request.user, "|", jaccountname, "|", "canvas")
+    thread = threading.Thread(target=canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread.start()
     data_list = gpt_filter("canvas_{}".format(jaccountname), lock=lock_canvas)
     # 读取该用户canvas信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
@@ -129,14 +137,10 @@ def show_canvas(request):
 def show_dekt(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
-    # 得知当前用户是谁
-    print(request.user)
-    # 得知该用户对应的甲亢用户名
     jaccountname = request.user.first_name
-    if jaccountname is None:
+    if jaccountname == '':
         return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(jaccountname)
-    # 后台运行更新函数，前台直接读取数据先行显示
+    print(request.user, "|", jaccountname, "|", "dekt")
     thread = threading.Thread(target=dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
     thread.start()
     data_list = gpt_filter("dekt", cue=None, mode=1, lock=lock_dekt)
@@ -151,14 +155,13 @@ def show_dekt(request):
 def show_shuiyuan(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
-    # 得知当前用户是谁
-    print(request.user)
-    # 得知该用户对应的甲亢用户名
     jaccountname = request.user.first_name
-    if jaccountname is None:
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "shuiyuan")
+    if jaccountname == '':
         return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
     print(jaccountname)
-    # 后台运行更新函数，前台直接读取数据先行显示
     thread = threading.Thread(target=shuiyuan, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
     thread.start()
 
@@ -171,11 +174,10 @@ def show_shuiyuan(request):
 def show_calendar(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
-    # 得知当前用户是谁
-    print(request.user)
-    # 得知该用户对应的甲亢用户名
     jaccountname = request.user.first_name
-    # 后台运行更新函数，前台直接读取数据先行显示
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "calendar")
     thread = threading.Thread(target=mysjtu_calendar, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread.start()
     data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar, mode=1)
