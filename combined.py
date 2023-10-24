@@ -297,6 +297,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
             cue = "和学生工作相关的内容"
         lock.acquire()
         current_topics = seieeNotification.objects.all()
+        current_topics =transfer_from_database_to_list("app01_seieenotification")
         lock.release()
         return current_topics
     elif site == 'minhang_weather':
@@ -659,7 +660,7 @@ def dekt_save_data(resp_from_section,category,category_url):
                                 active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)), activity_picurl=item['activityPicurl'])
 
 
-def dekt(username=None, password=None, lock=None, lock1=None):
+def process_dekt(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -733,7 +734,7 @@ def dekt(username=None, password=None, lock=None, lock1=None):
     return 1
 
 
-def canvas(username=None, password=None, lock=None, lock1=None):
+def process_canvas(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -839,7 +840,7 @@ def update_shuiyuan_category(shuiyuan_session, default_headers):
     print(shuiyuan_category_dict)
 
 
-def shuiyuan(username=None, password=None, lock=None, lock1=None):
+def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -911,7 +912,7 @@ def shuiyuan(username=None, password=None, lock=None, lock1=None):
     return 1
 
 
-def mysjtu_calendar(username=None, password=None, beginfrom=0, endat=7, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
+def mysjtu_calendar(username=None, password=None, beginfrom=-30, endat=30, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -1095,6 +1096,13 @@ def validate_account(username, password):
     else:
         return True, "Success"
 
+
+def save_collection(site,data):
+    kwargs={'site':site}
+    # for index,item in enumerate(data):
+    #     key=f'data{index}'
+    #     kwargs[key]=item
+    # collection.objects.create(**kwargs)
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':

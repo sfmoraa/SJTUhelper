@@ -1,0 +1,266 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SJTUhelper</title>
+    <link rel="stylesheet" href="../static/css/1.3.0/css/line-awesome.min.css">
+    <link rel="stylesheet" href="../static/css/1.3.0/css/line-awesome.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style_main/style.css">
+    <link rel="stylesheet"  href="../static/css/calendar/style.css">
+   <!-- bootstrap cdn link  -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
+     <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/main.min.css'>
+
+    <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
+
+
+</head>
+
+<body>
+    <input type="checkbox" name="" id="menu-toggle">
+    <div class="overlay">
+        <label for="menu-toggle" ></label>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-container">
+            <div class="brand">
+                <h2>
+                    <span class="lab la-staylinked"></span>
+                    SJTUhelper
+                </h2>
+            </div>
+
+            <div class="sidebar-avartar">
+                <div>
+                    <img src="../static/img/main/user.png" alt="">
+                </div>
+                <div class="avartar-info">
+                    <div class="avartar-text">
+                        <h4>Typh AdminSir</h4>
+
+                    </div>
+                    <span class="las la-angle-double-down"></span>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li>
+                        <a href="../zhihu" id="zhihu">
+                            <span class="las la-user"></span>
+                            <span>Zhihu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../github">
+                            <span class="las la-user"></span>
+                            <span>Github</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../bilibili">
+                            <span class="las la-user"></span>
+                            <span>BiliBili</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../weibo">
+                            <span class="las la-user"></span>
+                            <span>Weibo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../shuiyuan">
+                            <span class="las la-user"></span>
+                            <span>Shuiyuan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../canvas">
+                            <span class="las la-user"></span>
+                            <span>canvas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../dekt" id="dekt">
+                            <span class="las la-user"></span>
+                            <span>dekt</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../seiee" id="seiee">
+                            <span class="las la-user"></span>
+                            <span>seiee</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../calendar" id="calendar2" class="active">
+                            <span class="las la-user"></span>
+                            <span>calendar</span>
+                        </a>
+                    </li>
+                                <script>
+                                    var requestUrl = request.getScheme() //当前链接使用的协议
+                                                        +"://" + request.getServerName()//服务器地址
+                                                        + ":" + request.getServerPort() //端口号
+                                                        + request.getContextPath() //应用名称，如果应用名称为
+                                                        + request.getServletPath() //请求的相对url
+                                                        + "?" + request.getQueryString(); //请求参数
+                                    print(requestUrl);
+                                    var element=document.getElementById("canvas");
+                                    element.class="active";
+
+                                    var element2=document.getElementById("dekt");
+                                    element2.href="../bilibili";
+                                    element2.style.background="green"
+                                    element2.setAttribute("class","active");
+                                </script>
+
+
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <div class="header-title-wrapper">
+                <label for="menu-toggle">
+                    <span class="las la-bars"></span>
+                </label>
+                <div class="header-title">
+                    <h1>Analytics</h1>
+                    <p>Display analytics about your Channel <span class="las la-chart-line"></span></p>
+                </div>
+            </div>
+        </header>
+        <div class="login-form">
+           <form method="post">
+            <div id="close-login-form" class="fas fa-times"></div>
+             <div class="fas fa-user-astronaut">SJTUhelper</div>
+            <h2>Add a New Calender</h2>
+        {% csrf_token %}
+      <div class="form-row">
+        <label for="type">类型：</label>
+        <select id="type" name="type">
+            {% for table in tableid %}
+          <option value={{ table }}>{{table }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="title">标题：</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+
+      <div class="form-row">
+        <label for="start-date">开始日期：</label>
+        <input type="date" id="start-date" name="start-date" required>
+
+        <label for="start-time">开始时间：</label>
+        <input type="time" id="start-time" name="start-time" required>
+      </div>
+
+      <div class="form-row">
+        <label for="end-date">结束日期：</label>
+        <input type="date" id="end-date" name="end-date" required>
+
+        <label for="end-time">结束时间：</label>
+        <input type="time" id="end-time" name="end-time" required>
+      </div>
+
+      <div class="form-row">
+        <label for="location">地点：</label>
+        <input type="text" id="location" name="location" value="上海交通大学闵行校区">
+      </div>
+
+      <div class="form-row">
+        <label for="availability">可用性：</label>
+        <select id="availability" name="availability">
+          <option value="在忙">在忙</option>
+          <option value="空闲">空闲</option>
+          <option value="不在办公室">不在办公室</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="reminder">提醒：</label>
+        <select id="reminder" name="reminder">
+          <option value="-1">无提醒</option>
+          <option value="0">日程开始时</option>
+          <option value="5">5分钟前</option>
+          <option value="10">10分钟前</option>
+          <option value="15">15分钟前</option>
+          <option value="30">30分钟前</option>
+          <option value="60">1小时前</option>
+          <option value="1440">1天前</option>
+          <option value="10080">1周前</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="description">描述：</label>
+        <textarea id="description" name="description"></textarea>
+      </div>
+
+      <input type="submit" value="提交" class="link-btn">
+    </form>
+        </div>
+        <main>
+
+            <section>
+                    <h3 class="section-head">Calendar</h3>
+                        <div class="card">
+					        <div class="card-body">
+						    <div class="table-responsive">
+                                <button id="login-btn" class="link-btn" >add calendar</button>
+							    <div id='calendar'></div>
+						    </div>
+					        </div>
+				        </div>
+
+            </section>
+
+        </main>
+    </div>
+    <script src='../static/js/calendar/locales-all.js'></script>
+    <script src='../static/js/calendar/script.js'></script>
+    <script src='../static/js/calendar/main.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const initialLocaleCode = 'zh-cn';
+        const calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        },
+        locale: initialLocaleCode,
+        buttonIcons: false, // show the prev/next text
+        weekNumbers: true,
+        navLinks: true, // can click day/week names to navigate views
+        editable: true,
+        dayMaxEvents: true, // allow "more" link when too many events
+        events:{{ json_data|safe }} , //事件列表
+        });
+
+  calendar.render();
+
+  //增加日程
+
+});</script>
+
+</body>
+</html>

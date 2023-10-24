@@ -1,0 +1,112 @@
+:root {
+  font-size: 2vmin;
+  --accent-color: #ff2189;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background: url("../img/landscape-7283516.jpg") no-repeat;
+  background-size: cover;
+}
+
+
+
+/* header */
+.header {
+  display: flex;
+  justify-content: space-evenly;
+  margin-bottom: 20px;
+}
+
+.currentDate {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  text-align: center;
+  min-width: 28vmin;
+}
+
+.header button {
+  border: 2px solid transparent;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 0 10px;
+  transition: all 0.3s;
+  font-size: 1.3rem;
+}
+
+.header button:hover {
+  border: 2px solid var(--accent-color);
+}
+
+/* days */
+.days {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+}
+
+/* dates */
+.dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.date {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 1.6rem;
+  transition: all 0.3s;
+  border: 3px solid transparent;
+  color: rgba(0, 0, 0, 0.36);
+  cursor: pointer;
+  background-color: transparent;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.date.currentMonth {
+  color: #000;
+}
+
+.date:hover,
+.date.selected {
+  border-color: var(--accent-color);
+}
+
+.date.selected {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+
+.container111{
+  width: 100%;
+  height: 100%;
+}
+
+.calendar {
+  float: left;
+  width: 60%;
+  height: 100%;
+  user-select: none;
+}
+
+.tasklist{
+  float: right;
+  width: 35%;
+  height: 90%;
+  background: aqua;
+}

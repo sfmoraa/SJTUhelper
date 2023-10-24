@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib import auth
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from django.http import JsonResponse
 
 print("views running")
 from combined import *
@@ -36,7 +37,8 @@ def index(request):
 def test_job():
     print("running!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
     try:
-        get_zhihu_hot_topic(lock=lock_zhihu,cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
+        get_zhihu_hot_topic(lock=lock_zhihu,
+                            cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
     except:
         print("get_zhihu_hot_topic FAILED")
     try:
@@ -79,96 +81,17 @@ def sjtu_login(request):
     request.user.save()
     check_box = request.POST.get('check_box')
     '''*******************数据库添加表单：request.user（当前使用SJTUhelper的用户）；jaccount_user（jaccount用户名）；cookies（暂空）*******************'''
-    thread1 = threading.Thread(target=canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_canvas})
+    thread1 = threading.Thread(target=process_canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread1.start()
-    thread2 = threading.Thread(target=dekt, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_dekt})
+    thread2 = threading.Thread(target=process_dekt, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_dekt})
     thread2.start()
-    thread3 = threading.Thread(target=shuiyuan, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
+    thread3 = threading.Thread(target=process_shuiyuan, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
     thread3.start()
     thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread4.start()
     return redirect("http://127.0.0.1:8000/sjtu_login/")  # 重定向到主页
 
 
-def create__schedule(request):
-    if not request.user.is_authenticated:
-        return redirect("http://127.0.0.1:8000/loginpage/")
-    jaccountname = request.user.first_name
-    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
-    if request.method == "GET":
-        return render(request, "create_schedule.html", {"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
-    elif request.method == "POST":
-
-        lock_cookies.acquire()
-        required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
-        lock_cookies.release()
-        schedule_type = request.POST.get('type')
-        schedule_type_id = [table[2] for table in tablesid if table[1] == schedule_type][0]
-        title = request.POST.get('title')
-        start_date = request.POST.get('start-date')
-        start_time = request.POST.get('start-time')
-        end_date = request.POST.get('end-date')
-        end_time = request.POST.get('end-time')
-        location = request.POST.get('location')
-        availability = request.POST.get('availability')
-        reminder = int(request.POST.get('reminder'))
-        description = request.POST.get('description')
-        create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
-        return HttpResponse("Create done！！！！！！！！！！！！！！！！！！！")
-
-
-def show_canvas(request):
-    if not request.user.is_authenticated:
-        return redirect("http://127.0.0.1:8000/loginpage/")
-    jaccountname = request.user.first_name
-    if jaccountname is None:
-        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(request.user, "|", jaccountname, "|", "canvas")
-    thread = threading.Thread(target=canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_canvas})
-    thread.start()
-    data_list = gpt_filter("canvas_{}".format(jaccountname), lock=lock_canvas)
-    # 读取该用户canvas信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
-    # data_list = [[0, '/', 'Not required', 135243, '数字信号处理（E）', '/', '请尽快加入课程通知群', 'https://oc.sjtu.edu.cn/courses/59766/discussion_topics/135243'],
-    #              [2, '2023-10-11+23:59:59', 'true', 248811, '安全开发模型及安全编程', '<p>提交需求规划和项目进度计划，每组提交一份。</p>\r\n<p>具体要求：</p>\r\n<p>1、需求规划：一张思维导图，要体现出Epic，Feature，Story, Task四个层次的需求规划。</p>\r\n<p>2、项目进度计划：可以用Excell表格或甘特图，需要体现出开发任务的人员分工和时间进度计划。</p>\r\n<p>\xa0</p>', '项目计划提交',
-    #               'https://oc.sjtu.edu.cn/courses/59762/assignments/248811']]
-    return render(request, "show_canvas.html", {"canvas_data_list": data_list})
-
-
-def show_dekt(request):
-    if not request.user.is_authenticated:
-        return redirect("http://127.0.0.1:8000/loginpage/")
-    jaccountname = request.user.first_name
-    if jaccountname == '':
-        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(request.user, "|", jaccountname, "|", "dekt")
-    thread = threading.Thread(target=dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
-    thread.start()
-    data_list = gpt_filter("dekt", cue=None, mode=1, lock=lock_dekt)
-    # 读取该用户dekt信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
-    # data_list = [[0, '劳动教育', 'https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1', '045d80d2-b469-4a5e-a4e1-7abdec8a4c12', '“机源动力”第四期——机械拆解学堂', '2023-10-20 19:00:00', '2023-10-22 13:00:00', '2023-10-25 14:00:00', '2023-10-25 16:00:00',
-    #               'https://s3.jcloud.sjtu.edu.cn:443/2a9c49ee085a49b1907937307b539b06-arvato_uat/%E5%B0%81%E9%9D%A24_5wu1tGLN.png'],
-    #              [1, '劳动教育', 'https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1', '61ab5323-6c46-4daf-b119-a53f345dc007', '行之有序|生科院非机动车停放引导劳动教育 2023秋 第七周', '2023-10-18 21:00:00', '2023-10-22 21:00:00', '2023-10-23 08:30:00',
-    #               '2023-10-27 17:30:00', 'https://s3.jcloud.sjtu.edu.cn:443/2a9c49ee085a49b1907937307b539b06-arvato_uat/4fbee3327a850318081841e3d2b3904_eZnkgQPO.jpg']]
-    return render(request, "show_dekt.html", {"dekt_data_list": data_list})
-
-
-def show_shuiyuan(request):
-    if not request.user.is_authenticated:
-        return redirect("http://127.0.0.1:8000/loginpage/")
-    jaccountname = request.user.first_name
-    if jaccountname == '':
-        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(request.user, "|", jaccountname, "|", "shuiyuan")
-    if jaccountname == '':
-        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
-    print(jaccountname)
-    thread = threading.Thread(target=shuiyuan, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
-    thread.start()
-
-    data_list = gpt_filter("shuiyuan_{}".format(jaccountname), lock=lock_shuiyuan)
-    # 读取该用户水源信息，下为样例数据，需转为从数据库调取。注意！！！：下数据为从csv文件读取而来，第一项编号可能没有
-    # data_list = [[0, 'https://shuiyuan.sjtu.edu.cn/t/topic/167465', '100天诗词打卡(但是随机掉落猫猫)', 195, 70, False, '宠物花草', "['坚持100天']", 1988], [1, 'https://shuiyuan.sjtu.edu.cn/t/topic/207294', '不想上课不想上课不想上课不想上课', 23, 6, True, '校园生活', "['发电']", 1043]]
-    return render(request, "show_shuiyuan.html", {"shuiyuan_data_list": data_list})
 
 
 def show_calendar(request):
@@ -315,7 +238,7 @@ def loginpage(request):
                 thread5.start()
                 thread6 = threading.Thread(target=get_minhang_24h_weather, kwargs={'lock': lock_weather})
                 thread6.start()
-                return redirect("https://www.sjtu.edu.cn")
+                return redirect("/mainpage")
 
             # 用户名或密码不正确，返回登录页面并显示错误信息
         if 'signup' in request.POST:
@@ -334,3 +257,284 @@ def loginpage(request):
             user.save()
             send(request, user, email)
             return HttpResponse('请点击邮箱链接验证')
+
+
+def zhihu(request):
+    if (request.method == "GET"):
+        thread = threading.Thread(target=get_zhihu_hot_topic, kwargs={'lock': lock_zhihu,
+                                                                      'cookie': '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'})
+        thread.start()
+
+        key = "我对军事政治不感兴趣"
+        reducedHotTopics1 = gpt_filter('zhihu', cue=key, lock=lock_zhihu, mode=1)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"key": key,
+                                                  "zhihuHotTopic": reducedHotTopics1,
+                                                  "minhang_weather": weather[1:5]})
+    else:
+        key = request.POST.get("key")
+        print(key)
+
+        reducedHotTopics = gpt_filter('zhihu', cue=key, lock=lock_zhihu)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+
+
+def github(request):
+    if (request.method == "GET"):
+        get_github_trending(lock=lock_github)
+        key = "python"
+
+        reducedHotTopics = gpt_filter('github', cue=key, lock=lock_github, mode=1)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"key": key,
+                                                  "github": reducedHotTopics,
+                                                  "minhang_weather": weather[1:5]})
+    else:
+        key = request.POST.get("key")
+        print(key)
+
+        reducedHotTopics = gpt_filter('github', cue=key, lock=lock_github)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+
+
+def bilibili(request):
+    if (request.method == "GET"):
+        thread = threading.Thread(target=get_bilibili_ranking, kwargs={'lock': lock_bilibili})
+        key = "我想获得小于10条内容"
+
+        reducedHotTopics3 = gpt_filter('bilibili', cue=key, lock=lock_bilibili, mode=1)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"key": key,
+                                                  "bilibili": reducedHotTopics3,
+                                                  "minhang_weather": weather[1:5]
+                                                  })
+
+
+    else:
+        key = request.POST.get("key")
+        print(key)
+
+        reducedHotTopics = gpt_filter('bilibili', cue=key, lock=lock_bilibili)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"bilibili": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+
+
+def weibo(request):
+    if request.method == "GET":
+        thread = threading.Thread(target=get_weibo_hot_topic, kwargs={'lock': lock_weibo})
+        thread.start()
+        reducedHotTopics4 = gpt_filter('weibo', lock=lock_weibo, mode=1)
+        key = ""
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"weibo": reducedHotTopics4, "key": key, "minhang_weather": weather[1:5]})
+    else:
+        key = request.POST.get("key")
+        print(key)
+
+        reducedHotTopics = gpt_filter('weibo', cue="", lock=lock_weibo)
+
+        get_minhang_24h_weather(lock=lock_weather)
+        weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+
+
+def canvas(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "canvas")
+    thread = threading.Thread(target=process_canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_canvas})
+    thread.start()
+    data_list = gpt_filter("canvas_{}".format(jaccountname), lock=lock_canvas)
+    for item in data_list:
+        item[5] = mark_safe(item[5])
+    get_minhang_24h_weather(lock=lock_weather)
+    weather = gpt_filter("minhang_weather", lock=lock_weather)
+    return render(request, "main_menu.html", {"canvas_data_list": data_list, "minhang_weather": weather[1:5]})
+
+
+def dekt(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "dekt")
+    thread = threading.Thread(target=process_dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
+    thread.start()
+    data_list = gpt_filter("dekt", cue=None, mode=1, lock=lock_dekt)
+    for item in data_list:
+        item[5] = str(item[5])
+    get_minhang_24h_weather(lock=lock_weather)
+    weather = gpt_filter("minhang_weather", lock=lock_weather)
+    return render(request, "main_menu.html", {"dekt_data_list": data_list, "minhang_weather": weather[1:5]})
+
+
+def shuiyuan(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "shuiyuan")
+    thread = threading.Thread(target=process_shuiyuan, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
+    thread.start()
+    data_list = gpt_filter("shuiyuan_{}".format(jaccountname), lock=lock_shuiyuan)
+    get_minhang_24h_weather(lock=lock_weather)
+    weather = gpt_filter("minhang_weather", lock=lock_weather)
+    return render(request, "main_menu.html", {"shuiyuan_data_list": data_list, "minhang_weather": weather[1:5]})
+
+
+def seiee(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "seiee")
+    thread = threading.Thread(target=seiee_notification, kwargs={'lock': lock_seiee})
+    thread.start()
+    data_list = gpt_filter('seiee_notion', lock=lock_seiee)
+    data_list = [data[1:] for data in data_list]
+    get_minhang_24h_weather(lock=lock_weather)
+    weather = gpt_filter("minhang_weather", lock=lock_weather)
+    return render(request, "main_menu.html", {"seiee_data_list": data_list, "minhang_weather": weather[1:5]})
+
+
+def calendar(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        return HttpResponse("未登录！！！！！！！！！！！！！！！！！！！")
+    print(request.user, "|", jaccountname, "|", "calendar")
+    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+    if request.method == "POST":
+        lock_cookies.acquire()
+        required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
+        lock_cookies.release()
+        schedule_type = request.POST.get('type')
+        schedule_type_id = [table[2] for table in tablesid if table[1] == schedule_type][0]
+        title = request.POST.get('title')
+        start_date = request.POST.get('start-date')
+        start_time = request.POST.get('start-time')
+        end_date = request.POST.get('end-date')
+        end_time = request.POST.get('end-time')
+        location = request.POST.get('location')
+        availability = request.POST.get('availability')
+        reminder = int(request.POST.get('reminder'))
+        description = request.POST.get('description')
+        create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
+        mysjtu_calendar(username=jaccountname,lock=lock_cookies,lock1=lock_calendar)
+        return redirect("/calendar")
+
+    thread = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
+    thread.start()
+    data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
+
+    processed_data=[]
+    for data in data_list:
+        if data[6]=="false" or data[6]=="False":
+            allday=False
+        elif data[6]=="true" or data[6]=="True":
+            allday=True
+        processed_data.append({"id": data[5], "title": data[1] + " [" + data[4] + "]", "start": data[2], "end": data[3], "allDay": allday, 'url': "https://calendar.sjtu.edu.cn/ui/calendar"})
+    json_data = json.dumps(processed_data)
+    return render(request, "calendar.html", {"json_data": json_data,"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
+
+def create__schedule(request):
+    if not request.user.is_authenticated:
+        return redirect("http://127.0.0.1:8000/loginpage/")
+    jaccountname = request.user.first_name
+    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+    if request.method == "GET":
+        return render(request, "create_schedule.html", {"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
+    elif request.method == "POST":
+
+        lock_cookies.acquire()
+        required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
+        lock_cookies.release()
+        schedule_type = request.POST.get('type')
+        schedule_type_id = [table[2] for table in tablesid if table[1] == schedule_type][0]
+        title = request.POST.get('title')
+        start_date = request.POST.get('start-date')
+        start_time = request.POST.get('start-time')
+        end_date = request.POST.get('end-date')
+        end_time = request.POST.get('end-time')
+        location = request.POST.get('location')
+        availability = request.POST.get('availability')
+        reminder = int(request.POST.get('reminder'))
+        description = request.POST.get('description')
+        create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
+        return HttpResponse("Create done！！！！！！！！！！！！！！！！！！！")
+
+
+def collection(request):
+    # get_collection()
+
+    shuiyuan_data_list = [[0, 'https://shuiyuan.sjtu.edu.cn/t/topic/167465', '100天诗词打卡(但是随机掉落猫猫)', 195, 70, False,
+                           '宠物花草', "['坚持100天']", 1988],
+                          [1, 'https://shuiyuan.sjtu.edu.cn/t/topic/207294', '不想上课不想上课不想上课不想上课', 23, 6, True,
+                           '校园生活', "['发电']", 1043]]
+
+    seiee_data_list = [['【素拓活动】【本科生综测】【1121项95分】第三届海洋装备发展战略论坛', '2023-10',
+                        'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw_cat4/9184.html'],
+                       ['【素拓活动】【本科生综测】【1121项95分】第三届海洋装备发展战略论坛', '2023-10',
+                        'https://www.seiee.sjtu.edu.cn/xsgz_tzgg_xssw_cat4/9184.html']]
+    dekt_data_list = [[0, '劳动教育',
+                       'https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1',
+                       '045d80d2-b469-4a5e-a4e1-7abdec8a4c12', '“机源动力”第四期——机械拆解学堂', '2023-10-20 19:00:00',
+                       '2023-10-22 13:00:00', '2023-10-25 14:00:00', '2023-10-25 16:00:00',
+                       'https://s3.jcloud.sjtu.edu.cn:443/2a9c49ee085a49b1907937307b539b06-arvato_uat/%E5%B0%81%E9%9D%A24_5wu1tGLN.png'],
+                      [1, '劳动教育',
+                       'https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1',
+                       '61ab5323-6c46-4daf-b119-a53f345dc007', '行之有序|生科院非机动车停放引导劳动教育 2023秋 第七周',
+                       '2023-10-18 21:00:00', '2023-10-22 21:00:00', '2023-10-23 08:30:00',
+                       '2023-10-27 17:30:00',
+                       'https://s3.jcloud.sjtu.edu.cn:443/2a9c49ee085a49b1907937307b539b06-arvato_uat/4fbee3327a850318081841e3d2b3904_eZnkgQPO.jpg']]
+
+    get_minhang_24h_weather(lock=lock_weather)
+    weather = gpt_filter("minhang_weather", lock=lock_weather)
+
+    return render(request, "collection.html", {
+        "shuiyuan_data_list": shuiyuan_data_list,
+        "seiee_data_list": seiee_data_list,
+        "dekt_data_list": dekt_data_list,
+        "minhang_weather": weather[0:5],
+    })
+
+
+def add_to_favorites(request):
+    if request.method == 'POST':
+        collected_content = request.POST.dict()
+        save_collection(collected_content.pop('site'), collected_content)
+        return JsonResponse({'status': 'success'})
+    else:
+        print("gggggggggggggggggggg")
+        return JsonResponse({'status': 'error'})

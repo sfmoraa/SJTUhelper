@@ -20,7 +20,6 @@ class github(models.Model):
     href = models.URLField(max_length=500)
 
 
-
 class bilibili(models.Model):
     rank = models.IntegerField(default=1)
     pic_href = models.CharField(max_length=500, default='')
@@ -37,7 +36,7 @@ class weibo(models.Model):
 
 class dektinfo(models.Model):
     category = models.CharField(max_length=100)
-    category_url = models.TextField()
+    category_url = models.TextField(default="https://dekt.sjtu.edu.cn/h5/index")
     item_id = models.CharField(max_length=100)
     activity_name = models.CharField(max_length=100)
     enroll_start_time = models.DateTimeField()
@@ -63,6 +62,19 @@ class minhang_24h_weather(models.Model):
     wind_direction = models.CharField(max_length=100)
     wind_strength = models.CharField(max_length=100)
     hour = models.CharField(max_length=100)
+
+
+class collection(models.Model):
+    site = models.CharField(max_length=100)
+    data0 = models.CharField(max_length=100, null=True, blank=True)
+    data1 = models.CharField(max_length=100, null=True, blank=True)
+    data2 = models.CharField(max_length=100, null=True, blank=True)
+    data3 = models.CharField(max_length=100, null=True, blank=True)
+    data4 = models.CharField(max_length=100, null=True, blank=True)
+    data5 = models.CharField(max_length=100, null=True, blank=True)
+    data6 = models.CharField(max_length=100, null=True, blank=True)
+    data7 = models.CharField(max_length=100, null=True, blank=True)
+    data8 = models.CharField(max_length=100, null=True, blank=True)
 
 
 def create_dynamic_model_collection(table_name):
@@ -228,7 +240,7 @@ def delete_dynamic_model_calendar(table_name):
     db.close()
 
 
-def insert_dynamic_model_calendar(table_name, title, starttime, endtime, location, json_detail_url,allday):
+def insert_dynamic_model_calendar(table_name, title, starttime, endtime, location, json_detail_url, allday):
     # 打开数据库连接
     table_name = 'calendar_' + table_name
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
@@ -238,7 +250,7 @@ def insert_dynamic_model_calendar(table_name, title, starttime, endtime, locatio
         INSERT INTO `{}` (title, starttime, endtime, location, json_detail_url, allday)
         VALUES
             ('{}', '{}', '{}', '{}', '{}', '{}');
-        """.format(table_name, title, starttime, endtime, location, json_detail_url,allday)
+        """.format(table_name, title, starttime, endtime, location, json_detail_url, allday)
     cursor.execute(insert_data_query)
     db.commit()
     # 关闭游标和数据库连接
@@ -397,6 +409,8 @@ def transfer_from_database_to_list(tablename):
             row[5] = safe_fifth_element  # 更新第五个元素为安全的HTML
             content.append(row)
         return content
+
+
 def create_dynamic_model_tablesid(table_name):
     table_name = 'tablesid_' + table_name
     # 打开数据库连接

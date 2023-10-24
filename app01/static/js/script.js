@@ -18,3 +18,4 @@ window.onscroll = () =>{
       document.querySelector('.header').classList.remove('active');
    }
 }
+
