@@ -110,7 +110,7 @@ def get_zhihu_hot_topic(cookie, lock=None):
         if picture_path:
             picture_element = etree.tostring(picture_path[0], encoding='unicode')
         else:
-            picture_element = ''
+            picture_element = '<img loading="lazy" src="https://picx.zhimg.com/80/v2-4cd83ae3d6ca76dabecf001244a62310_xl.jpg?source=4e949a73" alt="打开话题页">'
         # print(number, title, href, picture_element)
         zhihu.objects.create(number=number, title=title, href=href, picture_element=picture_element)
         # rst.append([number, title, href, picture_element])
@@ -297,7 +297,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
             cue = "和学生工作相关的内容"
         lock.acquire()
         current_topics = seieeNotification.objects.all()
-        current_topics =transfer_from_database_to_list("app01_seieenotification")
+        current_topics = transfer_from_database_to_list("app01_seieenotification")
         lock.release()
         return current_topics
     elif site == 'minhang_weather':
@@ -395,7 +395,7 @@ def get_minhang_24h_weather(lock=None):
         "Sec-Fetch-Site": "cross-site",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
     }
-    weather_pics_path = './weather_pics'
+    weather_pics_path = './weather_pics'  # 由views.py调用
     existing_weather_pics = os.listdir(weather_pics_path)
     rst = [[], [], [], [], [], []]  # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
     sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
@@ -406,7 +406,7 @@ def get_minhang_24h_weather(lock=None):
             if pic_name not in existing_weather_pics:
                 response = requests.get("https:" + pic_url, headers=weather_pic_headers)
                 if response.status_code == 200:
-                    with open('./weather_pics/' + pic_name, 'wb') as file:
+                    with open(weather_pics_path + '/' + pic_name, 'wb') as file:
                         file.write(response.content)
                         print('图片保存成功')
                 else:
@@ -425,7 +425,6 @@ def get_minhang_24h_weather(lock=None):
             rst[5].append(hour.xpath("./text()")[0])
     lock.acquire()
     minhang_24h_weather.objects.all().delete()
-    reformed_rst = [[rst[0][i], rst[1][i], rst[2][i], rst[3][i], rst[4][i], rst[5][i]] for i in range(len(rst[0]))]
     for i in range(len(rst[0])):
         minhang_24h_weather.objects.create(Name_of_weather_picture=rst[0][i], weather_text=rst[1][i], temperature=rst[2][i], wind_direction=rst[3][i], wind_strength=rst[4][i], hour=rst[5][i])
     lock.release()
@@ -559,7 +558,7 @@ def load_cookies(username):
 
 
 def save_cookies(username, cookies):
-    delete_dynamic_model_cookies(username)
+    delete_dynamic_model('cookies_' + username)
     create_dynamic_model_cookies(username)
     for cookie in cookies:
         insert_dynamic_model_cookies(table_name=username, name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
@@ -638,26 +637,26 @@ def _get_GA():
     return GA_cookie
 
 
-def dekt_save_data(resp_from_section,category,category_url):
-    current_time = time()*1000
-    status_enroll="【报名中】"
-    status_activity="活动未开始"
+def dekt_save_data(resp_from_section, category, category_url):
+    current_time = time() * 1000
+    status_enroll = "【报名中】"
+    status_activity = "活动未开始"
     for item in resp_from_section.json()['rows']:
         if item['enrollStartTime'] is not None:
-            if item['enrollStartTime']>current_time:
-                status_enroll="报名未开始"
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
+            if item['enrollStartTime'] > current_time:
+                status_enroll = "报名未开始"
+            enrollStartTime = strftime('%Y年%m月%d日 %H:%M:%S', localtime(item['enrollStartTime'] / 1000))
         else:
-            enrollStartTime = strftime('%Y-%m-%d %H:%M:%S', localtime(0))
-        if item['enrollEndTime']<current_time:
-            status_enroll="报名已结束"
-        if item['activeStartTime']<current_time:
-            status_activity="活动进行中"
-        if item['activeEndTime']<current_time:
-            status_activity="活动已结束"
-        dektinfo.objects.create(category=category, category_url=category_url, item_id=status_enroll+"|"+status_activity, activity_name=item['activityName'], enroll_start_time=enrollStartTime,
-                                enroll_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
-                                active_end_time=strftime('%Y-%m-%d %H:%M:%S', localtime(item['activeEndTime'] / 1000)), activity_picurl=item['activityPicurl'])
+            enrollStartTime = strftime('%Y年%m月%d日 %H:%M:%S', localtime(0))
+        if item['enrollEndTime'] < current_time:
+            status_enroll = "报名已结束"
+        if item['activeStartTime'] < current_time:
+            status_activity = "活动进行中"
+        if item['activeEndTime'] < current_time:
+            status_activity = "活动已结束"
+        dektinfo.objects.create(category=category, category_url=category_url, item_id=status_enroll + "|" + status_activity, activity_name=item['activityName'], enroll_start_time=enrollStartTime,
+                                enroll_end_time=strftime('%Y年%m月%d日 %H:%M:%S', localtime(item['enrollEndTime'] / 1000)), active_start_time=strftime('%Y年%m月%d日 %H:%M:%S', localtime(item['activeStartTime'] / 1000)),
+                                active_end_time=strftime('%Y年%m月%d日 %H:%M:%S', localtime(item['activeEndTime'] / 1000)), activity_picurl=item['activityPicurl'])
 
 
 def process_dekt(username=None, password=None, lock=None, lock1=None):
@@ -692,7 +691,7 @@ def process_dekt(username=None, password=None, lock=None, lock1=None):
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
     if resp_from_dekt.json()['code'] == 1:
         lock.acquire()
-        delete_dynamic_model_cookies(username)
+        delete_dynamic_model('cookies_' + username)
         lock.release()
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
@@ -704,28 +703,28 @@ def process_dekt(username=None, password=None, lock=None, lock1=None):
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 1}, "publicaccountid": "sjtuvirtual"}))
     lock1.acquire()
     dektinfo.objects.all().delete()
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"hszl done")
-    dekt_save_data(resp_from_hszl,"红色之旅","https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "hszl done")
+    dekt_save_data(resp_from_hszl, "红色之旅", "https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E7%BA%A2%E8%89%B2%E4%B9%8B%E6%97%85&redTour=1")
     resp_from_ldjy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 1, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"ldjy done")
-    dekt_save_data(resp_from_ldjy,"劳动教育","https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "ldjy done")
+    dekt_save_data(resp_from_ldjy, "劳动教育", "https://dekt.sjtu.edu.cn/h5/activities?categoryName=%E5%8A%B3%E5%8A%A8%E6%95%99%E8%82%B2&laborEducation=1")
     resp_from_zygy = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "zygy", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"zygy done")
-    dekt_save_data(resp_from_zygy,"志愿公益","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "zygy done")
+    dekt_save_data(resp_from_zygy, "志愿公益", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=zygy&categoryName=%E5%BF%97%E6%84%BF%E5%85%AC%E7%9B%8A")
     resp_from_wthd = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "yshd", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"wthd done")
-    dekt_save_data(resp_from_wthd,"文体活动","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "wthd done")
+    dekt_save_data(resp_from_wthd, "文体活动", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=yshd&categoryName=%E6%96%87%E4%BD%93%E6%B4%BB%E5%8A%A8")
     resp_from_kjcx = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "kjcx", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"kjcx done")
-    dekt_save_data(resp_from_kjcx,"科技创新","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "kjcx done")
+    dekt_save_data(resp_from_kjcx, "科技创新", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=kjcx&categoryName=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0")
     resp_from_jtjz = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "jtjz", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
-    # print(strftime("%Y-%m-%d %H:%M:%S", localtime()),"jtjz done")
-    dekt_save_data(resp_from_jtjz,"讲坛讲座","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7")
+    print(strftime("%Y-%m-%d %H:%M:%S", localtime()), "jtjz done")
+    dekt_save_data(resp_from_jtjz, "讲坛讲座", "https://dekt.sjtu.edu.cn/h5/activities?categoryCode=jtjz&categoryName=%E8%AE%B2%E5%9D%9B%E8%AE%B2%E5%BA%A7")
     # resp_from_qt = dekt_session.post("https://dekt.sjtu.edu.cn/api/wmt/secondclass/fmGetActivityByPage?time=" + str(round(time() * 1000)) + "&tenantId=500&token=" + token + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
     #                                  data=json.dumps({"sort": "id", "order": "desc", "offset": 0, "limit": 50, "queryParams": {"activityName": "", "categoryCode": "qt", "topicCode": "", "statusType": "", "orderType": 1, "laborEducation": 0, "redTour": 0}, "publicaccountid": "sjtuvirtual"}))
     # dekt_save_data(resp_from_qt,"其他","https://dekt.sjtu.edu.cn/h5/activities?categoryCode=qt&categoryName=%E5%85%B6%E4%BB%96")
@@ -887,7 +886,7 @@ def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
     resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
     if resp_from_latest.status_code != 200:
-        delete_dynamic_model_cookies(username)
+        delete_dynamic_model('cookies_' + username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -912,7 +911,7 @@ def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
     return 1
 
 
-def mysjtu_calendar(username=None, password=None, beginfrom=-30, endat=30, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
+def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
     user_cookie = None
     if password is None:
         lock.acquire()
@@ -999,7 +998,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-30, endat=30, lock=
         "%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
     if calendar_list.status_code != 200:
-        delete_dynamic_model_cookies(username)
+        delete_dynamic_model('cookies_' + username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     lock1.acquire()
@@ -1013,7 +1012,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-30, endat=30, lock=
 
     # return calendar_session.cookies
     create_dynamic_model_cookies(username + 'store')
-    delete_dynamic_model_cookies(username + 'store')
+    delete_dynamic_model('cookies_' + username + 'store')
     create_dynamic_model_cookies(username + 'store')
     for cookie in calendar_session.cookies:
         insert_dynamic_model_cookies(table_name=username + 'store', name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
@@ -1097,12 +1096,23 @@ def validate_account(username, password):
         return True, "Success"
 
 
-def save_collection(site,data):
-    kwargs={'site':site}
-    # for index,item in enumerate(data):
-    #     key=f'data{index}'
-    #     kwargs[key]=item
-    # collection.objects.create(**kwargs)
+def save_collection(user, site, data):
+    kwargs = {'user': user, 'site': site}
+    for i, item in enumerate(data):
+        kwargs['data' + str(i)] = data[item]
+    obj, created = collection.objects.get_or_create(**kwargs)
+    if created:
+        print("already collected this one")
+
+def delete_collection(user, site, data):
+    kwargs = {'user': user, 'site': site}
+    for i, item in enumerate(data):
+        kwargs['data' + str(i)] = data[item]
+    if site =='weibo':
+        kwargs.pop('data1')
+        kwargs.pop('data2')
+    collection.objects.filter(**kwargs).delete()
+
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':

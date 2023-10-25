@@ -19,9 +19,9 @@ from django.urls import path
 from app01 import views
 
 urlpatterns = [
+    path('',views.index),
+    path('mainpage/',views.mainpage),
     path('admin/', admin.site.urls),
-    path('mytest/',views.mytest),
-    path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
     path('loginpage/', views.loginpage),
     path('logout/',views.log_out),
     path('bilibili/',views.bilibili),
@@ -36,8 +36,8 @@ urlpatterns = [
     path('show_calendar/', views.show_calendar),
     path('sjtu_login/',views.sjtu_login),
     path('create_schedule/',views.create__schedule),
-    path('collection/',views.collection),
-    path('add_to_favorites/', views.add_to_favorites),
+    path('collection/',views.show_collection),
+    path('process_favorites/', views.process_favorites),
     path('changepassword/',views.changepassword),
     path('changepassword/send_verification_code/',views.send),
     path('loginpage/send_verification_code/',views.send_signup),

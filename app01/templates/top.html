@@ -13,6 +13,8 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
    <!-- custom css file link  -->
    <link rel="stylesheet" href="../static/css/style.css">
+   <!-- <link rel="stylesheet" href="./css/style.scss"> -->
+
 
 </head>
 <body>
@@ -40,7 +42,7 @@
 
          <div class="icons">
             <div id="menu-btn" class="fas fa-bars"></div>
-           
+            <a href="/loginpage"><div id="login-btn" class="fas fa-user"></div></a>
          </div>
 
       </div>
@@ -49,8 +51,6 @@
 
 </header>
 
-
-
 <section class="home" id="home">
 
    <div class="container">
@@ -58,7 +58,7 @@
       <div class="row align-items-center text-center text-md-left min-vh-100">
          <div class="col-md-6">
             <span>SJTUhelper</span>
-            <h3>Learning with SJTUhelper</h3>
+            <h3>Learing with SJTUhelper</h3>
             <h4>Developed by us.</h4>
             <a href="/loginpage" class="link-btn">get started</a>
          </div>
@@ -66,8 +66,7 @@
 
    </div>
 
-</section>-
-
+</section>
 
 
 <!-- home section ends -->
@@ -93,9 +92,8 @@
 
          </div>
       </div>
-
+   </section>
    </div>
-</section>
    <section class="menu" id="menu">
 
       <h1 class="heading"> our menu </h1>
@@ -148,9 +146,6 @@
 
    </section>
 
-
-
-
 <section class="previews" id="previews">
 
    <h1 class="heading"> Today's previews</h1>
@@ -162,18 +157,16 @@
 
    <div class="box-container container">
 
-       {% for obj in zhihuHotTopic%}
-         <div class="box">
-            {% autoescape off %}
-            {{ obj.3 }}
-            {% endautoescape %}
-            <div class="content">
-               <h3>{{ obj.0 }}{{ obj.1 }}</h3>
-               <a href="{{obj.2}}" class="link-btn">view more</a>
-            </div>
-         </div>
-         {% endfor %}
+      <div class="box" border-radius="6px">
+         <img loading="lazy" src="https://pic1.zhimg.com/80/v2-342dda2d3f6bdfc46c430c268b074334_400x224.webp?source=1940ef5c" alt="如何看待国庆档首日（中秋节）电影票房大盘 3.61 亿不及预期，远低于 2020 中秋 7.44 亿这一成绩？">
 
+
+         <div class="content">
+            <h3>知乎</h3>
+            <p>如何看待国庆档首日（中秋节）电影票房大盘 3.61 亿不及预期，远低于 2020 中秋 7.44 亿这一成绩？</p>
+            <a href="https://www.zhihu.com/question/624350845" class="link-btn">view more</a>
+         </div>
+      </div>
 
       <div class="box">
          <video src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" data-canonical-src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2  width-fit" style="max-height:150px; min-height: 0px" autoplay>
@@ -187,7 +180,7 @@
 
       <div class="box">
 
-         <img src="../static/img/bilitrending.avif">
+         <img src="../static/img/bilitrending.avif"></img>
          <div class="content">
             <h3>Bilibili</h3>
             <p>【潘安】请记得我｜重返未来1999斯奈德</p>
@@ -235,7 +228,7 @@
       </div>
 
       <div class="box">
-         <img src="../static/img/lfz.png" alt="">
+         <img src="../static/img/lfz.jpg" alt="">
          <h3>Fazhong Liu</h3>
          <p>SJTUhelper is my study buddy! It gives me assignment deadlines, helps me plan my day, and suggests trending content from Zhihu, Bilibili, and GitHub. Highly recommended for students!</p>
          <div class="stars">
@@ -257,7 +250,7 @@
 
     <a href="#" class="logo"> <i class="fas fa-user-astronaut"></i> SJTUhelper </a>
 
-    <p class="credit"> created by <span>SJTUhelper</span> | all rights reserved! </p>
+    <p>© 2021 SJTUhelper. All rights reserved.</p>
 
 
  </section>
@@ -265,9 +258,7 @@
  <!-- footer section ends -->
 
 
-<script src="../static/js/script.js"></script>
-
-
+<script src="./js/script.js"></script>
 </body>
 
 

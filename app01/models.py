@@ -39,10 +39,10 @@ class dektinfo(models.Model):
     category_url = models.TextField(default="https://dekt.sjtu.edu.cn/h5/index")
     item_id = models.CharField(max_length=100)
     activity_name = models.CharField(max_length=100)
-    enroll_start_time = models.DateTimeField()
-    enroll_end_time = models.DateTimeField()
-    active_start_time = models.DateTimeField()
-    active_end_time = models.DateTimeField()
+    enroll_start_time = models.CharField(max_length=100)
+    enroll_end_time = models.CharField(max_length=100)
+    active_start_time = models.CharField(max_length=100)
+    active_end_time = models.CharField(max_length=100)
     activity_picurl = models.TextField()
 
     def __str__(self):
@@ -65,16 +65,19 @@ class minhang_24h_weather(models.Model):
 
 
 class collection(models.Model):
+    user = models.CharField(default="admin",max_length=100)
     site = models.CharField(max_length=100)
-    data0 = models.CharField(max_length=100, null=True, blank=True)
-    data1 = models.CharField(max_length=100, null=True, blank=True)
-    data2 = models.CharField(max_length=100, null=True, blank=True)
-    data3 = models.CharField(max_length=100, null=True, blank=True)
-    data4 = models.CharField(max_length=100, null=True, blank=True)
-    data5 = models.CharField(max_length=100, null=True, blank=True)
-    data6 = models.CharField(max_length=100, null=True, blank=True)
-    data7 = models.CharField(max_length=100, null=True, blank=True)
-    data8 = models.CharField(max_length=100, null=True, blank=True)
+    data0 = models.TextField(null=True, blank=True)
+    data1 = models.TextField(null=True, blank=True)
+    data2 = models.TextField(null=True, blank=True)
+    data3 = models.TextField(null=True, blank=True)
+    data4 = models.TextField(null=True, blank=True)
+    data5 = models.TextField(null=True, blank=True)
+    data6 = models.TextField(null=True, blank=True)
+    data7 = models.TextField(null=True, blank=True)
+    data8 = models.TextField(null=True, blank=True)
+    data9 = models.TextField(null=True, blank=True)
+    data10 = models.TextField(null=True, blank=True)
 
 
 def create_dynamic_model_collection(table_name):
@@ -348,8 +351,7 @@ def create_dynamic_model_cookies(table_name):
     db.close()
 
 
-def delete_dynamic_model_cookies(table_name):
-    table_name = 'cookies_' + table_name
+def delete_dynamic_model(table_name):
     # 打开数据库连接
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
