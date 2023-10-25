@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!--   <script-->
+<!--      src="https://kit.fontawesome.com/64d58efce2.js"-->
+<!--      crossorigin="anonymous"-->
+<!--    ></script>-->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/sjtuloginstyle.css" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <title>响应式登录页面</title>
+  </head>
+  <body>
+    <div class="container" >
+      <div class="forms-container">
+        <div class="signin-signup">
+          <form method="post" action='/sjtu_login/' class="sign-in-form">
+              {% csrf_token %}
+            <span style="color: red"> {{ errormsg }} </span>
+
+            <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </div>
+
+            <h2 class="title">login jAccount</h2>
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" name="signin_usr" placeholder="Enter your jaccount name." />
+            </div>
+            <div class="input-field">
+              <i class="fas fa-lock"></i>
+              <input type="password" name="signin_pwd" placeholder="Enter your jaccount password." />
+            </div>
+            <div class="remember-forgot">
+                <label><input type="checkbox" required>
+                    Save cookies</label>
+                <a href="#">Forgot Password?</a>
+            </div>
+            <input type="submit" name='signin'  value="SIGN IN NOW" class="btn solid" />
+
+
+          </form>
+
+          <div class="footer">
+              <p>© 2021 SJTUhelper. SJTU wesites will be accessed.</p>
+            </div>
+        </div>
+
+      </div>
+
+      <div class="panels-container">
+        <div class="panel left-panel" >
+          <div class="content">
+            <h3>JACCOUNT LOGIN PAGE</h3>
+            <p>
+              Get full access to sjtu websites including canvas, dekt, calendar, shuiyuan.
+            </p>
+
+          </div>
+
+            <img src="../static/img/school_logo.png" class="image">
+        </div>
+
+      </div>
+    </div>
+
+
+
+
+    <script src="../static/js/login.js"></script>
+  </body>
+
+</html>

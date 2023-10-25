@@ -38,4 +38,7 @@ urlpatterns = [
     path('create_schedule/',views.create__schedule),
     path('collection/',views.collection),
     path('add_to_favorites/', views.add_to_favorites),
+    path('changepassword/',views.changepassword),
+    path('changepassword/send_verification_code/',views.send),
+    path('loginpage/send_verification_code/',views.send_signup),
 ]

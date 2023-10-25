@@ -7,11 +7,17 @@
 <!--      src="https://kit.fontawesome.com/64d58efce2.js"-->
 <!--      crossorigin="anonymous"-->
 <!--    ></script>-->
+<script src="../static/js/jquery-3.6.0.min.js"></script>
+
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <link rel="stylesheet" href="../static/css/loginstyle.css" />
     <link rel="stylesheet" href="../static/css/style.css" />
     <title>响应式登录页面</title>
   </head>
+  <script>
+  var csrf_token = '{{ csrf_token }}';
+</script>
   <body>
     <div class="container">
       <div class="forms-container">
@@ -21,7 +27,7 @@
               <span style="color: red"> {{ error_message }} </span>
               <span style="color: red"> {{ error1 }} </span>
               <span style="color: red"> {{ error2 }} </span>
-            <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </a></div>
+            <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </div>
             <h2 class="title">SIGN IN</h2>
             <div class="input-field">
               <i class="fas fa-user"></i>
@@ -34,7 +40,7 @@
             <div class="remember-forgot">
                 <label><input type="checkbox" required>
                     Remember me</label>
-                <a href="#">Forgot Password?</a>
+                <a href="http://127.0.0.1:8000/changepassword/">Forgot Password?</a>
             </div>
             <input type="submit" name='signin'  value="SIGN IN NOW" class="btn solid" />
 
@@ -54,10 +60,10 @@
               </a>
             </div>
           </form>
-          <form method="post" action='' class="sign-up-form">
+          <form method="post" action='##' class="sign-up-form" onsubmit="return false" id="form1">
               {% csrf_token %}
 
-            <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </a></div>
+            <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </div>
             <h2 class="title">SIGN UP</h2>
 
             <div class="input-field">
@@ -75,24 +81,18 @@
               <div class="input-field">
               <i class="fas fa-lock"></i>
               <input type="email" name="email" placeholder="Enter your email." />
+
             </div>
 
-            <input type="submit" name='signup' class="btn" value="SIGN UP NOW" />
-            <p class="social-text">Other ways</p>
-            <div class="social-media">
-              <a href="#" class="social-icon">
-                <i class="fab fa-qq"></i>
-              </a>
-              <a href="#" class="social-icon">
-                <i class="fab fa-weixin"></i>
-              </a>
-              <a href="#" class="social-icon">
-                <i class="fab fa-weibo"></i>
-              </a>
-              <a href="#" class="social-icon">
-                <i class="fab fa-alipay"></i>
-              </a>
+
+            <div class="input-field">
+              <i class="fas fa-lock"></i>
+              <input type="text" name="token" placeholder="Enter your email token." />
+
             </div>
+              <input type="button" id="send-verification-code" class="btn" value="SEND EMAIL TOKEN" />
+              <input type="button" id='signup' class="btn" value="SIGN UP NOW" />
+
 
           </form>
           <div class="footer">
@@ -133,8 +133,9 @@
 
 
 
+      <script src="../static/js/login.js"></script>
 
-    <script src="../static/js/login.js"></script>
+
   </body>
 
 </html>

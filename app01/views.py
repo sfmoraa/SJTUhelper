@@ -70,13 +70,13 @@ def sjtu_login(request):
     if not request.user.is_authenticated:
         return redirect("http://127.0.0.1:8000/loginpage/")
     if request.method == "GET":
-        return render(request, "sjtu_login.html")
-    jaccount_user = request.POST.get("user")
-    jaccount_pwd = request.POST.get("pwd")
+        return render(request, "jaccount.html")
+    jaccount_user = request.POST.get("signin_usr")
+    jaccount_pwd = request.POST.get("signin_pwd")
     status, msg = validate_account(jaccount_user, jaccount_pwd)
     if not status:
         print("FAILED due to", msg)
-        return redirect("http://127.0.0.1:8000/sjtu_login/")  # 重定向到主页，后续添加错误信息
+        return render(request,"jaccount.html",{"errormsg":"用户名或者密码不正确"})  # 重定向到主页，后续添加错误信息
     request.user.first_name = jaccount_user
     request.user.save()
     check_box = request.POST.get('check_box')
@@ -198,16 +198,34 @@ def log_out(request):
     return HttpResponse("用户{}已经成功退出".format(uername))
 
 
-def send(request, user, email):
-    current_site = get_current_site(request)
-    # 发送激活邮件
-    mail_subject = '激活您的账号'
-    activation_link = f"http://{current_site.domain}/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}/"
-    message = render_to_string('activation_email.html', {
-        'user': user,
-        'activation_link': activation_link,
-    })
-    send_mail(mail_subject, message, 'sjtuhelper@163.com', [email])
+def send(request):
+    if request.method=='POST':
+
+        # current_site = get_current_site(request)
+        # 发送激活邮件
+        username=request.POST.get('username')
+        email=request.POST.get('email')
+        user=User.objects.filter(username=username,email=email)
+        if not user:
+            return JsonResponse({'message':'不存在此用户，请检查用户名或者邮箱'},status=400)
+        token = get_random_string(length=6)
+        request.session['verification_token'] = token
+        import datetime
+        request.session['verification_expiry'] = (timezone.now() + timezone.timedelta(minutes=5)).isoformat()
+        mail_subject = '激活您的账号'
+        # activation_link = f"http://{current_site.domain}/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}/"
+        # message = render_to_string('activation_email.html', {
+        #     'user': user,
+        #     'activation_link': activation_link,
+        # })
+        try:
+            send_mail(mail_subject, f'这是你的邮箱验证码:'+token+'\n有效时间为5分钟', 'sjtuhelper@163.com', [email])
+
+            return JsonResponse({'message': '邮箱验证码已发送,有限时间5分钟'})
+        except:
+            return JsonResponse({'message': '无效的请求方法,请检查邮箱是否格式正确'})
+    else:
+        return JsonResponse({'message': '无效的请求方法'}, status=400)
 
 
 def loginpage(request):
@@ -238,26 +256,103 @@ def loginpage(request):
                 thread5.start()
                 thread6 = threading.Thread(target=get_minhang_24h_weather, kwargs={'lock': lock_weather})
                 thread6.start()
-                return redirect("/mainpage")
+                return redirect("https://www.sjtu.edu.cn")
 
             # 用户名或密码不正确，返回登录页面并显示错误信息
-        if 'signup' in request.POST:
+
+        else:
             username = request.POST.get("signup_usr")
             pwd = request.POST.get("signup_pwd")
             repwd = request.POST.get("signup_repwd")
             email = request.POST.get("email")
-
+            token = request.POST.get("token")
+            if not (username and pwd and repwd and email and token):
+                return JsonResponse({'message': '输入不允许有空值'}, status=400)
             if User.objects.filter(username=username):
-                return render(request, "sign.html", {'error1': '用户名重复'})
+                return JsonResponse({'message': '用户已经存在，尝试别的用户名'}, status=400)
             if pwd != repwd:
-                return render(request, "sign.html", {'error2': "两次密码不一致"})
+                return JsonResponse({'message': '两次密码不一致'}, status=400)
+
+            if request.session.get('verification_token') != token:
+                print(request.session.get('verification_token'),token)
+                return JsonResponse({'message': '验证码错误'}, status=400)
+            if request.session.get('verification_expiry') < timezone.now().isoformat():
+                return JsonResponse({'message': '验证码过期'}, status=400)
+
             user = User(username=username, email=email)
             user.set_password(pwd)
-            user.is_active = False  # 设置用户状态为未激活
+            user.is_active = True
             user.save()
-            send(request, user, email)
-            return HttpResponse('请点击邮箱链接验证')
+            return JsonResponse({'message': '注册成功'})
 
+
+
+def changepassword(request):
+    if request.method == "GET":
+        return render(request, "changepassword.html")
+    username=request.POST.get("username")
+    email=request.POST.get('email')
+    token=request.POST.get('token')
+    password =request.POST.get('password')
+    user = User.objects.filter(username=username, email=email)
+    if not user:
+        return JsonResponse({'message': '不存在此用户，请检查用户名或者邮箱'}, status=400)
+    user=user.first()
+    user.set_password(password)
+    user.is_active=True
+    print(request.session.get('verification_token'))
+    if token!=request.session.get('verification_token'):
+        return JsonResponse({'message':'验证码错误'}, status=400)
+    if request.session.get('verification_expiry') < timezone.now().isoformat():
+        return JsonResponse({'message':'验证码超时'}, status=400)
+    user.save()
+    return JsonResponse({'message':'修改成功'})
+
+
+# views.py
+
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.utils.crypto import get_random_string
+from django.utils import timezone
+
+
+
+def send_signup(request):
+    if request.method=='POST':
+
+        # current_site = get_current_site(request)
+        # 发送激活邮件
+        username=request.POST.get('username')
+        pwd = request.POST.get("signup_pwd")
+        repwd = request.POST.get("signup_repwd")
+        email=request.POST.get('email')
+        if not (username and pwd and repwd and email):
+            return JsonResponse({'message': '输入不允许有空值'}, status=400)
+        user=User.objects.filter(username=username)
+        if user:
+            return JsonResponse({'message':'用户已经存在，尝试别的用户名'},status=400)
+        if pwd!=repwd:
+            return JsonResponse({'message': '两次密码不一致'}, status=400)
+        token = get_random_string(length=6)
+        request.session['verification_token'] = token
+        import datetime
+        request.session['verification_expiry'] = (timezone.now() + timezone.timedelta(minutes=5)).isoformat()
+        mail_subject = '激活您的账号'
+        # activation_link = f"http://{current_site.domain}/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{default_token_generator.make_token(user)}/"
+        # message = render_to_string('activation_email.html', {
+        #     'user': user,
+        #     'activation_link': activation_link,
+        # })
+        try:
+            send_mail(mail_subject, '这是你的邮箱验证码:'+token+'\n有效时间为5分钟', 'sjtuhelper@163.com', [email])
+            return JsonResponse({'message': '邮箱验证码已发送,有效时间5分钟'})
+        except:
+            return JsonResponse({'message': '无效的请求方法,请检查邮箱是否格式正确'}, status=400)
+
+
+    else:
+        return JsonResponse({'message': '无效的请求方法'}, status=400)
 
 def zhihu(request):
     if (request.method == "GET"):
