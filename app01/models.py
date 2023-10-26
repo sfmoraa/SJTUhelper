@@ -80,6 +80,12 @@ class collection(models.Model):
     data10 = models.TextField(null=True, blank=True)
 
 
+class keywords(models.Model):
+    username=models.CharField(max_length=100)
+    type=models.CharField(max_length=50,default='')
+    key=models.CharField(max_length=50)
+
+
 def create_dynamic_model_collection(table_name):
     table_name = 'collection_' + table_name
     # 打开数据库连接

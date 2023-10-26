@@ -11,18 +11,6 @@ from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 
-lock_cookies = threading.Lock()
-lock_canvas = threading.Lock()
-lock_dekt = threading.Lock()
-lock_calendar = threading.Lock()
-lock_shuiyuan = threading.Lock()
-lock_weibo = threading.Lock()
-lock_github = threading.Lock()
-lock_bilibili = threading.Lock()
-lock_zhihu = threading.Lock()
-lock_weather = threading.Lock()
-lock_seiee = threading.Lock()
-
 
 # Create your views here.
 def index(request):
@@ -32,7 +20,14 @@ def index(request):
 def mainpage(request):
     if not request.user.is_authenticated:
         return redirect("/loginpage")
-    return
+    zhihu_sample, bilibili_sample, weibo_sample, github_sample = get_today_regular()
+    jaccountname = request.user.first_name
+    if jaccountname == '':
+        canvas_sample = dekt_sample = seiee_sample = shuiyuan_sample = '登录后显示'
+    else:
+        canvas_sample, dekt_sample, seiee_sample, shuiyuan_sample = get_today_SJTU(jaccountname)
+
+    return render(request, "main_page.html", {'zhihu_sample': zhihu_sample, 'bilibili_sample': bilibili_sample, 'weibo_sample': weibo_sample, 'github_sample': github_sample, 'canvas_sample': canvas_sample, 'dekt_sample': dekt_sample, 'seiee_sample': seiee_sample, 'shuiyuan_sample': shuiyuan_sample})
 
 
 ''' *********************** 定时任务 *********************** '''
@@ -63,10 +58,15 @@ def test_job():
         print("get_bilibili_ranking FAILED")
     print("updated!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
+
 scheduler = BackgroundScheduler()
 trigger = IntervalTrigger(seconds=100)
 scheduler.add_job(test_job, trigger=trigger, id="update_data")
 scheduler.start()
+
+
+def focustime(request):
+    return render(request, "time.html")
 
 
 def sjtu_login(request):
@@ -273,15 +273,29 @@ def zhihu(request):
         thread.start()
         reducedHotTopics1 = gpt_filter('zhihu', lock=lock_zhihu, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics1, "minhang_weather": weather[1:5]})
+        zhihukeywords = getkeyword(request.user, 'zhihu', False)
+        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics1, "minhang_weather": weather[1:5], "key": zhihukeywords})
     else:
-        key = request.POST.get("key")
-        print(key)
+        keys = ""
+        setkeys = []
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys == '':
+            mode = 1
+        else:
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'zhihu', True, setkeys)
 
-        reducedHotTopics = gpt_filter('zhihu', cue=key, lock=lock_zhihu)
+        reducedHotTopics = gpt_filter('zhihu', cue=keys, lock=lock_zhihu, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+        zhihukeywords = getkeyword(request.user, 'zhihu', False)
+        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics, "key": zhihukeywords, "minhang_weather": weather[1:5]})
 
 
 def github(request):
@@ -290,21 +304,32 @@ def github(request):
     if request.method == "GET":
         thread = threading.Thread(target=get_github_trending, kwargs={'lock': lock_github})
         thread.start()
-        key = "python"
-        reducedHotTopics = gpt_filter('github', cue=key, lock=lock_github, mode=1)
+        reducedHotTopics = gpt_filter('github', lock=lock_github, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"key": key,
+        githubkeywords = getkeyword(request.user, 'github', False)
+        return render(request, "main_menu.html", {"key": githubkeywords,
                                                   "github": reducedHotTopics,
                                                   "minhang_weather": weather[1:5]})
     else:
-        key = request.POST.get("key")
-        print(key)
-
-        reducedHotTopics = gpt_filter('github', cue=key, lock=lock_github)
+        keys = ""
+        setkeys = []
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys == '':
+            mode = 1
+        else:
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'github', True, setkeys)
+        reducedHotTopics = gpt_filter('github', cue=keys, lock=lock_github, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+        githubkeywords = getkeyword(request.user, 'github', False)
+        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": githubkeywords, "minhang_weather": weather[1:5]})
 
 
 def bilibili(request):
@@ -313,22 +338,34 @@ def bilibili(request):
     if (request.method == "GET"):
         thread = threading.Thread(target=get_bilibili_ranking, kwargs={'lock': lock_bilibili})
         thread.start()
-        key = "我想获得小于10条内容"
-        reducedHotTopics3 = gpt_filter('bilibili', cue=key, lock=lock_bilibili, mode=1)
+        reducedHotTopics3 = gpt_filter('bilibili', lock=lock_bilibili, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"key": key,
+        bilibilikeywords = getkeyword(request.user, 'bilibili', False)
+        return render(request, "main_menu.html", {"key": bilibilikeywords,
                                                   "bilibili": reducedHotTopics3,
                                                   "minhang_weather": weather[1:5]
                                                   })
     else:
-        key = request.POST.get("key")
-        print(key)
+        keys = ""
+        setkeys = []
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys == '':
+            mode = 1
+        else:
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'bilibili', True, setkeys)
 
-        reducedHotTopics = gpt_filter('bilibili', cue=key, lock=lock_bilibili)
+        reducedHotTopics = gpt_filter('bilibili', cue=keys, lock=lock_bilibili, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"bilibili": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+        bilibilikeywords = getkeyword(request.user, 'bilibili', False)
+        return render(request, "main_menu.html", {"bilibili": reducedHotTopics, "key": bilibilikeywords, "minhang_weather": weather[1:5]})
 
 
 def weibo(request):
@@ -338,18 +375,30 @@ def weibo(request):
         thread = threading.Thread(target=get_weibo_hot_topic, kwargs={'lock': lock_weibo})
         thread.start()
         reducedHotTopics4 = gpt_filter('weibo', lock=lock_weibo, mode=1)
-        key = ""
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"weibo": reducedHotTopics4, "key": key, "minhang_weather": weather[1:5]})
+        weibokeywords = getkeyword(request.user, 'weibo', False)
+        return render(request, "main_menu.html", {"weibo": reducedHotTopics4, "key": weibokeywords, "minhang_weather": weather[1:5]})
     else:
-        key = request.POST.get("key")
-        print(key)
+        keys = ""
+        setkeys = []
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys == '':
+            mode = 1
+        else:
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'weibo', True, setkeys)
 
-        reducedHotTopics = gpt_filter('weibo', cue="", lock=lock_weibo)
+        reducedHotTopics = gpt_filter('weibo', cue=keys, lock=lock_weibo, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
-
-        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": key, "minhang_weather": weather[1:5]})
+        weibokeywords = getkeyword(request.user, 'weibo', False)
+        return render(request, "main_menu.html", {"weibo": reducedHotTopics, "key": weibokeywords, "minhang_weather": weather[1:5]})
 
 
 def canvas(request):
@@ -361,11 +410,29 @@ def canvas(request):
     print(request.user, "|", jaccountname, "|", "canvas")
     thread = threading.Thread(target=process_canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread.start()
-    data_list = gpt_filter("canvas_{}".format(jaccountname), lock=lock_canvas)
+
+    mode = 1
+    keys = ""
+    setkeys = []
+    if request.method == "POST":
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys != '':
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'canvas', True, setkeys)
+
+    data_list = gpt_filter("canvas_{}".format(jaccountname), lock=lock_canvas, cue=keys, mode=mode)
     for item in data_list:
         item[5] = mark_safe(item[5])
     weather = gpt_filter("minhang_weather", lock=lock_weather)
-    return render(request, "main_menu.html", {"canvas_data_list": data_list, "minhang_weather": weather[1:5]})
+    canvaskeywords = getkeyword(request.user, 'canvas', False)
+    return render(request, "main_menu.html", {"canvas_data_list": data_list, "minhang_weather": weather[1:5], 'key': canvaskeywords})
 
 
 def dekt(request):
@@ -377,9 +444,27 @@ def dekt(request):
     print(request.user, "|", jaccountname, "|", "dekt")
     thread = threading.Thread(target=process_dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
     thread.start()
-    data_list = gpt_filter("dekt", cue=None, mode=1, lock=lock_dekt)
+
+    mode = 1
+    keys = ""
+    setkeys = []
+    if request.method == "POST":
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys != '':
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'dekt', True, setkeys)
+
+    data_list = gpt_filter("dekt", cue=keys, mode=mode, lock=lock_dekt)
     weather = gpt_filter("minhang_weather", lock=lock_weather)
-    return render(request, "main_menu.html", {"dekt_data_list": data_list, "minhang_weather": weather[1:5]})
+    dektkeywords = getkeyword(request.user, 'dekt', False)
+    return render(request, "main_menu.html", {"dekt_data_list": data_list, "minhang_weather": weather[1:5], 'key': dektkeywords})
 
 
 def shuiyuan(request):
@@ -391,10 +476,26 @@ def shuiyuan(request):
     print(request.user, "|", jaccountname, "|", "shuiyuan")
     thread = threading.Thread(target=process_shuiyuan, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
     thread.start()
-    data_list = gpt_filter("shuiyuan_{}".format(jaccountname), lock=lock_shuiyuan)
+    mode = 1
+    keys = ""
+    setkeys = []
+    if request.method == "POST":
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys != '':
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'shuiyuan', True, setkeys)
+    data_list = gpt_filter("shuiyuan_{}".format(jaccountname), lock=lock_shuiyuan, cue=keys, mode=mode)
     data_list = [list(data) for data in data_list]
     weather = gpt_filter("minhang_weather", lock=lock_weather)
-    return render(request, "main_menu.html", {"shuiyuan_data_list": data_list, "minhang_weather": weather[1:5]})
+    shuiyuankeywords = getkeyword(request.user, 'shuiyuan', False)
+    return render(request, "main_menu.html", {"shuiyuan_data_list": data_list, "minhang_weather": weather[1:5],'key':shuiyuankeywords})
 
 
 def seiee(request):
@@ -406,11 +507,27 @@ def seiee(request):
     print(request.user, "|", jaccountname, "|", "seiee")
     thread = threading.Thread(target=seiee_notification, kwargs={'lock': lock_seiee})
     thread.start()
-    data_list = gpt_filter('seiee_notion', lock=lock_seiee)
-    data_list = [data[1:] for data in data_list]
-    data_list = [list(data) for data in data_list]
+    mode = 1
+    keys = ""
+    setkeys = []
+    if request.method == "POST":
+        for i in range(5):
+            key_place = request.POST.getlist("key-" + str(i + 1))
+            if key_place is None:
+                continue
+            for key in key_place:
+                keys += key + '或者'
+                setkeys.append(key)
+        if keys != '':
+            mode = None
+            keys = keys[:-2]
+            getkeyword(request.user, 'seiee', True, setkeys)
+
+    data_list = gpt_filter('seiee_notion', cue=keys, mode=mode, lock=lock_seiee)
+    data_list = [list(data[1:]) for data in data_list]
     weather = gpt_filter("minhang_weather", lock=lock_weather)
-    return render(request, "main_menu.html", {"seiee_data_list": data_list, "minhang_weather": weather[1:5]})
+    seieekeywords = getkeyword(request.user, 'seiee', False)
+    return render(request, "main_menu.html", {"seiee_data_list": data_list, "minhang_weather": weather[1:5],'key':seieekeywords})
 
 
 def calendar(request):
@@ -491,21 +608,21 @@ def show_collection(request):
     collected_data = {'zhihu': [], 'github': [], 'bilibili': [], 'weibo': [], 'shuiyuan': [], 'canvas': [], 'dekt': [], 'seiee': [], 'calendar': []}
     for item in a:
         item.pop('user')
-        site=item.pop('site')
-        solid_data=[]
+        site = item.pop('site')
+        solid_data = []
         for x in list(item.values())[1:]:
             if x is not None:
                 solid_data.append(x)
         collected_data[site].append(solid_data)
     for weibo in collected_data['weibo']:
-        weibo[1]='img/weibo_default_pic.jpg'
+        weibo[1] = 'img/weibo_default_pic.jpg'
     weather = gpt_filter("minhang_weather", lock=lock_weather)
-    return render(request, "collection.html", {"zhihuHotTopic":collected_data['zhihu'],"github":collected_data['github'],"bilibili":collected_data['bilibili'],"weibo":collected_data['weibo'],"canvas_data_list":collected_data['canvas'],
-        "shuiyuan_data_list": collected_data['shuiyuan'],
-        "seiee_data_list": collected_data['seiee'],
-        "dekt_data_list": collected_data['dekt'],
-        "minhang_weather": weather[0:5],
-    })
+    return render(request, "collection.html", {"zhihuHotTopic": collected_data['zhihu'], "github": collected_data['github'], "bilibili": collected_data['bilibili'], "weibo": collected_data['weibo'], "canvas_data_list": collected_data['canvas'],
+                                               "shuiyuan_data_list": collected_data['shuiyuan'],
+                                               "seiee_data_list": collected_data['seiee'],
+                                               "dekt_data_list": collected_data['dekt'],
+                                               "minhang_weather": weather[0:5],
+                                               })
 
 
 def process_favorites(request):
@@ -513,7 +630,7 @@ def process_favorites(request):
         return redirect("/loginpage")
     if request.method == 'POST':
         collected_content = request.POST.dict()
-        if collected_content.pop('status')=="btn-uncollected":
+        if collected_content.pop('status') == "btn-uncollected":
             save_collection(request.user, collected_content.pop('site'), collected_content)
         else:
             delete_collection(request.user, collected_content.pop('site'), collected_content)

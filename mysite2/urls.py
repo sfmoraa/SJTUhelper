@@ -22,6 +22,7 @@ urlpatterns = [
     path('',views.index),
     path('mainpage/',views.mainpage),
     path('admin/', admin.site.urls),
+    path('time/',views.focustime),
     path('loginpage/', views.loginpage),
     path('logout/',views.log_out),
     path('bilibili/',views.bilibili),

@@ -40,7 +40,7 @@
             <div class="remember-forgot">
                 <label><input type="checkbox" required>
                     Remember me</label>
-                <a href="http://127.0.0.1:8000/changepassword/">Forgot Password?</a>
+                <a href="/changepassword">Forgot Password?</a>
             </div>
             <input type="submit" name='signin'  value="SIGN IN NOW" class="btn solid" />
 
@@ -67,7 +67,7 @@
             <h2 class="title">SIGN UP</h2>
 
             <div class="input-field">
-              <i class="fas fa-envelope"></i>
+              <i class="fas fa-user"></i>
               <input type="text" name="signup_usr" placeholder="Enter your name." />
             </div>
             <div class="input-field">
@@ -79,9 +79,9 @@
               <input type="password" name="signup_repwd" placeholder="Confirm Your Password." />
             </div>
               <div class="input-field">
-              <i class="fas fa-lock"></i>
+              <i class="fas fa-envelope"></i>
               <input type="email" name="email" placeholder="Enter your email." />
-
+                  <input type="button" id="send-verification-code" class="btn" value="SEND EMAIL TOKEN" />
             </div>
 
 
@@ -90,7 +90,7 @@
               <input type="text" name="token" placeholder="Enter your email token." />
 
             </div>
-              <input type="button" id="send-verification-code" class="btn" value="SEND EMAIL TOKEN" />
+
               <input type="button" id='signup' class="btn" value="SIGN UP NOW" />
 
 

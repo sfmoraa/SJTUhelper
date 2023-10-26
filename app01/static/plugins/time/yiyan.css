@@ -1,0 +1,19 @@
+@charset "UTF-8";
+.yiyan{
+	width: 100%;
+	position:absolute;
+	bottom: 10px;
+}
+        /* 增加一言模块 */
+    .poem-wrap p:nth-of-type(1) {
+        font-size: 18px;
+        text-align: center;
+        margin: 15 auto;
+    }
+    .poem-wrap p {
+        width: 70%;
+        margin: auto;
+        line-height: 30px;
+        color: #ffffff;
+        font-family: "Linux Biolinum", "Noto Serif SC", Helvetica, Arial, Menlo, Monaco, monospace, sans-serif;
+    }

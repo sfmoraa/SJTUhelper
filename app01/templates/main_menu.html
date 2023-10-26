@@ -31,11 +31,30 @@
             }
             return cookieValue;
         }
+
+        function showcollection() {
+            var keyindex = 1;
+            {% for obj in key %}
+                if (todos.length > 5) {
+                    RenderAllTodos();
+                    return;
+                }
+                newtodo = {
+                    text: "{{obj}}",
+                    done: false,
+                    id: keyindex
+                }
+                keyindex += 1;
+                todos.push(newtodo);
+            {% endfor %}
+            RenderAllTodos();
+
+        }
     </script>
 
 </head>
 
-<body>
+<body onload="showcollection()">
 <input type="checkbox" name="" id="menu-toggle">
 <div class="overlay">
     <label for="menu-toggle"></label>
@@ -65,55 +84,73 @@
             <ul>
                 <li>
                     <a href="../zhihu" id="zhihu">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/zhihu.svg' %}">
+                            </span>
                         <span>Zhihu</span>
                     </a>
                 </li>
                 <li>
                     <a href="../github" id="github">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/github.svg' %}">
+                            </span>
                         <span>Github</span>
                     </a>
                 </li>
                 <li>
                     <a href="../bilibili" id="bilibili">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/bilibili.svg' %}">
+                            </span>
                         <span>BiliBili</span>
                     </a>
                 </li>
                 <li>
                     <a href="../weibo" id="weibo">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/weibo.jpg' %}">
+                            </span>
                         <span>Weibo</span>
                     </a>
                 </li>
                 <li>
                     <a href="../shuiyuan" id="shuiyuan">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/shuiyuan.jpg' %}">
+                            </span>
                         <span>Shuiyuan</span>
                     </a>
                 </li>
                 <li>
                     <a href="../canvas" id="canvas">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/SJTU.png' %}">
+                            </span>
                         <span>canvas</span>
                     </a>
                 </li>
                 <li>
                     <a href="../dekt" id="dekt">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/SJTU.png' %}">
+                            </span>
                         <span>dekt</span>
                     </a>
                 </li>
                 <li>
                     <a href="../seiee" id="seiee">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/SJTU.png' %}">
+                            </span>
                         <span>seiee</span>
                     </a>
                 </li>
                 <li>
                     <a href="../calendar" id="calendar">
-                        <span class="las la-user"></span>
+                            <span>
+                                <img class="icon" src="{% static 'img/calendar.svg' %}">
+                            </span>
                         <span>calendar</span>
                     </a>
                 </li>
@@ -164,12 +201,11 @@
                                     btn_img = document.getElementById("zhihu-img-{{ forloop.counter }}")
                                     var formData = new FormData();
                                     formData.append('site', "zhihu")
-                                    formData.append('status', btn.className);
                                     content.forEach(function (value, index) {
                                         formData.append('data' + index, value);
                                     });
                                     var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
+                                    xhr.open('POST', '/add_to_favorites/', true);
                                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
                                     xhr.onreadystatechange = function () {
                                         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -189,12 +225,13 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.2 }}">
                                     <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
-                                            {% autoescape off %}
+                                        {% autoescape off %}
+                                            <a href="{{ obj.2 }}">
                                                 {{ obj.3 }}
-                                            {% endautoescape %}</a>
+                                            </a>
+                                        {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -216,48 +253,31 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.3 }}">
 
-                            <button id="github-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="github-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="github-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("github-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("github-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "github")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.3 }}">
-                                        <a href="{{ obj.3 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/github.svg' %}"/>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.3 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src="{% static 'img/github.svg' %}"/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -283,48 +303,31 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.4 }}">
 
-                            <button id="bilibili-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="bilibili-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="bilibili-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("bilibili-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("bilibili-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "bilibili")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.4 }}">
-                                        <a href="{{ obj.4 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src={{ obj.3 }}>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.4 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src={{ obj.3 }}/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -334,13 +337,13 @@
                                         <div class="blog-slider__title">
                                             {{ obj.1 }}
                                         </div>
-                                        <div class="blog-slider__content">
-                                            tag:{{ obj.2 }}
-                                        </div>
                                     </a>
 
                                 </div>
                             </div>
+                        </div>
+                        <div class="tagg">
+                            <a class="tagg-text">{{ obj.2 }}</a>
                         </div>
                     </div>
                 {% endfor %}
@@ -349,48 +352,31 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.2 }}">
 
-                            <button id="weibo-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="weibo-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="weibo-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("weibo-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("weibo-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "weibo")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.4 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src="{% static obj.1 %}"/>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.2 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src="{% static obj.1 %}"/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -414,38 +400,24 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.7 }}">
 
-                            <button id="canvas-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="canvas-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="canvas-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("canvas-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("canvas-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "canvas")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
@@ -465,12 +437,10 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.7 }}">
-                                        <a href="{{ obj.4 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/SJTU.png' %}"/>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.7 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src="{% static 'img/SJTU.png' %}"/>
+
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -498,49 +468,35 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.2 }}">
 
-                            <button id="dekt-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="dekt-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="dekt-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
+                            <div class="dekt-state">
+                                <p>{{ obj.3 }}</p>
+                            </div>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("dekt-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("dekt-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "dekt")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src={{ obj.9 }}>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.2 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src={{ obj.9 }}/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -574,47 +530,30 @@
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.1 }}">
 
-                            <button id="shuiyuan-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="shuiyuan-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="shuiyuan-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("shuiyuan-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("shuiyuan-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "shuiyuan")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.1 }}">
-                                        <a href="{{ obj.4 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/shuiyuan.jpg' %}"/>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.1 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src="{% static 'img/shuiyuan.jpg' %}"/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -663,48 +602,31 @@
                 {% for obj in seiee_data_list %}
                     <div class="blog-slider">
                         <div class="blog-slider__wrp swiper-wrapper" href="{{ obj.2 }}">
-                            <button id="seiee-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ({{ obj }})">
+                            <button id="seiee-btn-{{ forloop.counter }}" class="btn-uncollected" onclick="collect_{{ forloop.counter }} ()">
                                 {% autoescape off %}
                                     <img id="seiee-img-{{ forloop.counter }}" src="{% static 'img/weishoucang.svg' %}" style="width: 30px;height: 30px"/>
                                 {% endautoescape %}
                             </button>
 
                             <script>
-                                function collect_{{ forloop.counter }}(content) {
+                                function collect_{{ forloop.counter }}() {
                                     btn = document.getElementById("seiee-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("seiee-img-{{ forloop.counter }}")
-                                    var formData = new FormData();
-                                    formData.append('site', "seiee")
-                                    formData.append('status', btn.className);
-                                    content.forEach(function (value, index) {
-                                        formData.append('data' + index, value);
-                                    });
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open('POST', '/process_favorites/', true);
-                                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-                                    xhr.onreadystatechange = function () {
-                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                            if (btn.className === "btn-uncollected") {
-                                                btn_img.src = "/../static/img/yishoucang.svg"
-                                                btn.className = "btn-collected"
-                                            } else {
-                                                btn_img.src = "/../static/img/weishoucang.svg"
-                                                btn.className = "btn-uncollected"
-                                            }
-                                        }
-                                    };
-                                    xhr.send(formData);  // 将所选内容ID作为数据发送
 
+                                    if (btn.className == "btn-uncollected") {
+                                        btn_img.src = "/../static/img/yishoucang.svg"
+                                        btn.className = "btn-collected"
+                                    } else {
+                                        btn_img.src = "/../static/img/weishoucang.svg"
+                                        btn.className = "btn-uncollected"
+                                    }
                                 }
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
-                                    <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
-                                            {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/SJTU.png' %}"/>
-                                            {% endautoescape %}</a>
+                                <a target="_blank" href="{{ obj.2 }}">
+                                    <div class="blog-slider__img">
+                                        <img alt="111" src="{% static 'img/SJTU.png' %}"/>
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -764,14 +686,15 @@
 
         </section>
 
-        <section class="key-choose">
+        <form class="key-choose" method="post" target="_self">
+            {% csrf_token %}
             <div class="analytic">
                 <div class="card-body">
                     <h4 class="mb-0">Key words</h4>
                     <hr/>
                     <div class="row gy-3">
                         <div class="col-md-10">
-                            <input id="todo-input" type="text" class="form-control" placeholder="at most 5 labels" value="">
+                            <input id="todo-input" type="text" class="form-control" placeholder="at most 5 labels" value=""/>
                         </div>
                         <div class="col-md-2 text-end d-grid">
                             <button type="button" onclick="CreateTodo();" class="btn btn-light">Add</button>
@@ -779,9 +702,10 @@
                     </div>
                     <div class="form-row mt-3">
                         <div class="col-12">
-                            <div id="todo-container"></div>
+                            <div id="todo-container" class="btn btn-light"></div>
                         </div>
                     </div>
+                    <input type="submit" class="form-control"/>
                 </div>
             </div>
             <script>
@@ -809,7 +733,7 @@
                         <div class="pb-3 todo-item" todo-id="${todo.id}">
                             <div class="input-group">
 
-                                <input type="text" readonly class="form-control ${todo.done && " todo-done "} " aria-label="Text input with checkbox" value="${todo.text}">
+                                <input type="text" readonly class="form-control ${todo.done && " todo-done "} "  name = "key-${todo.id}" aria-label="Text input with checkbox" value="${todo.text}">
 
                                     <button todo-id="${todo.id}" class="btn btn-outline-secondary bg-dark text-white" type="button" onclick="DeleteTodo(this);" id="button-addon2 ">X</button>
 
@@ -876,7 +800,7 @@
                     RenderAllTodos();
                 }
             </script>
-        </section>
+        </form>
 
     </main>
 </div>
