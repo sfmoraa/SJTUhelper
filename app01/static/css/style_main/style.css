@@ -20,7 +20,7 @@ body {
 }
 
 #menu-toggle:checked~.sidebar {
-    left: -345px;
+    left: -300px;
 }
 .sidebar .imageg{
     width:1rem;
@@ -48,7 +48,7 @@ body {
 }
 
 .sidebar {
-    width: 345px;
+    width: 300px;
     height: 100%;
     position: fixed;
     top: 0;
@@ -262,7 +262,9 @@ header {
     margin-outside: 2rem;
     margin-bottom: 2rem;
 }
-
+.analytic-info{
+    margin-left: 25px
+}
 .analytic-info h4 {
     font-weight: 400;
     color: #555;

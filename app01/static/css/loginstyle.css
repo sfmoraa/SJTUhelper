@@ -128,7 +128,16 @@ form.sign-in-form {
 .input-field input:valid ~ placeholder {
   top: -10%;
 }
+.btnn {
+  background: initial; /* 初始背景色 */
+  color: initial; /* 初始文本颜色 */
+  text-decoration: none; /* 移除下划线 */
+}
 
+.btnn .hover{
+  background: grey;
+  text-decoration: none;
+}
 .social-text {
   padding: 0.7rem 0;
   font-size: 1rem;
@@ -164,9 +173,9 @@ form.sign-in-form {
     font-size: .9em;
     color: #162938;
     font-weight: 500;
-    margin: 15px 15px 15px;
+    margin: 15px 30px 15px;
     display: flex;
-    justify-content: space-between;
+    justify-content: right;
 }
 
 .remember-forgot label input {

@@ -56,112 +56,155 @@
 
 <body onload="showcollection()">
 <input type="checkbox" name="" id="menu-toggle">
-<div class="overlay">
-    <label for="menu-toggle"></label>
-</div>
-
-<div class="sidebar">
-    <div class="sidebar-container">
-        <div class="brand">
-            <h2>
-                <span class="fas fa-user-astronaut"></span>
-                SJTUhelper
-            </h2>
-        </div>
-
-        <div class="sidebar-avartar">
-            <div>
-                <img src="../static/img/main/user.png" alt="">
-            </div>
-            <div class="avartar-info">
-                <div class="avartar-text">
-                    <h4>Alex</h4>
-                </div>
-                <span class="las la-angle-double-down"></span>
-            </div>
-        </div>
-        <div class="sidebar-menu">
-            <ul>
-                <li>
-                    <a href="../zhihu" id="zhihu">
-                            <span>
-                                <img class="icon" src="{% static 'img/zhihu.svg' %}">
-                            </span>
-                        <span>Zhihu</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../github" id="github">
-                            <span>
-                                <img class="icon" src="{% static 'img/github.svg' %}">
-                            </span>
-                        <span>Github</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../bilibili" id="bilibili">
-                            <span>
-                                <img class="icon" src="{% static 'img/bilibili.svg' %}">
-                            </span>
-                        <span>BiliBili</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../weibo" id="weibo">
-                            <span>
-                                <img class="icon" src="{% static 'img/weibo.jpg' %}">
-                            </span>
-                        <span>Weibo</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../shuiyuan" id="shuiyuan">
-                            <span>
-                                <img class="icon" src="{% static 'img/shuiyuan.jpg' %}">
-                            </span>
-                        <span>Shuiyuan</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../canvas" id="canvas">
-                            <span>
-                                <img class="icon" src="{% static 'img/SJTU.png' %}">
-                            </span>
-                        <span>canvas</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../dekt" id="dekt">
-                            <span>
-                                <img class="icon" src="{% static 'img/SJTU.png' %}">
-                            </span>
-                        <span>dekt</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../seiee" id="seiee">
-                            <span>
-                                <img class="icon" src="{% static 'img/SJTU.png' %}">
-                            </span>
-                        <span>seiee</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="../calendar" id="calendar">
-                            <span>
-                                <img class="icon" src="{% static 'img/calendar.svg' %}">
-                            </span>
-                        <span>calendar</span>
-                    </a>
-                </li>
-
-
-            </ul>
-        </div>
-
-
+    <div class="overlay">
+        <label for="menu-toggle" ></label>
     </div>
-</div>
+
+    <div class="sidebar">
+        <div class="sidebar-container">
+            <a href="../mainpage">
+                <div class="brand">
+                <h2>
+                    <span class="fas fa-user-astronaut"></span>
+                    SJTUhelper
+                </h2>
+                </div>
+            </a>
+            <div class="sidebar-avartar">
+                    <img src="../static/img/main/user.png" alt="">
+                <div class="avartar-info">
+                  <div class="avartar-text">
+                      <h4>{{ current_username}}</h4>
+                  </div>
+                      <button onclick="showItem()"style="background: transparent">
+                        <span class="las la-angle-double-down"></span>
+                      </button>
+                </div>
+
+            </div>
+           <div class="sidebar-menu" style="font-size:15px">
+                  <ul>
+                      <li class="dropdown_items hidden " id="drop-item2" >
+                      <a href="../collection">
+                        <span class="fas fa-star"></span>
+                        <span>collection</span>
+                      </a>
+                    </li>
+                    <li class="dropdown_items hidden" id="drop-item1">
+                      <a href="../time" id="concentration">
+                            <span class="fas fa-comment-slash"></span>
+                            <span>Focus</span>
+                        </a>
+                      </a>
+                    </li>
+
+
+
+                    <li class="dropdown_items hidden " id="drop-item3">
+                      <a href="../">
+                        <span class="fas fa-sign-out-alt"></span>
+                        <span>Log out</span>
+                      </a>
+                    </li>
+
+                    <li class="dropdown_items hidden" id="drop-item4">
+                      <a href="../changepassword">
+                        <span class="fas fa-user-edit"></span>
+                        <span>Change password</span>
+                      </a>
+                    </li>
+                    <li class="dropdown_items hidden" id="drop-item5">
+                        <br>
+                    </li>
+                <script>
+                    function showItem() {
+                    var targetItems = document.querySelectorAll('.dropdown_items');
+                    for (let i = 0; i < targetItems.length; i++) {
+                        if (targetItems[i].classList.contains('hidden')) {
+                            setTimeout(function(){targetItems[i].classList.remove('hidden');},20*i);
+                        } else {
+                             setTimeout(function(){targetItems[i].classList.add('hidden');},20*i);
+                        }
+                    }
+                }
+                 </script>
+
+
+                    <li>
+                        <a href="../zhihu" id="zhihu">
+                            <span class="fab fa-zhihu"></span>
+                            <span>Zhihu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../github">
+                            <span class="fab fa-github"></span>
+                            <span>Github</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../bilibili">
+                            <img src="../static/img/bilibili.jpg" style="width:15px">
+                            <span>BiliBili</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../weibo">
+                              <span class="fab fa-weibo"></span>
+                            <span>Weibo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../shuiyuan">
+                            <span class="fas fa-tint"></span>
+                            <span>Shuiyuan</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../canvas">
+                            <span class="fas fa-clipboard-list"></span>
+                            <span>canvas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../dekt" id="dekt">
+                            <span class="fas la-chalkboard-teacher"></span>
+                            <span>dekt</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../seiee" id="seiee">
+                            <span class="fas la-school"></span>
+                            <span>seiee</span>
+                        </a>
+                    </li>
+
+
+
+                                <script>
+                                    var requestUrl = request.getScheme() //当前链接使用的协议
+                                                        +"://" + request.getServerName()//服务器地址
+                                                        + ":" + request.getServerPort() //端口号
+                                                        + request.getContextPath() //应用名称，如果应用名称为
+                                                        + request.getServletPath() //请求的相对url
+                                                        + "?" + request.getQueryString(); //请求参数
+                                    print(requestUrl);
+                                    var element=document.getElementById("canvas");
+                                    element.class="active";
+
+                                    var element2=document.getElementById("dekt");
+                                    element2.href="../bilibili";
+                                    element2.style.background="green"
+                                    element2.setAttribute("class","active");
+                                </script>
+
+
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
 
 <div class="main-content">
     <header>
