@@ -957,6 +957,7 @@ def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
 
 def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, lock=None, lock1=None):  # beginfrom和endat均是相对今天而言
     user_cookie = None
+    lock1.acquire()
     if password is None:
         lock.acquire()
         user_cookie = load_cookies('cookies_' + username)
@@ -1025,7 +1026,6 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, loc
         else:
             break
     calendar_session.get(redirect_url, headers=calendar_headers)
-    # get tables_id
     get_tables_id = calendar_session.get("https://calendar.sjtu.edu.cn/api/calendar/list", headers=calendar_headers).json()['data']['my']
     tables = []
     for table in get_tables_id:
@@ -1045,14 +1045,13 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, loc
         delete_dynamic_model('cookies_' + username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
-    lock1.acquire()
     delete_dynamic_model_calendar(username)
     create_dynamic_model_calendar(username)
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username, title=event["title"], starttime=event["startTime"],
                                       endtime=event["endTime"], location=event["location"],
                                       json_detail_url=event['eventId'], allday=event['allDay'])
-    print("calendar success!!!")
+
 
     # return calendar_session.cookies
     create_dynamic_model_cookies(username + 'store')
@@ -1061,7 +1060,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, loc
     for cookie in calendar_session.cookies:
         insert_dynamic_model_cookies(table_name=username + 'store', name=cookie.name, value=cookie.value, domain=cookie.domain, path=cookie.path, secure=cookie.secure)
     lock1.release()
-
+    print("calendar success!!!")
     return
 
 
@@ -1134,9 +1133,13 @@ def validate_account(username, password):
     oc_session.get(canvas_login_url, headers=myheaders_for_oc)
     resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
     msg, type = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
+    print()
     if type == 0 or type == 1:
         return False, msg
     else:
+        lock_cookies.acquire()
+        save_cookies(username, msg)
+        lock_cookies.release()
         return True, "Success"
 
 
@@ -1222,6 +1225,19 @@ def getkeyword(username,type,add=False,userkeywords=None):
     lock_keywords.release()
     result=[row.key for row in result]
     return result
+
+
+def erase_SJTU_user(jaccountname):
+    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
+    cursor = db.cursor()
+    erase_SJTU_user_query = """
+            DROP TABLE `calendar_{}`,`canvas_{}`,`cookies_{}`,`cookies_{}store`,`shuiyuan_{}`,`tablesid_{}`;
+            """.format(jaccountname,jaccountname,jaccountname,jaccountname,jaccountname,jaccountname)
+    cursor.execute(erase_SJTU_user_query)
+    db.commit()
+    cursor.close()
+    db.close()
+
 
 zhihu_cookie = '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
 if __name__ == '__main__':

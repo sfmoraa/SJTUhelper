@@ -24,10 +24,47 @@ def mainpage(request):
     jaccountname = request.user.first_name
     if jaccountname == '':
         canvas_sample = dekt_sample = seiee_sample = shuiyuan_sample = '登录后显示'
+        json_data=None
+        tablesid=[]
     else:
+        if request.method == "POST":
+            lock_cookies.acquire()
+            required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
+            lock_cookies.release()
+            lock_calendar.acquire()
+            tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+            lock_calendar.release()
+            schedule_type = request.POST.get('type')
+            schedule_type_id = [table[2] for table in tablesid if table[1] == schedule_type][0]
+            title = request.POST.get('title')
+            start_date = request.POST.get('start-date')
+            start_time = request.POST.get('start-time')
+            end_date = request.POST.get('end-date')
+            end_time = request.POST.get('end-time')
+            location = request.POST.get('location')
+            availability = request.POST.get('availability')
+            reminder = int(request.POST.get('reminder'))
+            description = request.POST.get('description')
+            create_schedule(required_cookies, title, start_date + ' ' + start_time, end_date + ' ' + end_time, availability, reminderMinutes=reminder, allDay=False, location=location, description=description, schedule_type=schedule_type_id, recurrence=None)
+            mysjtu_calendar(username=jaccountname, lock=lock_cookies, lock1=lock_calendar)
+            return redirect("/mainpage")
+        mysjtu_calendar(username=jaccountname, lock=lock_cookies, lock1=lock_calendar)
+        data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
+        lock_calendar.acquire()
+        tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+        lock_calendar.release()
         canvas_sample, dekt_sample, seiee_sample, shuiyuan_sample = get_today_SJTU(jaccountname)
-
-    return render(request, "main_page.html", {'zhihu_sample': zhihu_sample, 'bilibili_sample': bilibili_sample, 'weibo_sample': weibo_sample, 'github_sample': github_sample, 'canvas_sample': canvas_sample, 'dekt_sample': dekt_sample, 'seiee_sample': seiee_sample, 'shuiyuan_sample': shuiyuan_sample})
+        thread = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
+        thread.start()
+        processed_data = []
+        for data in data_list:
+            if data[6] == "false" or data[6] == "False":
+                allday = False
+            elif data[6] == "true" or data[6] == "True":
+                allday = True
+            processed_data.append({"id": data[5], "title": data[1] + " [" + data[4] + "]", "start": data[2], "end": data[3], "allDay": allday, 'url': "https://calendar.sjtu.edu.cn/ui/calendar"})
+        json_data = json.dumps(processed_data)
+    return render(request, "main_page.html", {'current_username':request.user.get_username(),'zhihu_sample': zhihu_sample, 'bilibili_sample': bilibili_sample, 'weibo_sample': weibo_sample, 'github_sample': github_sample, 'canvas_sample': canvas_sample, 'dekt_sample': dekt_sample, 'seiee_sample': seiee_sample, 'shuiyuan_sample': shuiyuan_sample,'json_data':json_data,"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
 
 
 ''' *********************** 定时任务 *********************** '''
@@ -84,14 +121,15 @@ def sjtu_login(request):
     request.user.save()
     check_box = request.POST.get('check_box')
     '''*******************数据库添加表单：request.user（当前使用SJTUhelper的用户）；jaccount_user（jaccount用户名）；cookies（暂空）*******************'''
+    # thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_calendar})
+    # thread4.start()
     thread1 = threading.Thread(target=process_canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread1.start()
     thread2 = threading.Thread(target=process_dekt, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_dekt})
     thread2.start()
     thread3 = threading.Thread(target=process_shuiyuan, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
     thread3.start()
-    thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_calendar})
-    thread4.start()
+
     return redirect("/mainpage")  # 重定向到主页
 
 
@@ -113,9 +151,15 @@ def show_calendar(request):
 
 
 def log_out(request):
-    uername = request.user.username
+    if not request.user.is_authenticated:
+        return redirect("/loginpage")
+    jaccountname = request.user.first_name
+    if jaccountname != '':
+        erase_SJTU_user(jaccountname)
+    request.user.first_name=''
+    request.user.save()
     auth.logout(request)
-    return HttpResponse("用户{}已经成功退出".format(uername))
+    return redirect("/")
 
 
 def send(request):
@@ -274,7 +318,7 @@ def zhihu(request):
         reducedHotTopics1 = gpt_filter('zhihu', lock=lock_zhihu, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         zhihukeywords = getkeyword(request.user, 'zhihu', False)
-        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics1, "minhang_weather": weather[1:5], "key": zhihukeywords})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"zhihuHotTopic": reducedHotTopics1, "minhang_weather": weather[1:5], "key": zhihukeywords})
     else:
         keys = ""
         setkeys = []
@@ -295,7 +339,7 @@ def zhihu(request):
         reducedHotTopics = gpt_filter('zhihu', cue=keys, lock=lock_zhihu, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         zhihukeywords = getkeyword(request.user, 'zhihu', False)
-        return render(request, "main_menu.html", {"zhihuHotTopic": reducedHotTopics, "key": zhihukeywords, "minhang_weather": weather[1:5]})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"zhihuHotTopic": reducedHotTopics, "key": zhihukeywords, "minhang_weather": weather[1:5]})
 
 
 def github(request):
@@ -307,7 +351,7 @@ def github(request):
         reducedHotTopics = gpt_filter('github', lock=lock_github, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         githubkeywords = getkeyword(request.user, 'github', False)
-        return render(request, "main_menu.html", {"key": githubkeywords,
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"key": githubkeywords,
                                                   "github": reducedHotTopics,
                                                   "minhang_weather": weather[1:5]})
     else:
@@ -329,7 +373,7 @@ def github(request):
         reducedHotTopics = gpt_filter('github', cue=keys, lock=lock_github, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         githubkeywords = getkeyword(request.user, 'github', False)
-        return render(request, "main_menu.html", {"github": reducedHotTopics, "key": githubkeywords, "minhang_weather": weather[1:5]})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"github": reducedHotTopics, "key": githubkeywords, "minhang_weather": weather[1:5]})
 
 
 def bilibili(request):
@@ -341,7 +385,7 @@ def bilibili(request):
         reducedHotTopics3 = gpt_filter('bilibili', lock=lock_bilibili, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         bilibilikeywords = getkeyword(request.user, 'bilibili', False)
-        return render(request, "main_menu.html", {"key": bilibilikeywords,
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"key": bilibilikeywords,
                                                   "bilibili": reducedHotTopics3,
                                                   "minhang_weather": weather[1:5]
                                                   })
@@ -365,7 +409,7 @@ def bilibili(request):
         reducedHotTopics = gpt_filter('bilibili', cue=keys, lock=lock_bilibili, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         bilibilikeywords = getkeyword(request.user, 'bilibili', False)
-        return render(request, "main_menu.html", {"bilibili": reducedHotTopics, "key": bilibilikeywords, "minhang_weather": weather[1:5]})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"bilibili": reducedHotTopics, "key": bilibilikeywords, "minhang_weather": weather[1:5]})
 
 
 def weibo(request):
@@ -377,7 +421,7 @@ def weibo(request):
         reducedHotTopics4 = gpt_filter('weibo', lock=lock_weibo, mode=1)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         weibokeywords = getkeyword(request.user, 'weibo', False)
-        return render(request, "main_menu.html", {"weibo": reducedHotTopics4, "key": weibokeywords, "minhang_weather": weather[1:5]})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"weibo": reducedHotTopics4, "key": weibokeywords, "minhang_weather": weather[1:5]})
     else:
         keys = ""
         setkeys = []
@@ -398,7 +442,7 @@ def weibo(request):
         reducedHotTopics = gpt_filter('weibo', cue=keys, lock=lock_weibo, mode=mode)
         weather = gpt_filter("minhang_weather", lock=lock_weather)
         weibokeywords = getkeyword(request.user, 'weibo', False)
-        return render(request, "main_menu.html", {"weibo": reducedHotTopics, "key": weibokeywords, "minhang_weather": weather[1:5]})
+        return render(request, "main_menu.html", {'current_username':request.user.get_username(),"weibo": reducedHotTopics, "key": weibokeywords, "minhang_weather": weather[1:5]})
 
 
 def canvas(request):
@@ -432,7 +476,7 @@ def canvas(request):
         item[5] = mark_safe(item[5])
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     canvaskeywords = getkeyword(request.user, 'canvas', False)
-    return render(request, "main_menu.html", {"canvas_data_list": data_list, "minhang_weather": weather[1:5], 'key': canvaskeywords})
+    return render(request, "main_menu.html", {'current_username':request.user.get_username(),"canvas_data_list": data_list, "minhang_weather": weather[1:5], 'key': canvaskeywords})
 
 
 def dekt(request):
@@ -442,8 +486,8 @@ def dekt(request):
     if jaccountname == '':
         return redirect("/sjtu_login")
     print(request.user, "|", jaccountname, "|", "dekt")
-    thread = threading.Thread(target=process_dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
-    thread.start()
+    # thread = threading.Thread(target=process_dekt, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_dekt})
+    # thread.start()
 
     mode = 1
     keys = ""
@@ -464,7 +508,7 @@ def dekt(request):
     data_list = gpt_filter("dekt", cue=keys, mode=mode, lock=lock_dekt)
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     dektkeywords = getkeyword(request.user, 'dekt', False)
-    return render(request, "main_menu.html", {"dekt_data_list": data_list, "minhang_weather": weather[1:5], 'key': dektkeywords})
+    return render(request, "main_menu.html", {'current_username':request.user.get_username(),"dekt_data_list": data_list, "minhang_weather": weather[1:5], 'key': dektkeywords})
 
 
 def shuiyuan(request):
@@ -495,7 +539,7 @@ def shuiyuan(request):
     data_list = [list(data) for data in data_list]
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     shuiyuankeywords = getkeyword(request.user, 'shuiyuan', False)
-    return render(request, "main_menu.html", {"shuiyuan_data_list": data_list, "minhang_weather": weather[1:5],'key':shuiyuankeywords})
+    return render(request, "main_menu.html", {'current_username':request.user.get_username(),"shuiyuan_data_list": data_list, "minhang_weather": weather[1:5],'key':shuiyuankeywords})
 
 
 def seiee(request):
@@ -527,7 +571,7 @@ def seiee(request):
     data_list = [list(data[1:]) for data in data_list]
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     seieekeywords = getkeyword(request.user, 'seiee', False)
-    return render(request, "main_menu.html", {"seiee_data_list": data_list, "minhang_weather": weather[1:5],'key':seieekeywords})
+    return render(request, "main_menu.html", {'current_username':request.user.get_username(),"seiee_data_list": data_list, "minhang_weather": weather[1:5],'key':seieekeywords})
 
 
 def calendar(request):
@@ -557,10 +601,9 @@ def calendar(request):
         mysjtu_calendar(username=jaccountname, lock=lock_cookies, lock1=lock_calendar)
         return redirect("/calendar")
 
+    data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
     thread = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread.start()
-    data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
-
     processed_data = []
     for data in data_list:
         if data[6] == "false" or data[6] == "False":
