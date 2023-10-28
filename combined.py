@@ -1269,12 +1269,17 @@ def get_today_SJTU(jaccountname=None):
     lock_dekt.acquire()
     row_dekt = dektinfo.objects.values('activity_name', 'active_start_time','category_url')
     lock_dekt.release()
-    row_dekt_random_index = random.randint(0, len(row_dekt) - 1)
-    row_dekt = [row_dekt[row_dekt_random_index]['activity_name'] + "开始时间：" + row_dekt[row_dekt_random_index]['active_start_time'],row_dekt[row_dekt_random_index]['category_url']]
+    if len(row_dekt)==0:
+        row_dekt=['尚未加载，刷新后即可显示',"/dekt"]
+    else:
+        row_dekt_random_index = random.randint(0, len(row_dekt) - 1)
+        row_dekt = [row_dekt[row_dekt_random_index]['activity_name'] + "开始时间：" + row_dekt[row_dekt_random_index]['active_start_time'],row_dekt[row_dekt_random_index]['category_url']]
 
     lock_seiee.acquire()
     row_seiee = list(seieeNotification.objects.values('name','href').first().values())
     lock_seiee.release()
+    if not row_seiee:
+        row_seiee=['尚未加载，刷新后即可显示',"/seiee"]
 
     data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
     tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
