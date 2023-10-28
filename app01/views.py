@@ -156,10 +156,23 @@ def log_out(request):
     jaccountname = request.user.first_name
     if jaccountname != '':
         erase_SJTU_user(jaccountname)
-    request.user.first_name=''
-    request.user.save()
+    user=request.user
+    user.first_name = ''
+    user.save()
     auth.logout(request)
     return redirect("/")
+
+def sjtu_logout(request):
+    if not request.user.is_authenticated:
+        return redirect("/loginpage")
+    jaccountname = request.user.first_name
+    if jaccountname != '':
+        erase_SJTU_user(jaccountname)
+        user = request.user
+        user.first_name = ''
+        user.save()
+
+    return redirect("/mainpage")
 
 
 def send(request):

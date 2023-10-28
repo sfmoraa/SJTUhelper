@@ -165,10 +165,15 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([current_topics[index - 1].number, current_topics[index - 1].title, current_topics[index - 1].href, current_topics[index - 1].picture_element])
             return content
@@ -187,15 +192,23 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         i = 1
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a.title + ':' + a.description + ';'
+
             i = i + 1
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user', 'content': f'From now on, you have to play the role of a senior programmer. You have knowledge of various programming languages and project-related information. You need to evaluate whether these projects meet the given selection criteria based on the numbered titles and descriptions of GitHub projects I provide you. Please guess the content of these projects and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered projects, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered topics I want to filter: "{topics}." Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the projects that meet the criteria in the following method in English:"the output should be: (your answers).".'} ]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([current_topics[index - 1].author, current_topics[index - 1].title, current_topics[index - 1].description, current_topics[index - 1].href])
             return content
@@ -213,14 +226,21 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         topics = ""
         for a in current_topics:
             topics += '(' + str(a.rank) + ') ' + a.title+':'+a.tname+ '；'
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user', 'content': f'From now on, you have to play the role of a proficient content auditor who is fluent in Chinese. You need to evaluate whether these videos meet the given selection criteria based on the numbered video titles and their corresponding categories. Please note that both the titles and categories are in Chinese. Please understand their content and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered videos, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered video titles and categories I want to filter: "{topics}". Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([current_topics[index - 1].rank, current_topics[index - 1].title, current_topics[index - 1].tname, current_topics[index - 1].pic_href, current_topics[index - 1].link])
             return content
@@ -244,10 +264,16 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([current_topics[index - 1].title, current_topics[index - 1].rank_pic_href, current_topics[index - 1].link])
             return content
@@ -273,10 +299,16 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([index, current_topics[index - 1].category, current_topics[index - 1].category_url, current_topics[index - 1].item_id, current_topics[index - 1].activity_name, current_topics[index - 1].active_start_time, current_topics[index - 1].active_end_time,
                                 current_topics[index - 1].enroll_start_time, current_topics[index - 1].enroll_end_time, current_topics[index - 1].activity_picurl])
@@ -299,10 +331,16 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3]])
             content.sort(key=lambda x: x[0])
@@ -334,10 +372,16 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3],current_topics[index - 1][4],current_topics[index - 1][5],current_topics[index - 1][6],current_topics[index - 1][7]])
             content.sort(key=lambda x: x[0])
@@ -366,10 +410,16 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
-            return 0
+            return []
         else:
             content = []
-            numbers = sorted([int(item) for item in (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
+            if re.search(r'the output should be:(.*)', ans[1]) is None:
+                numbers = re.findall(r'Based on*?\((\d+)\)', ans[1])
+                # 转换为整数数组
+                numbers = [int(match) for match in numbers]
+            else:
+                numbers = sorted([int(item) for item in
+                                  (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
                 content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3],current_topics[index - 1][4],current_topics[index - 1][5],current_topics[index - 1][6],current_topics[index - 1][7]])
             content.sort(key=lambda x: x[0])
@@ -1177,21 +1227,35 @@ def get_today_SJTU(jaccountname=None):
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
 
-    sql_canvas = "select * from `{}` where submit = 'false'".format('canvas_' + jaccountname)
-    lock_canvas.acquire()
-    cursor.execute(sql_canvas)
-    row_canvas = cursor.fetchone()
-    lock_canvas.release()
-    row_canvas = row_canvas[4] + ": " + row_canvas[6] + "  Due at:" + row_canvas[1]
 
-    sql_shuiyuan = "select * from `{}`".format('shuiyuan_' + jaccountname)
-    lock_shuiyuan.acquire()
-    cursor.execute(sql_shuiyuan)
-    row_shuiyuan = cursor.fetchall()
-    lock_shuiyuan.release()
-    row_shuiyuan_random_index = random.randint(0, len(row_shuiyuan) - 1)
-    row_shuiyuan = row_shuiyuan[row_shuiyuan_random_index]
-    row_shuiyuan = "[" + row_shuiyuan[6] + "]" + row_shuiyuan[2]
+    query = "SHOW TABLES LIKE %s"
+    cursor.execute(query, ('canvas_' + jaccountname))
+    result = cursor.fetchone()
+    if result:
+        # 表存在，执行查询操作
+        sql_canvas = "select * from `{}` where submit = 'false'".format('canvas_' + jaccountname)
+        cursor.execute(sql_canvas)
+        lock_canvas.acquire()
+        cursor.execute(sql_canvas)
+        row_canvas = cursor.fetchone()
+        lock_canvas.release()
+        row_canvas = row_canvas[4] + ": " + row_canvas[6] + "  Due at:" + row_canvas[1]
+    else:
+        row_canvas='尚未加载，刷新后即可显示'
+
+    cursor.execute(query, ('shuiyuan_' + jaccountname))
+    result = cursor.fetchone()
+    if result:
+        sql_shuiyuan = "select * from `{}`".format('shuiyuan_' + jaccountname)
+        lock_shuiyuan.acquire()
+        cursor.execute(sql_shuiyuan)
+        row_shuiyuan = cursor.fetchall()
+        lock_shuiyuan.release()
+        row_shuiyuan_random_index = random.randint(0, len(row_shuiyuan) - 1)
+        row_shuiyuan = row_shuiyuan[row_shuiyuan_random_index]
+        row_shuiyuan = "[" + row_shuiyuan[6] + "]" + row_shuiyuan[2]
+    else:
+        row_canvas = '尚未加载，刷新后即可显示'
 
     lock_dekt.acquire()
     row_dekt = dektinfo.objects.values('activity_name', 'active_start_time')

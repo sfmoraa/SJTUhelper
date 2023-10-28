@@ -25,6 +25,7 @@ urlpatterns = [
     path('time/',views.focustime),
     path('loginpage/', views.loginpage),
     path('logout/',views.log_out),
+    path('sjtulogout/',views.sjtu_logout),
     path('bilibili/',views.bilibili),
     path('weibo/',views.weibo),
     path('zhihu/',views.zhihu),
