@@ -1228,7 +1228,7 @@ def get_today_regular():
 
 def get_today_SJTU(jaccountname=None):
     if not jaccountname:
-        return '登录后显示', '登录后显示', '登录后显示', '登录后显示',None
+        return ['登录后显示','/canvas'], ['登录后显示','/dekt'],[ '登录后显示','/seiee'], ['登录后显示','/shuiyuan'],None
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
@@ -1245,9 +1245,9 @@ def get_today_SJTU(jaccountname=None):
         if row_canvas is not None:
             row_canvas = [row_canvas[4] + ": " + row_canvas[6] + "  Due at:" + row_canvas[1],row_canvas[7]]
         else:
-            row_canvas='尚未加载，刷新后即可显示'
+            row_canvas=['尚未加载，刷新后即可显示',"/canvas"]
     else:
-        row_canvas = '尚未加载，刷新后即可显示'
+        row_canvas = ['尚未加载，刷新后即可显示',"/canvas"]
 
     cursor.execute(query, ('shuiyuan_' + jaccountname))
     result = cursor.fetchone()
@@ -1262,9 +1262,9 @@ def get_today_SJTU(jaccountname=None):
             row_shuiyuan = row_shuiyuan[row_shuiyuan_random_index]
             row_shuiyuan = ["[" + row_shuiyuan[6] + "]" + row_shuiyuan[2],row_shuiyuan[1]]
         else:
-            row_shuiyuan = '尚未加载，刷新后即可显示'
+            row_shuiyuan = ['尚未加载，刷新后即可显示',"/shuiyuan"]
     else:
-        row_shuiyuan = '尚未加载，刷新后即可显示'
+        row_shuiyuan = ['尚未加载，刷新后即可显示',"/shuiyuan"]
 
     lock_dekt.acquire()
     row_dekt = dektinfo.objects.values('activity_name', 'active_start_time','category_url')
