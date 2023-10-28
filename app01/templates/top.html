@@ -154,54 +154,54 @@
 
 
 
-<section class="previews" id="previews">
-
-   <h1 class="heading"> Today's previews</h1>
-   <h3 class="heading"><script>
-      var now=new Date();
-      var str=now.toLocaleDateString();
-      document.write(str);
-   </script></h3>
-
-   <div class="box-container container">
-
-       {% for obj in zhihuHotTopic%}
-         <div class="box">
-            {% autoescape off %}
-            {{ obj.3 }}
-            {% endautoescape %}
-            <div class="content">
-               <h3>{{ obj.0 }}{{ obj.1 }}</h3>
-               <a href="{{obj.2}}" class="link-btn">view more</a>
-            </div>
-         </div>
-         {% endfor %}
-
-
-      <div class="box">
-         <video src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" data-canonical-src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2  width-fit" style="max-height:150px; min-height: 0px" autoplay>
-         </video>
-         <div class="content">
-            <h3>Github</h3>
-            <p>Generative Gaussian Splatting for Efficient 3D Content Creation</p>
-            <a href="https://github.com/dreamgaussian/dreamgaussian" class="link-btn">view more</a>
-         </div>
-      </div>
-
-      <div class="box">
-
-         <img src="../static/img/bilitrending.avif"></img>
-         <div class="content">
-            <h3>Bilibili</h3>
-            <p>【潘安】请记得我｜重返未来1999斯奈德</p>
-            <a href="#" class="link-btn">view more</a>
-         </div>
-      </div>
-
-
-   </div>
-
-</section>
+{#<section class="previews" id="previews">#}
+{##}
+{#   <h1 class="heading"> Today's previews</h1>#}
+{#   <h3 class="heading"><script>#}
+{#      var now=new Date();#}
+{#      var str=now.toLocaleDateString();#}
+{#      document.write(str);#}
+{#   </script></h3>#}
+{##}
+{#   <div class="box-container container">#}
+{##}
+{#       {% for obj in zhihuHotTopic%}#}
+{#         <div class="box">#}
+{#            {% autoescape off %}#}
+{#            {{ obj.3 }}#}
+{#            {% endautoescape %}#}
+{#            <div class="content">#}
+{#               <h3>{{ obj.0 }}{{ obj.1 }}</h3>#}
+{#               <a href="{{obj.2}}" class="link-btn">view more</a>#}
+{#            </div>#}
+{#         </div>#}
+{#         {% endfor %}#}
+{##}
+{##}
+{#      <div class="box">#}
+{#         <video src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" data-canonical-src="https://user-images.githubusercontent.com/25863658/271315963-db860801-7b9c-4b30-9eb9-87330175f5c8.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2  width-fit" style="max-height:150px; min-height: 0px" autoplay>#}
+{#         </video>#}
+{#         <div class="content">#}
+{#            <h3>Github</h3>#}
+{#            <p>Generative Gaussian Splatting for Efficient 3D Content Creation</p>#}
+{#            <a href="https://github.com/dreamgaussian/dreamgaussian" class="link-btn">view more</a>#}
+{#         </div>#}
+{#      </div>#}
+{##}
+{#      <div class="box">#}
+{##}
+{#         <img src="../static/img/bilitrending.avif"></img>#}
+{#         <div class="content">#}
+{#            <h3>Bilibili</h3>#}
+{#            <p>【潘安】请记得我｜重返未来1999斯奈德</p>#}
+{#            <a href="#" class="link-btn">view more</a>#}
+{#         </div>#}
+{#      </div>#}
+{##}
+{##}
+{#   </div>#}
+{##}
+{#</section>#}
 
 
 

@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,11 +13,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../static/css/style_main/style.css">
-    <link rel="stylesheet"  href="../static/css/calendar/style.css">
-   <!-- bootstrap cdn link  -->
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
-     <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/main.min.css'>
-
+    <link rel="stylesheet" href="../static/css/calendar/style.css">
+    <!-- bootstrap cdn link  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/main.min.css'>
+    <link rel="stylesheet" href="{% static 'css/style_mainpage.css' %}">
     <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
 
 
@@ -25,365 +25,415 @@
 
 <body>
 
-    <input type="checkbox" name="" id="menu-toggle">
-    <div class="overlay">
-        <label for="menu-toggle" ></label>
-    </div>
+<input type="checkbox" name="" id="menu-toggle">
+<div class="overlay">
+    <label for="menu-toggle"></label>
+</div>
 
-    <div class="sidebar">
-        <div class="sidebar-container">
-            <a href="../mainpage">
-                <div class="brand">
+<div class="sidebar">
+    <div class="sidebar-container">
+        <a href="../mainpage">
+            <div class="brand">
                 <h2>
                     <span class="fas fa-user-astronaut"></span>
                     SJTUhelper
                 </h2>
-                </div>
-            </a>
-            <div class="sidebar-avartar">
-                    <img src="../static/img/main/user.png" alt="">
-                <div class="avartar-info">
-                  <div class="avartar-text">
-                      <h4>{{ current_username}}</h4>
-                  </div>
-                      <button onclick="showItem()"style="background: transparent">
-                        <span class="las la-angle-double-down"></span>
-                      </button>
-                </div>
-
             </div>
-           <div class="sidebar-menu" style="font-size:15px">
-                  <ul>
-                      <li class="dropdown_items hidden " id="drop-item2" >
-                      <a href="../collection">
+        </a>
+        <div class="sidebar-avartar">
+            {#            <img src="../static/img/main/user.png" alt="">#}
+            <div id="username-initial" class="username-initial">A</div>
+            <div class="avartar-info">
+                <div class="avartar-text">
+                    <h4 id="username">{{ current_username }}</h4>
+                </div>
+                <button onclick="showItem()" style="background: transparent">
+                    <span class="las la-angle-double-down"></span>
+                </button>
+            </div>
+            <script>
+                element = document.getElementById("username")
+                username = element.innerText
+                initial_letter = username.charAt(0).toUpperCase()
+                document.getElementById("username-initial").innerText = initial_letter
+            </script>
+        </div>
+        <div class="sidebar-menu" style="font-size:15px">
+            <ul>
+                <li class="dropdown_items hidden " id="drop-item2">
+                    <a href="../collection">
                         <span class="fas fa-star"></span>
                         <span>collection</span>
-                      </a>
-                    </li>
-                    <li class="dropdown_items hidden" id="drop-item1">
-                      <a href="../time" id="concentration">
-                            <span class="fas fa-comment-slash"></span>
-                            <span>Focus</span>
-                        </a>
-                      </a>
-                    </li>
+                    </a>
+                </li>
+                <li class="dropdown_items hidden" id="drop-item1">
+                    <a href="../time" id="concentration">
+                        <span class="fas fa-comment-slash"></span>
+                        <span>Focus</span>
+                    </a>
+                    </a>
+                </li>
 
 
-
-                    <li class="dropdown_items hidden " id="drop-item3">
-                      <a href="../logout">
+                <li class="dropdown_items hidden " id="drop-item3">
+                    <a href="../logout">
                         <span class="fas fa-sign-out-alt"></span>
                         <span>Log out</span>
-                      </a>
-                    </li>
+                    </a>
+                </li>
 
-                      <li class="dropdown_items hidden " id="drop-item6">
-                      <a href="../sjtulogout">
+                <li class="dropdown_items hidden " id="drop-item6">
+                    <a href="../sjtulogout">
                         <span class="fas fa-sign-out-alt"></span>
                         <span>delete jaccount</span>
-                      </a>
-                    </li>
+                    </a>
+                </li>
 
-                    <li class="dropdown_items hidden" id="drop-item4">
-                      <a href="../changepassword">
+                <li class="dropdown_items hidden" id="drop-item4">
+                    <a href="../changepassword">
                         <span class="fas fa-user-edit"></span>
                         <span>Change password</span>
-                      </a>
-                    </li>
-                    <li class="dropdown_items hidden" id="drop-item5">
-                        <br>
-                    </li>
+                    </a>
+                </li>
+                <li class="dropdown_items hidden" id="drop-item5">
+                    <br>
+                </li>
                 <script>
                     function showItem() {
-                    var targetItems = document.querySelectorAll('.dropdown_items');
-                    for (let i = 0; i < targetItems.length; i++) {
-                        if (targetItems[i].classList.contains('hidden')) {
-                            setTimeout(function(){targetItems[i].classList.remove('hidden');},20*i);
-                        } else {
-                             setTimeout(function(){targetItems[i].classList.add('hidden');},20*i);
+                        var targetItems = document.querySelectorAll('.dropdown_items');
+                        for (let i = 0; i < targetItems.length; i++) {
+                            if (targetItems[i].classList.contains('hidden')) {
+                                setTimeout(function () {
+                                    targetItems[i].classList.remove('hidden');
+                                }, 20 * i);
+                            } else {
+                                setTimeout(function () {
+                                    targetItems[i].classList.add('hidden');
+                                }, 20 * i);
+                            }
                         }
                     }
-                }
-                 </script>
+                </script>
 
 
-                    <li>
-                        <a href="../zhihu" id="zhihu">
-                            <span class="fab fa-zhihu"></span>
-                            <span>Zhihu</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../github">
-                            <span class="fab fa-github"></span>
-                            <span>Github</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../bilibili">
-                            <img src="../static/img/bilibili.jpg" style="width:15px">
-                            <span>BiliBili</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../weibo">
-                              <span class="fab fa-weibo"></span>
-                            <span>Weibo</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../shuiyuan">
-                            <span class="fas fa-tint"></span>
-                            <span>Shuiyuan</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../canvas">
-                            <span class="fas fa-clipboard-list"></span>
-                            <span>canvas</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../dekt" id="dekt">
-                            <span class="fas la-chalkboard-teacher"></span>
-                            <span>dekt</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="../seiee" id="seiee">
-                            <span class="fas la-school"></span>
-                            <span>seiee</span>
-                        </a>
-                    </li>
+                <li>
+                    <a href="../zhihu" id="zhihu">
+                        <span class="fab fa-zhihu"></span>
+                        <span>Zhihu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../github">
+                        <span class="fab fa-github"></span>
+                        <span>Github</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../bilibili">
+                        <img src="../static/img/bilibili.jpg" style="width:15px">
+                        <span>BiliBili</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../weibo">
+                        <span class="fab fa-weibo"></span>
+                        <span>Weibo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../shuiyuan">
+                        <span class="fas fa-tint"></span>
+                        <span>Shuiyuan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../canvas">
+                        <span class="fas fa-clipboard-list"></span>
+                        <span>canvas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../dekt" id="dekt">
+                        <span class="fas la-chalkboard-teacher"></span>
+                        <span>dekt</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../seiee" id="seiee">
+                        <span class="fas la-school"></span>
+                        <span>seiee</span>
+                    </a>
+                </li>
 
 
+                <script>
+                    var requestUrl = request.getScheme() //当前链接使用的协议
+                        + "://" + request.getServerName()//服务器地址
+                        + ":" + request.getServerPort() //端口号
+                        + request.getContextPath() //应用名称，如果应用名称为
+                        + request.getServletPath() //请求的相对url
+                        + "?" + request.getQueryString(); //请求参数
+                    print(requestUrl);
+                    var element = document.getElementById("canvas");
+                    element.class = "active";
 
-                                <script>
-                                    var requestUrl = request.getScheme() //当前链接使用的协议
-                                                        +"://" + request.getServerName()//服务器地址
-                                                        + ":" + request.getServerPort() //端口号
-                                                        + request.getContextPath() //应用名称，如果应用名称为
-                                                        + request.getServletPath() //请求的相对url
-                                                        + "?" + request.getQueryString(); //请求参数
-                                    print(requestUrl);
-                                    var element=document.getElementById("canvas");
-                                    element.class="active";
-
-                                    var element2=document.getElementById("dekt");
-                                    element2.href="../bilibili";
-                                    element2.style.background="green"
-                                    element2.setAttribute("class","active");
-                                </script>
-
-
-                </ul>
-            </div>
+                    var element2 = document.getElementById("dekt");
+                    element2.href = "../bilibili";
+                    element2.style.background = "green"
+                    element2.setAttribute("class", "active");
+                </script>
 
 
+            </ul>
         </div>
-    </div>
 
-    <div class="main-content">
-        <header>
-            <div class="header-title-wrapper">
-                <label for="menu-toggle">
-                    <span class="las la-bars"></span>
-                </label>
-                <div class="header-title">
-                    <h1>Menu</h1>
-                    <p>Welcome to SJTUhelper </p>
-                </div>
+
+    </div>
+</div>
+
+<div class="main-content">
+    <header>
+        <div class="header-title-wrapper">
+            <label for="menu-toggle">
+                <span class="las la-bars"></span>
+            </label>
+            <div class="header-title">
+                <h1>Menu</h1>
+                <p>Welcome to SJTUhelper </p>
             </div>
-        </header>
+        </div>
+    </header>
     <section>
 
-                <div class="analytics">
-                    <div class="analytic">
-                        <div style="fill:#005eff">
-                            <a href="../zhihu"><svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M170.54 148.13v217.54l23.43.01 7.71 26.37 42.01-26.37h49.53V148.13H170.54zm97.75 193.93h-27.94l-27.9 17.51-5.08-17.47-11.9-.04V171.75h72.82v170.31zm-118.46-94.39H97.5c1.74-27.1 2.2-51.59 2.2-73.46h51.16s1.97-22.56-8.58-22.31h-88.5c3.49-13.12 7.87-26.66 13.12-40.67 0 0-24.07 0-32.27 21.57-3.39 8.9-13.21 43.14-30.7 78.12 5.89-.64 25.37-1.18 36.84-22.21 2.11-5.89 2.51-6.66 5.14-14.53h28.87c0 10.5-1.2 66.88-1.68 73.44H20.83c-11.74 0-15.56 23.62-15.56 23.62h65.58C66.45 321.1 42.83 363.12 0 396.34c20.49 5.85 40.91-.93 51-9.9 0 0 22.98-20.9 35.59-69.25l53.96 64.94s7.91-26.89-1.24-39.99c-7.58-8.92-28.06-33.06-36.79-41.81L87.9 311.95c4.36-13.98 6.99-27.55 7.87-40.67h61.65s-.09-23.62-7.59-23.62v.01zm412.02-1.6c20.83-25.64 44.98-58.57 44.98-58.57s-18.65-14.8-27.38-4.06c-6 8.15-36.83 48.2-36.83 48.2l19.23 14.43zm-150.09-59.09c-9.01-8.25-25.91 2.13-25.91 2.13s39.52 55.04 41.12 57.45l19.46-13.73s-25.67-37.61-34.66-45.86h-.01zM640 258.35c-19.78 0-130.91.93-131.06.93v-101c4.81 0 12.42-.4 22.85-1.2 40.88-2.41 70.13-4 87.77-4.81 0 0 12.22-27.19-.59-33.44-3.07-1.18-23.17 4.58-23.17 4.58s-165.22 16.49-232.36 18.05c1.6 8.82 7.62 17.08 15.78 19.55 13.31 3.48 22.69 1.7 49.15.89 24.83-1.6 43.68-2.43 56.51-2.43v99.81H351.41s2.82 22.31 25.51 22.85h107.94v70.92c0 13.97-11.19 21.99-24.48 21.12-14.08.11-26.08-1.15-41.69-1.81 1.99 3.97 6.33 14.39 19.31 21.84 9.88 4.81 16.17 6.57 26.02 6.57 29.56 0 45.67-17.28 44.89-45.31v-73.32h122.36c9.68 0 8.7-23.78 8.7-23.78l.03-.01z"/></svg>
-                            </a>
-                            </div>
-                            <div class="analytic-info" >
-                             <h3 >知乎</h3>
-                             <p>{{ zhihu_sample }}</p>
-                             </div>
-                    </div>
-                   <div class="analytic">
-                       <a href="../bilibili">                        <img src="../static/img/bilibili.jpg" style="max-height: 50px;width:auto" >
-                        </a>
-                        <div class="analytic-info"style="margin-left: 25px">
-                            <h3>Bilibili</h3>
-                            <p>{{ bilibili_sample }}</p>
-                        </div>
-                    </div>
-                    <div class="analytic">
-
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
-                        <div class="analytic-info" style="margin-left: 25px">
-                            <h3>Github</h3>
-                            <p>{{ github_sample }}</p>
-                        </div>
-
-                    </div>
-                    <div class="analytic">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#cd4242}</style><path d="M407 177.6c7.6-24-13.4-46.8-37.4-41.7-22 4.8-28.8-28.1-7.1-32.8 50.1-10.9 92.3 37.1 76.5 84.8-6.8 21.2-38.8 10.8-32-10.3zM214.8 446.7C108.5 446.7 0 395.3 0 310.4c0-44.3 28-95.4 76.3-143.7C176 67 279.5 65.8 249.9 161c-4 13.1 12.3 5.7 12.3 6 79.5-33.6 140.5-16.8 114 51.4-3.7 9.4 1.1 10.9 8.3 13.1 135.7 42.3 34.8 215.2-169.7 215.2zm143.7-146.3c-5.4-55.7-78.5-94-163.4-85.7-84.8 8.6-148.8 60.3-143.4 116s78.5 94 163.4 85.7c84.8-8.6 148.8-60.3 143.4-116zM347.9 35.1c-25.9 5.6-16.8 43.7 8.3 38.3 72.3-15.2 134.8 52.8 111.7 124-7.4 24.2 29.1 37 37.4 12 31.9-99.8-55.1-195.9-157.4-174.3zm-78.5 311c-17.1 38.8-66.8 60-109.1 46.3-40.8-13.1-58-53.4-40.3-89.7 17.7-35.4 63.1-55.4 103.4-45.1 42 10.8 63.1 50.2 46 88.5zm-86.3-30c-12.9-5.4-30 .3-38 12.9-8.3 12.9-4.3 28 8.6 34 13.1 6 30.8.3 39.1-12.9 8-13.1 3.7-28.3-9.7-34zm32.6-13.4c-5.1-1.7-11.4.6-14.3 5.4-2.9 5.1-1.4 10.6 3.7 12.9 5.1 2 11.7-.3 14.6-5.4 2.8-5.2 1.1-10.9-4-12.9z"/></svg>
-                        <div class="analytic-info"style="margin-left: 25px">
-                            <h3>微博</h3>
-                            <p>{{ weibo_sample }}</p>
-                        </div>
-                    </div>
+        <div class="analytics">
+            <div class="analytic">
+                <div style="fill:#005eff">
+                    <a href="../zhihu">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                            <path d="M170.54 148.13v217.54l23.43.01 7.71 26.37 42.01-26.37h49.53V148.13H170.54zm97.75 193.93h-27.94l-27.9 17.51-5.08-17.47-11.9-.04V171.75h72.82v170.31zm-118.46-94.39H97.5c1.74-27.1 2.2-51.59 2.2-73.46h51.16s1.97-22.56-8.58-22.31h-88.5c3.49-13.12 7.87-26.66 13.12-40.67 0 0-24.07 0-32.27 21.57-3.39 8.9-13.21 43.14-30.7 78.12 5.89-.64 25.37-1.18 36.84-22.21 2.11-5.89 2.51-6.66 5.14-14.53h28.87c0 10.5-1.2 66.88-1.68 73.44H20.83c-11.74 0-15.56 23.62-15.56 23.62h65.58C66.45 321.1 42.83 363.12 0 396.34c20.49 5.85 40.91-.93 51-9.9 0 0 22.98-20.9 35.59-69.25l53.96 64.94s7.91-26.89-1.24-39.99c-7.58-8.92-28.06-33.06-36.79-41.81L87.9 311.95c4.36-13.98 6.99-27.55 7.87-40.67h61.65s-.09-23.62-7.59-23.62v.01zm412.02-1.6c20.83-25.64 44.98-58.57 44.98-58.57s-18.65-14.8-27.38-4.06c-6 8.15-36.83 48.2-36.83 48.2l19.23 14.43zm-150.09-59.09c-9.01-8.25-25.91 2.13-25.91 2.13s39.52 55.04 41.12 57.45l19.46-13.73s-25.67-37.61-34.66-45.86h-.01zM640 258.35c-19.78 0-130.91.93-131.06.93v-101c4.81 0 12.42-.4 22.85-1.2 40.88-2.41 70.13-4 87.77-4.81 0 0 12.22-27.19-.59-33.44-3.07-1.18-23.17 4.58-23.17 4.58s-165.22 16.49-232.36 18.05c1.6 8.82 7.62 17.08 15.78 19.55 13.31 3.48 22.69 1.7 49.15.89 24.83-1.6 43.68-2.43 56.51-2.43v99.81H351.41s2.82 22.31 25.51 22.85h107.94v70.92c0 13.97-11.19 21.99-24.48 21.12-14.08.11-26.08-1.15-41.69-1.81 1.99 3.97 6.33 14.39 19.31 21.84 9.88 4.81 16.17 6.57 26.02 6.57 29.56 0 45.67-17.28 44.89-45.31v-73.32h122.36c9.68 0 8.7-23.78 8.7-23.78l.03-.01z"/>
+                        </svg>
+                    </a>
                 </div>
-                <div class="analytics" style="">
-                     <div class="analytic">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 352 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#005eff}</style><path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"/></svg>
-                         <div class="analytic-info" style="margin-left: 25px">
-                            <h3>水源社区</h3>
-                             <p>{{ shuiyuan_sample }}</p>
-                         </div>
-
-                    </div>
-                    <div class="analytic">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#8834ef}</style><path d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z"/></svg>
-                        <div class="analytic-info"style="margin-left: 25px">
-                            <h3>Canvas</h3>
-                            <p>{{ canvas_sample}}</p>
-                        </div>
-                    </div>
-                   <div class="analytic">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ff7b00}</style><path d="M208 352c-2.39 0-4.78.35-7.06 1.09C187.98 357.3 174.35 360 160 360c-14.35 0-27.98-2.7-40.95-6.91-2.28-.74-4.66-1.09-7.05-1.09C49.94 352-.33 402.48 0 464.62.14 490.88 21.73 512 48 512h224c26.27 0 47.86-21.12 48-47.38.33-62.14-49.94-112.62-112-112.62zm-48-32c53.02 0 96-42.98 96-96s-42.98-96-96-96-96 42.98-96 96 42.98 96 96 96zM592 0H208c-26.47 0-48 22.25-48 49.59V96c23.42 0 45.1 6.78 64 17.8V64h352v288h-64v-64H384v64h-76.24c19.1 16.69 33.12 38.73 39.69 64H592c26.47 0 48-22.25 48-49.59V49.59C640 22.25 618.47 0 592 0z"/></svg>                       <div class="analytic-info">
-                            <h3>第二课堂</h3>
-                            <p>{{ dekt_sample }}</p>
-                       </div>
-
-                    </div>
-                    <div class="analytic">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#47aaf5}</style><path d="M0 224v272c0 8.84 7.16 16 16 16h80V192H32c-17.67 0-32 14.33-32 32zm360-48h-24v-40c0-4.42-3.58-8-8-8h-16c-4.42 0-8 3.58-8 8v64c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-16c0-4.42-3.58-8-8-8zm137.75-63.96l-160-106.67a32.02 32.02 0 0 0-35.5 0l-160 106.67A32.002 32.002 0 0 0 128 138.66V512h128V368c0-8.84 7.16-16 16-16h96c8.84 0 16 7.16 16 16v144h128V138.67c0-10.7-5.35-20.7-14.25-26.63zM320 256c-44.18 0-80-35.82-80-80s35.82-80 80-80 80 35.82 80 80-35.82 80-80 80zm288-64h-64v320h80c8.84 0 16-7.16 16-16V224c0-17.67-14.33-32-32-32z"/></svg>                        <div class="analytic-info">
-                            <h3>电院通知</h3>
-                            <p>{{ seiee_sample }}</p>
-                        </div>
-                    </div>
-
+                <div class="analytic-info">
+                    <h3>知乎</h3>
+                    <a href="{{ zhihu_sample.1 }}" target="_blank"><p>{{ zhihu_sample.0 }}</p></a>
                 </div>
-        </section>
-        <div class="login-form">
-           <form method="post">
-            <div id="close-login-form" class="fas fa-times"></div>
-             <div class="fas fa-user-astronaut">SJTUhelper</div>
-            <h2>Add a New Calender</h2>
-        {% csrf_token %}
-      <div class="form-row">
-        <label for="type">类型：</label>
-        <select id="type" name="type">
-            {% for table in tableid %}
-          <option value={{ table }}>{{table }}</option>
-          {% endfor %}
-        </select>
-      </div>
+            </div>
+            <div class="analytic">
+                <a href="../bilibili"> <img src="../static/img/bilibili.jpg" style="max-height: 50px;width:auto">
+                </a>
+                <div class="analytic-info" style="margin-left: 25px">
+                    <h3>Bilibili</h3>
+                    <a href="{{ bilibili_sample.1 }}" target="_blank"><p>{{ bilibili_sample.0 }}</p></a>
+                </div>
+            </div>
+            <div class="analytic">
+                <a href="../github">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                        <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/>
+                    </svg>
+                </a>
+                <div class="analytic-info" style="margin-left: 25px">
+                    <h3>Github</h3>
+                    <a href="{{ github_sample.1 }}" target="_blank"><p>{{ github_sample.0 }}</p></a>
+                </div>
 
-      <div class="form-row">
-        <label for="title">标题：</label>
-        <input type="text" id="title" name="title" required>
-      </div>
-
-      <div class="form-row">
-        <label for="start-date">开始日期：</label>
-        <input type="date" id="start-date" name="start-date" required>
-
-        <label for="start-time">开始时间：</label>
-        <input type="time" id="start-time" name="start-time" required>
-      </div>
-
-      <div class="form-row">
-        <label for="end-date">结束日期：</label>
-        <input type="date" id="end-date" name="end-date" required>
-
-        <label for="end-time">结束时间：</label>
-        <input type="time" id="end-time" name="end-time" required>
-      </div>
-
-      <div class="form-row">
-        <label for="location">地点：</label>
-        <input type="text" id="location" name="location" value="上海交通大学闵行校区">
-      </div>
-
-      <div class="form-row">
-        <label for="availability">可用性：</label>
-        <select id="availability" name="availability">
-          <option value="在忙">在忙</option>
-          <option value="空闲">空闲</option>
-          <option value="不在办公室">不在办公室</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label for="reminder">提醒：</label>
-        <select id="reminder" name="reminder">
-          <option value="-1">无提醒</option>
-          <option value="0">日程开始时</option>
-          <option value="5">5分钟前</option>
-          <option value="10">10分钟前</option>
-          <option value="15">15分钟前</option>
-          <option value="30">30分钟前</option>
-          <option value="60">1小时前</option>
-          <option value="1440">1天前</option>
-          <option value="10080">1周前</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label for="description">描述：</label>
-        <textarea id="description" name="description"></textarea>
-      </div>
-
-      <input type="submit" value="提交" class="link-btn">
-    </form>
+            </div>
+            <div class="analytic">
+                <a href="../weibo">
+                <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                    <style>svg {
+                        fill: #cd4242
+                    }</style>
+                    <path d="M407 177.6c7.6-24-13.4-46.8-37.4-41.7-22 4.8-28.8-28.1-7.1-32.8 50.1-10.9 92.3 37.1 76.5 84.8-6.8 21.2-38.8 10.8-32-10.3zM214.8 446.7C108.5 446.7 0 395.3 0 310.4c0-44.3 28-95.4 76.3-143.7C176 67 279.5 65.8 249.9 161c-4 13.1 12.3 5.7 12.3 6 79.5-33.6 140.5-16.8 114 51.4-3.7 9.4 1.1 10.9 8.3 13.1 135.7 42.3 34.8 215.2-169.7 215.2zm143.7-146.3c-5.4-55.7-78.5-94-163.4-85.7-84.8 8.6-148.8 60.3-143.4 116s78.5 94 163.4 85.7c84.8-8.6 148.8-60.3 143.4-116zM347.9 35.1c-25.9 5.6-16.8 43.7 8.3 38.3 72.3-15.2 134.8 52.8 111.7 124-7.4 24.2 29.1 37 37.4 12 31.9-99.8-55.1-195.9-157.4-174.3zm-78.5 311c-17.1 38.8-66.8 60-109.1 46.3-40.8-13.1-58-53.4-40.3-89.7 17.7-35.4 63.1-55.4 103.4-45.1 42 10.8 63.1 50.2 46 88.5zm-86.3-30c-12.9-5.4-30 .3-38 12.9-8.3 12.9-4.3 28 8.6 34 13.1 6 30.8.3 39.1-12.9 8-13.1 3.7-28.3-9.7-34zm32.6-13.4c-5.1-1.7-11.4.6-14.3 5.4-2.9 5.1-1.4 10.6 3.7 12.9 5.1 2 11.7-.3 14.6-5.4 2.8-5.2 1.1-10.9-4-12.9z"/>
+                </svg>
+                </a>
+                <div class="analytic-info" style="margin-left: 25px">
+                    <h3>微博</h3>
+                    <a href="{{ weibo_sample.1 }}" target="_blank"><p>{{ weibo_sample.0 }}</p></a>
+                </div>
+            </div>
         </div>
-        <main>
+        <div class="analytics" style="">
+            <div class="analytic">
+                <a href="../shuiyuan">
+                <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 352 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                    <style>svg {
+                        fill: #005eff
+                    }</style>
+                    <path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82zM176 448c-61.75 0-112-50.25-112-112 0-8.84 7.16-16 16-16s16 7.16 16 16c0 44.11 35.89 80 80 80 8.84 0 16 7.16 16 16s-7.16 16-16 16z"/>
+                </svg>
+                </a>
+                <div class="analytic-info" style="margin-left: 25px">
+                    <h3>水源社区</h3>
+                    <a href="{{ shuiyuan_sample.1 }}" target="_blank"><p>{{ shuiyuan_sample.0 }}</p></a>
+                </div>
 
-            <section>
-                    <h3 class="section-head">Calendar</h3>
-                        <div class="card">
-					        <div class="card-body">
-						    <div class="table-responsive">
-                                <button id="login-btn" class="link-btn" >add calendar</button>
-							    <div id='calendar'></div>
-						    </div>
-					        </div>
-				        </div>
+            </div>
+            <div class="analytic">
+                <a href="../canvas">
+                <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                    <style>svg {
+                        fill: #8834ef
+                    }</style>
+                    <path d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z"/>
+                </svg>
+                </a>
+                <div class="analytic-info" style="margin-left: 25px">
+                    <h3>Canvas</h3>
+                    <a href="{{ canvas_sample.1 }}" target="_blank"><p>{{ canvas_sample.0 }}</p></a>
+                </div>
+            </div>
+            <div class="analytic">
+                <a href="../dekt">
+                <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                    <style>svg {
+                        fill: #ff7b00
+                    }</style>
+                    <path d="M208 352c-2.39 0-4.78.35-7.06 1.09C187.98 357.3 174.35 360 160 360c-14.35 0-27.98-2.7-40.95-6.91-2.28-.74-4.66-1.09-7.05-1.09C49.94 352-.33 402.48 0 464.62.14 490.88 21.73 512 48 512h224c26.27 0 47.86-21.12 48-47.38.33-62.14-49.94-112.62-112-112.62zm-48-32c53.02 0 96-42.98 96-96s-42.98-96-96-96-96 42.98-96 96 42.98 96 96 96zM592 0H208c-26.47 0-48 22.25-48 49.59V96c23.42 0 45.1 6.78 64 17.8V64h352v288h-64v-64H384v64h-76.24c19.1 16.69 33.12 38.73 39.69 64H592c26.47 0 48-22.25 48-49.59V49.59C640 22.25 618.47 0 592 0z"/>
+                </svg>
+                </a>
+                <div class="analytic-info">
+                    <h3>第二课堂</h3>
+                    <a href="{{ dekt_sample.1 }}" target="_blank"><p>{{ dekt_sample.0 }}</p></a>
+                </div>
 
-            </section>
+            </div>
+            <div class="analytic">
+                <a href="../seiee">
+                <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                    <style>svg {
+                        fill: #47aaf5
+                    }</style>
+                    <path d="M0 224v272c0 8.84 7.16 16 16 16h80V192H32c-17.67 0-32 14.33-32 32zm360-48h-24v-40c0-4.42-3.58-8-8-8h-16c-4.42 0-8 3.58-8 8v64c0 4.42 3.58 8 8 8h48c4.42 0 8-3.58 8-8v-16c0-4.42-3.58-8-8-8zm137.75-63.96l-160-106.67a32.02 32.02 0 0 0-35.5 0l-160 106.67A32.002 32.002 0 0 0 128 138.66V512h128V368c0-8.84 7.16-16 16-16h96c8.84 0 16 7.16 16 16v144h128V138.67c0-10.7-5.35-20.7-14.25-26.63zM320 256c-44.18 0-80-35.82-80-80s35.82-80 80-80 80 35.82 80 80-35.82 80-80 80zm288-64h-64v320h80c8.84 0 16-7.16 16-16V224c0-17.67-14.33-32-32-32z"/>
+                </svg>
+                </a>
+                <div class="analytic-info">
+                    <h3>电院通知</h3>
+                    <a href="{{ seiee_sample.1 }}" target="_blank"><p>{{ seiee_sample.0 }}</p></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="login-form">
+        <form method="post">
+            <div id="close-login-form" class="fas fa-times"></div>
+            <div class="fas fa-user-astronaut">SJTUhelper</div>
+            <h2>Add a New Calender</h2>
+            {% csrf_token %}
+            <div class="form-row">
+                <label for="type">类型：</label>
+                <select id="type" name="type">
+                    {% for table in tableid %}
+                        <option value={{ table }}>{{ table }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        </main>
+            <div class="form-row">
+                <label for="title">标题：</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-row">
+                <label for="start-date">开始日期：</label>
+                <input type="date" id="start-date" name="start-date" required>
+
+                <label for="start-time">开始时间：</label>
+                <input type="time" id="start-time" name="start-time" required>
+            </div>
+
+            <div class="form-row">
+                <label for="end-date">结束日期：</label>
+                <input type="date" id="end-date" name="end-date" required>
+
+                <label for="end-time">结束时间：</label>
+                <input type="time" id="end-time" name="end-time" required>
+            </div>
+
+            <div class="form-row">
+                <label for="location">地点：</label>
+                <input type="text" id="location" name="location" value="上海交通大学闵行校区">
+            </div>
+
+            <div class="form-row">
+                <label for="availability">可用性：</label>
+                <select id="availability" name="availability">
+                    <option value="在忙">在忙</option>
+                    <option value="空闲">空闲</option>
+                    <option value="不在办公室">不在办公室</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="reminder">提醒：</label>
+                <select id="reminder" name="reminder">
+                    <option value="-1">无提醒</option>
+                    <option value="0">日程开始时</option>
+                    <option value="5">5分钟前</option>
+                    <option value="10">10分钟前</option>
+                    <option value="15">15分钟前</option>
+                    <option value="30">30分钟前</option>
+                    <option value="60">1小时前</option>
+                    <option value="1440">1天前</option>
+                    <option value="10080">1周前</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="description">描述：</label>
+                <textarea id="description" name="description"></textarea>
+            </div>
+
+            <input type="submit" value="提交" class="link-btn">
+        </form>
     </div>
-    <script src='../static/js/calendar/locales-all.js'></script>
-    <script src='../static/js/calendar/script.js'></script>
-    <script src='../static/js/calendar/main.min.js'></script>
+    <main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        <section>
+            <h3 class="section-head">Calendar</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <button id="login-btn" class="link-btn">add calendar</button>
+                        <div id='calendar'></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+</div>
+<script src='../static/js/calendar/locales-all.js'></script>
+<script src='../static/js/calendar/script.js'></script>
+<script src='../static/js/calendar/main.min.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         const initialLocaleCode = 'zh-cn';
         const calendarEl = document.getElementById('calendar');
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
-        },
-        locale: initialLocaleCode,
-        buttonIcons: false, // show the prev/next text
-        weekNumbers: true,
-        navLinks: true, // can click day/week names to navigate views
-        editable: true,
-        dayMaxEvents: true, // allow "more" link when too many events
-        events:{{ json_data|safe }} , //事件列表
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+            },
+            locale: initialLocaleCode,
+            buttonIcons: false, // show the prev/next text
+            weekNumbers: true,
+            navLinks: true, // can click day/week names to navigate views
+            editable: true,
+            dayMaxEvents: true, // allow "more" link when too many events
+            events:{{ json_data|safe }}, //事件列表
         });
 
-  calendar.render();
+        calendar.render();
 
-  //增加日程
+        //增加日程
 
-});</script>
+    });</script>
 
 </body>
 </html>

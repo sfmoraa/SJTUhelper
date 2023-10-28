@@ -1,0 +1,7 @@
+{
+  "name": "SJTUhelperv4",
+  "version": "1.0.0",
+  "dependencies": {
+    "vue-avatar": "^2.3.3"
+  }
+}

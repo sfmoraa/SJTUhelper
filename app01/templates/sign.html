@@ -28,7 +28,7 @@
               <span style="color: red"> {{ error1 }} </span>
               <span style="color: red"> {{ error2 }} </span>
             <div class="logo1"> <i class="fas fa-user-astronaut"></i> SJTUhelper </div>
-            <h2 class="title">SIGN IN</h2>
+            <h2 class="title">Our Journey Starts Here</h2>
             <div class="input-field">
               <i class="fas fa-user"></i>
               <input type="text" name="signin_usr" placeholder="Enter your name." />
@@ -39,10 +39,10 @@
             </div>
             <div class="remember-forgot">
                 <label><input type="checkbox" required>
-                    Remember me</label>
+                    I agree to SJTUhelper's terms</label>
                 <a href="/changepassword">Forgot Password?</a>
             </div>
-            <input type="submit" name='signin'  value="SIGN IN NOW" class="btn solid" />
+            <input type="submit" name='signin'  value="SIGN IN" class="btn solid" />
           </form>
           <form method="post" action='##' class="sign-up-form" onsubmit="return false" id="form1">
               {% csrf_token %}
@@ -69,13 +69,13 @@
             </div>
 
 
-           <div style="display: flex; justify-content: space-between; margin-left: 0px; margin-right: 20px;">
+           <div style="display: flex; justify-content: space-between; margin-left: 50px; margin-right: 20px;">
               <div class="input-field" style="right:20px">
                 <i class="fas fa-lock"></i>
                 <input type="text" name="token" placeholder="Enter your email token." />
               </div>
               <div>
-                <input type="button" id="send-verification-code" class="btn" value="SEND EMAIL TOKEN" style="height: 50px;width: 150px;color:grey;background: transparent"/>
+                <input type="button" id="send-verification-code" class="btn" value="SEND EMAIL TOKEN" style="height: 50px;width: 180px;color:white;background-color: #fdbe59; "/>
               </div>
             </div>
                           <input type="button" id='signup' class="btn" style="width: 300px"value= "SIGN UP NOW" />
@@ -83,7 +83,7 @@
 
           </form>
           <div class="footer">
-              <p>© 2021 SJTUhelper. All rights reserved.</p>
+              <p>© 2023 SJTUhelper. All rights reserved.</p>
             </div>
         </div>
 
@@ -94,7 +94,7 @@
           <div class="content">
             <h3>Join Us</h3>
             <p>
-              Get full access to Zhihu hot list, Github trendings, Bilibili hot list, and SJTU's websites.
+              Get full access to trending news and SJTU's websites.
             </p>
             <button class="btn transparent" id="sign-up-btn">
              Sign up
@@ -104,9 +104,9 @@
         </div>
         <div class="panel right-panel">
           <div class="content">
-            <h3>Already have account？</h3>
+            <h3>Already have an account?</h3>
             <p>
-              Start to enjoy touching fish in classes in SJTUhelper.
+{#              Start our journey here.#}
             </p>
             <button class="btn transparent" id="sign-in-btn">
               SIGN IN

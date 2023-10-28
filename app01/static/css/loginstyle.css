@@ -25,7 +25,7 @@ input {
   top: 0;
   left: 0;
 }
-.forms-container .{
+.forms-container {
 
 }
 .signin-signup {
@@ -204,7 +204,7 @@ form.sign-in-form {
 }
 
 .btn {
-  width: 150px;
+  width: 300px;
   background-color: #fdbe59;
   border: none;
   outline: none;

@@ -313,11 +313,11 @@ section {
   transition: .1s;
 }
 .options:hover{
-  width: 200px;.box:hover{
-    background-color: rgb(55, 65, 81);
-  }
+  width: 200px;
 }
-
+.box:hover{
+    background-color: rgb(55, 65, 81);
+}
 .options:hover span{
   opacity: 1;
 }
@@ -352,3 +352,4 @@ section {
   text-align: center;
 
 }
+

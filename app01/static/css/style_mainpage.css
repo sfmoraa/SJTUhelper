@@ -4,6 +4,17 @@
   height: 100%;
 }
 
+.username-initial {
+    width: 70px;
+    height: 70px;
+    border-radius: 160px;
+    text-align: center;
+    background-color: #56C6CB;
+    font-size: 45px;
+    font-weight: lighter;
+    font-family: "Forte";
+    color:white;
+}
 
 
 .key{
@@ -22,6 +33,8 @@
   width: 20px;
   height: 20px;
 }
+
+
 .weather a{
   font-size: 1rem;
 }

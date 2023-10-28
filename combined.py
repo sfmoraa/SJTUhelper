@@ -25,7 +25,7 @@ lock_bilibili = threading.Lock()
 lock_zhihu = threading.Lock()
 lock_weather = threading.Lock()
 lock_seiee = threading.Lock()
-lock_keywords=threading.Lock()
+lock_keywords = threading.Lock()
 
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
@@ -195,7 +195,8 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
 
             i = i + 1
         topics = topics.encode('gbk', errors='ignore').decode('gbk')
-        messages = [{'role': 'user', 'content': f'From now on, you have to play the role of a senior programmer. You have knowledge of various programming languages and project-related information. You need to evaluate whether these projects meet the given selection criteria based on the numbered titles and descriptions of GitHub projects I provide you. Please guess the content of these projects and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered projects, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered topics I want to filter: "{topics}." Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the projects that meet the criteria in the following method in English:"the output should be: (your answers).".'} ]
+        messages = [{'role': 'user',
+                     'content': f'From now on, you have to play the role of a senior programmer. You have knowledge of various programming languages and project-related information. You need to evaluate whether these projects meet the given selection criteria based on the numbered titles and descriptions of GitHub projects I provide you. Please guess the content of these projects and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered projects, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered topics I want to filter: "{topics}." Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the projects that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -225,9 +226,10 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
             cue = "娱乐新闻、政治新闻、假想性话题、与中国相关的话题"
         topics = ""
         for a in current_topics:
-            topics += '(' + str(a.rank) + ') ' + a.title+':'+a.tname+ '；'
+            topics += '(' + str(a.rank) + ') ' + a.title + ':' + a.tname + '；'
         topics = topics.encode('gbk', errors='ignore').decode('gbk')
-        messages = [{'role': 'user', 'content': f'From now on, you have to play the role of a proficient content auditor who is fluent in Chinese. You need to evaluate whether these videos meet the given selection criteria based on the numbered video titles and their corresponding categories. Please note that both the titles and categories are in Chinese. Please understand their content and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered videos, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered video titles and categories I want to filter: "{topics}". Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
+        messages = [{'role': 'user',
+                     'content': f'From now on, you have to play the role of a proficient content auditor who is fluent in Chinese. You need to evaluate whether these videos meet the given selection criteria based on the numbered video titles and their corresponding categories. Please note that both the titles and categories are in Chinese. Please understand their content and compare them with the selection criteria. Additionally, you must only output the numbers of the filtered videos, separating them with commas. Here is my selection criteria: "{cue}," and here are the numbered video titles and categories I want to filter: "{topics}". Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -260,7 +262,8 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a.title + '；'
             i += 1
-        messages = [{'role': 'user', 'content': f'From now on, you are supposed to play the role of a proficient Chinese-speaking content auditor. You need to determine whether the given topics meet the filtering criteria based on the filtering standards and a set of numbered topic titles I provide you with. Please note that these topics are all in Chinese. You should understand the content represented by these topics and compare them with the filtering standards. Additionally, you are required to output only the topic numbers of the filtered results, separating them with commas. The following is the selection criteria in Chinese: "{cue}". And here are the numbered topics for screening: "{topics}" Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'} ]
+        messages = [{'role': 'user',
+                     'content': f'From now on, you are supposed to play the role of a proficient Chinese-speaking content auditor. You need to determine whether the given topics meet the filtering criteria based on the filtering standards and a set of numbered topic titles I provide you with. Please note that these topics are all in Chinese. You should understand the content represented by these topics and compare them with the filtering standards. Additionally, you are required to output only the topic numbers of the filtered results, separating them with commas. The following is the selection criteria in Chinese: "{cue}". And here are the numbered topics for screening: "{topics}" Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -295,7 +298,8 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a.category + ":" + a.activity_name + '；'
             i += 1
-        messages = [{'role': 'user', 'content': f'From now on, you are required to play the role of a proficient Chinese-speaking content auditor. You need to evaluate whether the provided activities meet the given selection criteria based on the designated activity categories and titles, which are all in Chinese. Please understand the meaning of the categories and titles and compare them to the selection criteria. Furthermore, you should only output the numbers of the activities that pass the selection, separating them with commas. The following is the selection criteria: "{cue}". Here are the numbered video titles and categories for your evaluation: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the activities that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
+        messages = [{'role': 'user',
+                     'content': f'From now on, you are required to play the role of a proficient Chinese-speaking content auditor. You need to evaluate whether the provided activities meet the given selection criteria based on the designated activity categories and titles, which are all in Chinese. Please understand the meaning of the categories and titles and compare them to the selection criteria. Furthermore, you should only output the numbers of the activities that pass the selection, separating them with commas. The following is the selection criteria: "{cue}". Here are the numbered video titles and categories for your evaluation: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the activities that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -325,9 +329,10 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         topics = ""
         i = 1
         for a in current_topics:
-            topics += '(' + str(i) + ') ' + a[1]+ '；'
+            topics += '(' + str(i) + ') ' + a[1] + '；'
             i += 1
-        messages = [{'role': 'user', 'content': f'From now on, you will play the role of a content auditor proficient in Chinese. You need to determine whether the provided notices meet the filtering criteria by using the filtering criteria I give you and the numbered titles of the school notices. Please note that the titles of these notices are in Chinese. Please understand their content and compare them with the filtering criteria. Additionally, you should only output the numbers of the notices that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered titles of the school notices to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the notices that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
+        messages = [{'role': 'user',
+                     'content': f'From now on, you will play the role of a content auditor proficient in Chinese. You need to determine whether the provided notices meet the filtering criteria by using the filtering criteria I give you and the numbered titles of the school notices. Please note that the titles of these notices are in Chinese. Please understand their content and compare them with the filtering criteria. Additionally, you should only output the numbers of the notices that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered titles of the school notices to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the notices that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
         if ans[0] != True:
             print("gpt调用异常！！！！！", ans)
@@ -342,7 +347,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
                 numbers = sorted([int(item) for item in
                                   (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
-                content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3]])
+                content.append([index, current_topics[index - 1][1], current_topics[index - 1][2], current_topics[index - 1][3]])
             content.sort(key=lambda x: x[0])
             return content
 
@@ -365,7 +370,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         topics = ""
         i = 1
         for a in current_topics:
-            topics += '(' + str(i) + ') ' + a[6]+":"+a[2] + '；'
+            topics += '(' + str(i) + ') ' + a[6] + ":" + a[2] + '；'
             i += 1
         messages = [{'role': 'user',
                      'content': f'From now on, you are going to play the role of a student. You need to determine whether the given topics meet the selection criteria I provide you with, along with a list of numbered topic categories and topic names. Please note that the topics are in Chinese. It is important to understand their content and compare them to the selection criteria. Additionally, you should only output the numbers of the topics that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered topic categories and topic names to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
@@ -383,7 +388,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
                 numbers = sorted([int(item) for item in
                                   (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
-                content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3],current_topics[index - 1][4],current_topics[index - 1][5],current_topics[index - 1][6],current_topics[index - 1][7]])
+                content.append([index, current_topics[index - 1][1], current_topics[index - 1][2], current_topics[index - 1][3], current_topics[index - 1][4], current_topics[index - 1][5], current_topics[index - 1][6], current_topics[index - 1][7]])
             content.sort(key=lambda x: x[0])
             return content
     elif 'calendar' in site:
@@ -403,7 +408,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         topics = ""
         i = 1
         for a in current_topics:
-            topics += '(' + str(i) + ') ' + a[4]+":"+a[6] + '；'
+            topics += '(' + str(i) + ') ' + a[4] + ":" + a[6] + '；'
             i += 1
         messages = [{'role': 'user',
                      'content': f'From now on, you are going to play the role of a student. You need to determine whether the given assignments meet the selection criteria I provide you with, along with a list of numbered courses and assignments. Please note that the titles of these assignments are in Chinese. It is important to understand their content and compare them to the selection criteria Additionally, you should only output the numbers of the assignments that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered courses and assignments to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the assignments that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
@@ -421,10 +426,9 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
                 numbers = sorted([int(item) for item in
                                   (set(re.findall(r'\d+', re.search(r'the output should be:(.*)', ans[1]).group(1))))])
             for index in numbers:
-                content.append([index, current_topics[index - 1][1],current_topics[index - 1][2],current_topics[index - 1][3],current_topics[index - 1][4],current_topics[index - 1][5],current_topics[index - 1][6],current_topics[index - 1][7]])
+                content.append([index, current_topics[index - 1][1], current_topics[index - 1][2], current_topics[index - 1][3], current_topics[index - 1][4], current_topics[index - 1][5], current_topics[index - 1][6], current_topics[index - 1][7]])
             content.sort(key=lambda x: x[0])
             return content
-
 
 
 def get_weibo_hot_topic(lock=None):
@@ -1096,12 +1100,14 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, loc
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     delete_dynamic_model_calendar(username)
+    tmp_lock=threading.Lock()
+    tmp_lock.acquire()
     create_dynamic_model_calendar(username)
+    tmp_lock.release()
     for event in calendar_list.json()['data']['events']:
         insert_dynamic_model_calendar(table_name=username, title=event["title"], starttime=event["startTime"],
                                       endtime=event["endTime"], location=event["location"],
                                       json_detail_url=event['eventId'], allday=event['allDay'])
-
 
     # return calendar_session.cookies
     create_dynamic_model_cookies(username + 'store')
@@ -1213,35 +1219,35 @@ def delete_collection(user, site, data):
 
 
 def get_today_regular():
-    zhihu_sample = zhihu.objects.values('title').first()['title']
-    bilibili_sample = bilibili.objects.values('title').first()['title']
-    weibo_sample = weibo.objects.values('title').first()['title']
-    github_sample = github.objects.values('title').first()['title']
+    zhihu_sample = list(zhihu.objects.values('title','href').first().values())
+    bilibili_sample = list(bilibili.objects.values('title','link').first().values())
+    weibo_sample = list(weibo.objects.values('title','link').first().values())
+    github_sample = list(github.objects.values('title','href').first().values())
     return zhihu_sample, bilibili_sample, weibo_sample, github_sample
 
 
 def get_today_SJTU(jaccountname=None):
     if not jaccountname:
-        return '登录后显示', '登录后显示', '登录后显示', '登录后显示'
+        return '登录后显示', '登录后显示', '登录后显示', '登录后显示',None
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     # 使用 cursor() 方法创建一个游标对象 cursor
     cursor = db.cursor()
-
-
     query = "SHOW TABLES LIKE %s"
     cursor.execute(query, ('canvas_' + jaccountname))
     result = cursor.fetchone()
     if result:
         # 表存在，执行查询操作
         sql_canvas = "select * from `{}` where submit = 'false'".format('canvas_' + jaccountname)
-        cursor.execute(sql_canvas)
         lock_canvas.acquire()
         cursor.execute(sql_canvas)
         row_canvas = cursor.fetchone()
         lock_canvas.release()
-        row_canvas = row_canvas[4] + ": " + row_canvas[6] + "  Due at:" + row_canvas[1]
+        if row_canvas is not None:
+            row_canvas = [row_canvas[4] + ": " + row_canvas[6] + "  Due at:" + row_canvas[1],row_canvas[7]]
+        else:
+            row_canvas='尚未加载，刷新后即可显示'
     else:
-        row_canvas='尚未加载，刷新后即可显示'
+        row_canvas = '尚未加载，刷新后即可显示'
 
     cursor.execute(query, ('shuiyuan_' + jaccountname))
     result = cursor.fetchone()
@@ -1251,43 +1257,50 @@ def get_today_SJTU(jaccountname=None):
         cursor.execute(sql_shuiyuan)
         row_shuiyuan = cursor.fetchall()
         lock_shuiyuan.release()
-        row_shuiyuan_random_index = random.randint(0, len(row_shuiyuan) - 1)
-        row_shuiyuan = row_shuiyuan[row_shuiyuan_random_index]
-        row_shuiyuan = "[" + row_shuiyuan[6] + "]" + row_shuiyuan[2]
+        if row_shuiyuan is not None:
+            row_shuiyuan_random_index = random.randint(0, len(row_shuiyuan) - 1)
+            row_shuiyuan = row_shuiyuan[row_shuiyuan_random_index]
+            row_shuiyuan = ["[" + row_shuiyuan[6] + "]" + row_shuiyuan[2],row_shuiyuan[1]]
+        else:
+            row_shuiyuan = '尚未加载，刷新后即可显示'
     else:
-        row_canvas = '尚未加载，刷新后即可显示'
+        row_shuiyuan = '尚未加载，刷新后即可显示'
 
     lock_dekt.acquire()
-    row_dekt = dektinfo.objects.values('activity_name', 'active_start_time')
+    row_dekt = dektinfo.objects.values('activity_name', 'active_start_time','category_url')
     lock_dekt.release()
     row_dekt_random_index = random.randint(0, len(row_dekt) - 1)
-    row_dekt = row_dekt[row_dekt_random_index]['activity_name'] + "开始时间：" + row_dekt[row_dekt_random_index]['active_start_time']
+    row_dekt = [row_dekt[row_dekt_random_index]['activity_name'] + "开始时间：" + row_dekt[row_dekt_random_index]['active_start_time'],row_dekt[row_dekt_random_index]['category_url']]
 
     lock_seiee.acquire()
-    row_seiee = seieeNotification.objects.values('name').first()['name']
+    row_seiee = list(seieeNotification.objects.values('name','href').first().values())
     lock_seiee.release()
-    return row_canvas, row_dekt, row_seiee, row_shuiyuan
+
+    data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
+    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+
+    return row_canvas, row_dekt, row_seiee, row_shuiyuan, data_list, tablesid
 
 
-def getkeyword(username,type,add=False,userkeywords=None):
+def getkeyword(username, type, add=False, userkeywords=None):
     lock_keywords.acquire()
     if userkeywords:
         if add:
-            if keywords.objects.filter(username=username,type=type):
+            if keywords.objects.filter(username=username, type=type):
                 keywords.objects.filter(username=username, type=type).delete()
             for keyword in userkeywords:
-                keywords.objects.create(username=username, key=keyword,type=type)
+                keywords.objects.create(username=username, key=keyword, type=type)
             lock_keywords.release()
             return
         lock_keywords.release()
         print("不合适的调用方法")
         return
-    if type=='all':
+    if type == 'all':
         result = keywords.objects.filter(username=username).all()
     else:
-        result=keywords.objects.filter(username=username,type=type).all()
+        result = keywords.objects.filter(username=username, type=type).all()
     lock_keywords.release()
-    result=[row.key for row in result]
+    result = [row.key for row in result]
     return result
 
 
@@ -1296,7 +1309,7 @@ def erase_SJTU_user(jaccountname):
     cursor = db.cursor()
     erase_SJTU_user_query = """
             DROP TABLE `calendar_{}`,`canvas_{}`,`cookies_{}`,`cookies_{}store`,`shuiyuan_{}`,`tablesid_{}`;
-            """.format(jaccountname,jaccountname,jaccountname,jaccountname,jaccountname,jaccountname)
+            """.format(jaccountname, jaccountname, jaccountname, jaccountname, jaccountname, jaccountname)
     cursor.execute(erase_SJTU_user_query)
     db.commit()
     cursor.close()
