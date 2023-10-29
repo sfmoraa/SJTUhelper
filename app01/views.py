@@ -672,6 +672,8 @@ def show_collection(request):
         collected_data[site].append(solid_data)
     for weibo in collected_data['weibo']:
         weibo[1] = 'img/weibo_default_pic.jpg'
+    for item in collected_data['canvas']:
+        item[5] = mark_safe(item[5])
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     return render(request, "collection.html", {"zhihuHotTopic": collected_data['zhihu'], "github": collected_data['github'], "bilibili": collected_data['bilibili'], "weibo": collected_data['weibo'], "canvas_data_list": collected_data['canvas'],
                                                "shuiyuan_data_list": collected_data['shuiyuan'],

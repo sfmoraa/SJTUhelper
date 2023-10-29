@@ -372,6 +372,8 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a[6] + ":" + a[2] + '；'
             i += 1
+
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are going to play the role of a student. You need to determine whether the given topics meet the selection criteria I provide you with, along with a list of numbered topic categories and topic names. Please note that the topics are in Chinese. It is important to understand their content and compare them to the selection criteria. Additionally, you should only output the numbers of the topics that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered topic categories and topic names to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)

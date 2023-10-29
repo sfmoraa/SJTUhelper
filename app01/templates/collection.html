@@ -44,7 +44,6 @@
 <div class="overlay">
     <label for="menu-toggle"></label>
 </div>
-
 <div class="sidebar">
     <div class="sidebar-container">
         <a href="../mainpage">
@@ -78,13 +77,13 @@
                 <li class="dropdown_items hidden " id="drop-item2">
                     <a href="../collection">
                         <span class="fas fa-star"></span>
-                        <span>collection</span>
+                        <span>收藏夹</span>
                     </a>
                 </li>
                 <li class="dropdown_items hidden" id="drop-item1">
                     <a href="../time" id="concentration">
                         <span class="fas fa-comment-slash"></span>
-                        <span>Focus</span>
+                        <span>专注模式</span>
                     </a>
                     </a>
                 </li>
@@ -93,14 +92,14 @@
                 <li class="dropdown_items hidden " id="drop-item3">
                     <a href="../logout">
                         <span class="fas fa-sign-out-alt"></span>
-                        <span>Log out</span>
+                        <span>登出</span>
                     </a>
                 </li>
 
                 <li class="dropdown_items hidden " id="drop-item6">
                     <a href="../sjtulogout">
                         <span class="fas fa-eraser"></span>
-                        <span>delete jaccount</span>
+                        <span>清除当前jaccount信息</span>
                     </a>
                 </li>
 
@@ -108,7 +107,7 @@
                 <li class="dropdown_items hidden" id="drop-item4">
                     <a href="../changepassword">
                         <span class="fas fa-user-edit"></span>
-                        <span>Change password</span>
+                        <span>修改密码</span>
                     </a>
                 </li>
                 <li class="dropdown_items hidden" id="drop-item5">
@@ -119,49 +118,49 @@
                 <li>
                     <a href="../zhihu" id="zhihu">
                         <img src="../static/img/zhihu.svg" style="width:15px">
-                        <span>Zhihu</span>
+                        <span>&nbsp;&nbsp;知乎</span>
                     </a>
                 </li>
                 <li>
                     <a href="../github" id="github">
                         <img src="../static/img/github.svg" style="width:15px">
-                        <span>Github</span>
+                        <span>&nbsp;&nbsp;Github</span>
                     </a>
                 </li>
                 <li>
                     <a href="../bilibili" id="bilibili">
                         <img src="../static/img/bilibili.svg" style="width:15px">
-                        <span>BiliBili</span>
+                        <span>&nbsp;&nbsp;bilibili</span>
                     </a>
                 </li>
                 <li>
                     <a href="../weibo" id="weibo">
                         <img src="../static/img/weibo.svg" style="width:15px">
-                        <span>Weibo</span>
+                        <span>&nbsp;&nbsp;微博</span>
                     </a>
                 </li>
                 <li>
                     <a href="../shuiyuan" id="shuiyuan">
                         <img src="../static/img/tint-solid.svg" style="width:15px">
-                        <span>Shuiyuan</span>
+                        <span>&nbsp;&nbsp;水源社区</span>
                     </a>
                 </li>
                 <li>
                     <a href="../canvas" id="canvas">
                         <img src="../static/img/clipboard-list-solid.svg" style="width:15px">
-                        <span>canvas</span>
+                        <span>&nbsp;&nbsp;Canvas</span>
                     </a>
                 </li>
                 <li>
                     <a href="../dekt" id="dekt">
                         <img src="../static/img/chalkboard-teacher-solid.svg" style="width:15px">
-                        <span>dekt</span>
+                        <span>&nbsp;&nbsp;第二课堂</span>
                     </a>
                 </li>
                 <li>
                     <a href="../seiee" id="seiee">
                         <img src="../static/img/school-solid.svg" style="width:15px">
-                        <span>seiee</span>
+                        <span>&nbsp;&nbsp;电院通知</span>
                     </a>
                 </li>
 
@@ -172,7 +171,6 @@
     </div>
 </div>
 
-
 <div class="main-content">
     <header>
         <div class="header-title-wrapper">
@@ -180,8 +178,8 @@
                 <span class="las la-bars"></span>
             </label>
             <div class="header-title">
-                <h1>Collection </h1>
-                <p>Review the topics you collected.</p>
+                <h1>收藏夹 </h1>
+                <p>在此处回顾你收藏的内容</p>
             </div>
         </div>
     </header>
@@ -191,7 +189,7 @@
 
 
             <div class="block-custom-large">
-                <h1>zhihu</h1>
+                <h1>知乎</h1>
                 <hr/>
                 {% for obj in zhihuHotTopic %}
                     <div class="blog-slider">
@@ -203,7 +201,7 @@
                             </button>
 
                             <script>
-                                function collect_zhihu{{ forloop.counter }}(content) {
+                                function collect_zhihu_{{ forloop.counter }}(content) {
                                     btn = document.getElementById("zhihu-btn-{{ forloop.counter }}")
                                     btn_img = document.getElementById("zhihu-img-{{ forloop.counter }}")
                                     var formData = new FormData();
@@ -232,12 +230,11 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.2 }}">
                                     <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
                                             {% autoescape off %}
                                                 {{ obj.3 }}
-                                            {% endautoescape %}</a>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -296,12 +293,11 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.3 }}">
                                     <div class="blog-slider__img" href="{{ obj.3 }}">
-                                        <a href="{{ obj.3 }}">
                                             {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/github.svg' %}"/>
-                                            {% endautoescape %}</a>
+                                                <img alt="111" src="{% static 'img/github.jpg' %}"/>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -365,12 +361,11 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.4 }}">
                                     <div class="blog-slider__img" href="{{ obj.4 }}">
-                                        <a href="{{ obj.4 }}">
                                             {% autoescape off %}
                                                 <img alt="111" src={{ obj.3 }}>
-                                            {% endautoescape %}</a>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -380,19 +375,20 @@
                                         <div class="blog-slider__title">
                                             {{ obj.1 }}
                                         </div>
-                                        <div class="blog-slider__content">
-                                            tag:{{ obj.2 }}
-                                        </div>
                                     </a>
 
                                 </div>
+                            </div>
+
+                            <div class="tagg">
+                                <a class="tagg-text">{{ obj.2 }}</a>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
 
 
-                <h1>weibo</h1>
+                <h1>微博</h1>
                 <hr/>
                 {% for obj in weibo %}
                     <div class="blog-slider">
@@ -434,12 +430,11 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.4 }}">
                                     <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.4 }}">
                                             {% autoescape off %}
-                                                <img alt="111" src="{% static obj.1 %}"/>
-                                            {% endautoescape %}</a>
+                                                <img alt="loading···" src="{% static obj.1 %}"/>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -459,7 +454,7 @@
                 {% endfor %}
 
 
-                <h1>canvas</h1>
+                <h1>Canvas</h1>
                 <hr/>
                 {% for obj in canvas_data_list %}
                     <div class="blog-slider">
@@ -500,7 +495,8 @@
                                 }
                             </script>
 
-                            <div class="ddl">
+
+                            <div class="ddl" style="font-size: 13px">
                                 <img class="finish" id="finish-{{ forloop.counter }}"/>
                                 <a>ddl: {{ obj.1 }}</a>
                             </div>
@@ -515,13 +511,12 @@
                                 }
                             </script>
 
-                            <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                                        <div class="blog-slider__item swiper-slide">
+                                <a target="_blank" href="{{ obj.4 }}">
                                     <div class="blog-slider__img" href="{{ obj.7 }}">
-                                        <a href="{{ obj.4 }}">
                                             {% autoescape off %}
-                                                <img alt="111" src="{% static 'img/SJTU.png' %}"/>
-                                            {% endautoescape %}</a>
+                                                <img alt="loading···" src="{% static 'img/SJTU.png' %}"/>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -529,7 +524,7 @@
                                                                     </span>
                                     <a target="_blank" href="{{ obj.7 }}">
                                         <div class="blog-slider__title">
-                                            {{ obj.6 }} ( 课程：{{ obj.4 }} )
+                                            {{ obj.6 }} [ {{ obj.4 }} ]
                                         </div>
                                         <div class="blog-slider__content">
                                             <p>{{ obj.5 }}</p>
@@ -544,7 +539,7 @@
                     </div>
                 {% endfor %}
 
-                <h1>dekt</h1>
+                <h1>第二课堂</h1>
                 <hr/>
                 {% for obj in dekt_data_list %}
                     <div class="blog-slider">
@@ -584,15 +579,16 @@
 
                                 }
                             </script>
-
+                            <div class="ddl" style="font-size: 13px">
+                                <a>{{ obj.3 }}</a>
+                            </div>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.2 }}">
                                     <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
                                             {% autoescape off %}
                                                 <img alt="111" src={{ obj.9 }}>
-                                            {% endautoescape %}</a>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -620,7 +616,7 @@
                 {% endfor %}
 
 
-                <h1>shuiyuan</h1>
+                <h1>水源社区</h1>
                 <hr/>
                 {% for obj in shuiyuan_data_list %}
                     <div class="blog-slider">
@@ -661,12 +657,11 @@
                                 }
                             </script>
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.4 }}">
                                     <div class="blog-slider__img" href="{{ obj.1 }}">
-                                        <a href="{{ obj.4 }}">
                                             {% autoescape off %}
                                                 <img alt="111" src="{% static 'img/shuiyuan.jpg' %}"/>
-                                            {% endautoescape %}</a>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -712,7 +707,7 @@
                 {% endfor %}
 
 
-                <h1>seiee</h1>
+                <h1>电院通知</h1>
                 <hr/>
                 {% for obj in seiee_data_list %}
                     <div class="blog-slider">
@@ -753,12 +748,11 @@
                             </script>
 
                             <div class="blog-slider__item swiper-slide">
-                                <a target="_blank">
+                                <a target="_blank" href="{{ obj.2 }}">
                                     <div class="blog-slider__img" href="{{ obj.2 }}">
-                                        <a href="{{ obj.2 }}">
                                             {% autoescape off %}
                                                 <img alt="111" src="{% static 'img/SJTU.png' %}"/>
-                                            {% endautoescape %}</a>
+                                            {% endautoescape %}
                                     </div>
                                 </a>
                                 <div class="blog-slider__content">
@@ -790,6 +784,56 @@
     </main>
 </div>
 
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showcollection() {
+            var keyindex = 1;
+            {% for obj in key %}
+                if (todos.length > 5) {
+                    RenderAllTodos();
+                    return;
+                }
+                newtodo = {
+                    text: "{{obj}}",
+                    done: false,
+                    id: keyindex
+                }
+                keyindex += 1;
+                todos.push(newtodo);
+            {% endfor %}
+            RenderAllTodos();
+
+        }
+
+        function showItem() {
+            var targetItems = document.querySelectorAll('.dropdown_items');
+            for (let i = 0; i < targetItems.length; i++) {
+                if (targetItems[i].classList.contains('hidden')) {
+                    setTimeout(function () {
+                        targetItems[i].classList.remove('hidden');
+                    }, 20 * i);
+                } else {
+                    setTimeout(function () {
+                        targetItems[i].classList.add('hidden');
+                    }, 20 * i);
+                }
+            }
+        }
+    </script>
 
 </body>
 </html>

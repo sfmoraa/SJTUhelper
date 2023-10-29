@@ -64,13 +64,13 @@
                 <li class="dropdown_items hidden " id="drop-item2">
                     <a href="../collection">
                         <span class="fas fa-star"></span>
-                        <span>collection</span>
+                        <span>收藏夹</span>
                     </a>
                 </li>
                 <li class="dropdown_items hidden" id="drop-item1">
                     <a href="../time" id="concentration">
                         <span class="fas fa-comment-slash"></span>
-                        <span>Focus</span>
+                        <span>专注模式</span>
                     </a>
                     </a>
                 </li>
@@ -79,14 +79,14 @@
                 <li class="dropdown_items hidden " id="drop-item3">
                     <a href="../logout">
                         <span class="fas fa-sign-out-alt"></span>
-                        <span>Log out</span>
+                        <span>登出</span>
                     </a>
                 </li>
 
                 <li class="dropdown_items hidden " id="drop-item6">
                     <a href="../sjtulogout">
                         <span class="fas fa-eraser"></span>
-                        <span>delete jaccount</span>
+                        <span>清除当前jaccount信息</span>
                     </a>
                 </li>
 
@@ -94,7 +94,7 @@
                 <li class="dropdown_items hidden" id="drop-item4">
                     <a href="../changepassword">
                         <span class="fas fa-user-edit"></span>
-                        <span>Change password</span>
+                        <span>修改密码</span>
                     </a>
                 </li>
                 <li class="dropdown_items hidden" id="drop-item5">
@@ -105,49 +105,49 @@
                 <li>
                     <a href="../zhihu" id="zhihu">
                         <img src="../static/img/zhihu.svg" style="width:15px">
-                        <span>Zhihu</span>
+                        <span>&nbsp;&nbsp;知乎</span>
                     </a>
                 </li>
                 <li>
                     <a href="../github" id="github">
                         <img src="../static/img/github.svg" style="width:15px">
-                        <span>Github</span>
+                        <span>&nbsp;&nbsp;Github</span>
                     </a>
                 </li>
                 <li>
                     <a href="../bilibili" id="bilibili">
                         <img src="../static/img/bilibili.svg" style="width:15px">
-                        <span>BiliBili</span>
+                        <span>&nbsp;&nbsp;bilibili</span>
                     </a>
                 </li>
                 <li>
                     <a href="../weibo" id="weibo">
                         <img src="../static/img/weibo.svg" style="width:15px">
-                        <span>Weibo</span>
+                        <span>&nbsp;&nbsp;微博</span>
                     </a>
                 </li>
                 <li>
                     <a href="../shuiyuan" id="shuiyuan">
                         <img src="../static/img/tint-solid.svg" style="width:15px">
-                        <span>Shuiyuan</span>
+                        <span>&nbsp;&nbsp;水源社区</span>
                     </a>
                 </li>
                 <li>
                     <a href="../canvas" id="canvas">
                         <img src="../static/img/clipboard-list-solid.svg" style="width:15px">
-                        <span>canvas</span>
+                        <span>&nbsp;&nbsp;Canvas</span>
                     </a>
                 </li>
                 <li>
                     <a href="../dekt" id="dekt">
                         <img src="../static/img/chalkboard-teacher-solid.svg" style="width:15px">
-                        <span>dekt</span>
+                        <span>&nbsp;&nbsp;第二课堂</span>
                     </a>
                 </li>
                 <li>
                     <a href="../seiee" id="seiee">
                         <img src="../static/img/school-solid.svg" style="width:15px">
-                        <span>seiee</span>
+                        <span>&nbsp;&nbsp;电院通知</span>
                     </a>
                 </li>
 
@@ -165,8 +165,8 @@
                 <span class="las la-bars"></span>
             </label>
             <div class="header-title">
-                <h1>Menu</h1>
-                <p>Welcome to SJTUhelper </p>
+                <h1>主页</h1>
+                <p>欢迎来到SJTUhelper! </p>
             </div>
         </div>
     </header>
@@ -401,6 +401,55 @@
         //增加日程
 
     });</script>
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
+        function showcollection() {
+            var keyindex = 1;
+            {% for obj in key %}
+                if (todos.length > 5) {
+                    RenderAllTodos();
+                    return;
+                }
+                newtodo = {
+                    text: "{{obj}}",
+                    done: false,
+                    id: keyindex
+                }
+                keyindex += 1;
+                todos.push(newtodo);
+            {% endfor %}
+            RenderAllTodos();
+
+        }
+
+        function showItem() {
+            var targetItems = document.querySelectorAll('.dropdown_items');
+            for (let i = 0; i < targetItems.length; i++) {
+                if (targetItems[i].classList.contains('hidden')) {
+                    setTimeout(function () {
+                        targetItems[i].classList.remove('hidden');
+                    }, 20 * i);
+                } else {
+                    setTimeout(function () {
+                        targetItems[i].classList.add('hidden');
+                    }, 20 * i);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
