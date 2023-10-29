@@ -16,6 +16,11 @@
     color:white;
 }
 
+.weather-img{
+
+  width: 20px;
+  height: 20px;
+}
 
 .key{
   position: relative;
@@ -29,10 +34,7 @@
   width: 100%;
 }
 
-.weather-img{
-  width: 20px;
-  height: 20px;
-}
+
 
 
 .weather a{

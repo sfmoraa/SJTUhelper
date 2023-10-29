@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/style_mainpage.css' %}">
     <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
+      <link rel="icon" href= "../static/img/user-astronaut-solid.svg">
+
     <script>
         function getCookie(name) {
             var cookieValue = null;
@@ -130,7 +132,7 @@
 
                 <li class="dropdown_items hidden " id="drop-item6">
                     <a href="../sjtulogout">
-                        <span class="fas fa-sign-out-alt"></span>
+                        <span class="fas fa-eraser"></span>
                         <span>delete jaccount</span>
                     </a>
                 </li>
@@ -149,71 +151,52 @@
 
                 <li>
                     <a href="../zhihu" id="zhihu">
-                        <span class="fab fa-zhihu"></span>
-                        <span>Zhihu</span>
+                        <img src="../static/img/zhihu.svg" style="width:15px">
+                        <span>&nbsp;知乎</span>
                     </a>
                 </li>
                 <li>
                     <a href="../github" id="github">
-                        <span class="fab fa-github"></span>
-                        <span>Github</span>
+                        <img src="../static/img/github.svg" style="width:15px">
+                        <span>&nbsp;Github</span>
                     </a>
                 </li>
                 <li>
                     <a href="../bilibili" id="bilibili">
-                        <img src="../static/img/bilibili.jpg" style="width:15px">
-                        <span>BiliBili</span>
+                        <img src="../static/img/bilibili.svg" style="width:15px">
+                        <span>&nbsp;bilibili</span>
                     </a>
                 </li>
                 <li>
                     <a href="../weibo" id="weibo">
-                        <span class="fab fa-weibo"></span>
-                        <span>Weibo</span>
+                        <img src="../static/img/weibo.svg" style="width:15px">
+                        <span>&nbsp;微博</span>
                     </a>
                 </li>
                 <li>
                     <a href="../shuiyuan" id="shuiyuan">
-                        <span class="fas fa-tint"></span>
-                        <span>Shuiyuan</span>
+                        <img src="../static/img/tint-solid.svg" style="width:15px">
+                        <span>&nbsp;水源社区</span>
                     </a>
                 </li>
                 <li>
                     <a href="../canvas" id="canvas">
-                        <span class="fas fa-clipboard-list"></span>
-                        <span>canvas</span>
+                        <img src="../static/img/clipboard-list-solid.svg" style="width:15px">
+                        <span>&nbsp;Canvas</span>
                     </a>
                 </li>
                 <li>
                     <a href="../dekt" id="dekt">
-                        <span class="fas la-chalkboard-teacher"></span>
-                        <span>dekt</span>
+                        <img src="../static/img/chalkboard-teacher-solid.svg" style="width:15px">
+                        <span>&nbsp;第二课堂</span>
                     </a>
                 </li>
                 <li>
                     <a href="../seiee" id="seiee">
-                        <span class="fas la-school"></span>
-                        <span>seiee</span>
+                        <img src="../static/img/school-solid.svg" style="width:15px">
+                        <span>&nbsp;电院通知</span>
                     </a>
                 </li>
-
-
-                <script>
-                    var requestUrl = request.getScheme() //当前链接使用的协议
-                        + "://" + request.getServerName()//服务器地址
-                        + ":" + request.getServerPort() //端口号
-                        + request.getContextPath() //应用名称，如果应用名称为
-                        + request.getServletPath() //请求的相对url
-                        + "?" + request.getQueryString(); //请求参数
-                    print(requestUrl);
-                    var element = document.getElementById("canvas");
-                    element.class = "active";
-
-                    var element2 = document.getElementById("dekt");
-                    element2.href = "../bilibili";
-                    element2.style.background = "green"
-                    element2.setAttribute("class", "active");
-                </script>
-
 
             </ul>
         </div>
@@ -229,19 +212,16 @@
                 <span class="las la-bars"></span>
             </label>
             <div class="header-title">
-                <h1 id="header-title-h1">Analytics</h1>
-                <p id="header-title-p">Display analytics about your Channel <span class="las la-chart-line"></span></p>
+                <h1 id="header-title-h1"></h1>
+                <p id="header-title-p"></p>
             </div>
         </div>
     </header>
     <main>
 
 
-        <section>
 
-        </section>
-
-        <div class="container111·">
+        <div class="container111">
 
 
             <div class="block-custom-large">
@@ -828,7 +808,7 @@
             <div>
                 <div class="analytic">
                     <div class="analytic-icon">
-                        <span class="weather-img"></span>
+                            <img src="{% static 'img/weather.svg' %}" style="width: 30px;height: 30px;color: #2aabd2"/>
                     </div>
                     <div class="analytic-info">
                         <h3>Weather</h3>

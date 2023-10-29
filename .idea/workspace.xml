@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="138c7fda-6c29-46ee-82ce-5cf151e41de3" name="变更" comment="">
+      <change afterPath="$PROJECT_DIR$/app01/static/img/weather.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/SJTUhelper-main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/SJTUhelper.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SJTUhelper.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/SJTUhelper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/migrations/0002_alter_dektinfo_activity_picurl.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/migrations/0002_alter_dektinfo_activity_picurl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/migrations/0003_collection_user_alter_collection_data0_and_more.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/migrations/0003_collection_user_alter_collection_data0_and_more.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/migrations/0004_collection_data10_collection_data9.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/migrations/0004_collection_data10_collection_data9.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/migrations/0005_keywords.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/migrations/0005_keywords.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/css/line-awesome.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/css/line-awesome.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/css/line-awesome.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/css/line-awesome.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-brands-400.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-brands-400.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-regular-400.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-regular-400.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-solid-900.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/fonts/la-solid-900.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_bordered_pulled.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_bordered_pulled.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_core.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_core.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_fixed-width.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_fixed-width.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_icons.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_icons.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_larger.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_larger.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_list.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_list.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_mixins.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_mixins.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_path.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_path.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_rotated-flipped.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_rotated-flipped.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_screen-reader.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_screen-reader.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_stacked.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_stacked.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_variables.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/_variables.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/line-awesome.scss" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/1.3.0/scss/line-awesome.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/all.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/all.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/bootstrap.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/bootstrap.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/calendar/main.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/calendar/main.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/calendar/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/calendar/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/demo.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/demo.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/diy_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/diy_style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/diy_style2.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/diy_style2.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/iconfont.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/iconfont.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/loginstyle.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/loginstyle.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/sjtuloginstyle.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/sjtuloginstyle.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_calendar.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_calendar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_main.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_main/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_main/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_main/style_main.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_main/style_main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_main/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_main/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/style_mainpage.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/style_mainpage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/css/test_table.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/css/test_table.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/img/school-solid.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/img/school-solid.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/img/shuiyuan.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/img/shuiyuan.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/calendar.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/calendar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/calendar/insert.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/calendar/insert.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/calendar/locales-all.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/calendar/locales-all.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/calendar/main.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/calendar/main.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/calendar/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/calendar/script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/changepassword.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/changepassword.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/jquery-3.6.0.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/jquery-3.6.0.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/login.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/login.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/mainpage.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/mainpage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/js/script1.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/js/script1.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap-theme.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap-theme.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/fonts/glyphicons-halflings-regular.svg" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/fonts/glyphicons-halflings-regular.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/bootstrap.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/bootstrap.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/bootstrap.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/bootstrap.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/npm.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/bootstrap-3.4.1/js/npm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/css/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/css/main.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/css/main.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/js/main.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/fullcalendar/js/main.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/NoSleep.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/NoSleep.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/NoSleepWindow.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/NoSleepWindow.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/music.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/music.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/quanping.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/quanping.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/style1.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/style1.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/yiyan.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/yiyan.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/yiyan.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/yiyan.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/youjian.css" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/youjian.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/static/plugins/time/youjian.js" beforeDir="false" afterPath="$PROJECT_DIR$/app01/static/plugins/time/youjian.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/activation_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/activation_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/calendar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/changepassword.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/changepassword.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/collection.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/collection.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/jaccount.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/jaccount.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/main_menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/main_menu.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/main_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/main_page.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/mytest.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/mytest.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/sign.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/sign.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/time.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/time.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/templates/top.html" beforeDir="false" afterPath="$PROJECT_DIR$/app01/templates/top.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app01/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app01/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysite2/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysite2/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysite2/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysite2/asgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysite2/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysite2/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysite2/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysite2/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysite2/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysite2/wsgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2XR7dTP5soIUkqgaMg8iRX2tW8V" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/Lenovo/Desktop/SJTUhelper/app01/static/img",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Lenovo\Desktop\SJTUhelper\app01\static\img" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="SJTUhelper" type="Python.DjangoServer" factoryName="Django server">
+      <module name="SJTUhelper" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="mysite2.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="138c7fda-6c29-46ee-82ce-5cf151e41de3" name="变更" comment="" />
+      <created>1698580125920</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1698580125920</updated>
+      <workItem from="1698580128157" duration="2387000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

@@ -19,6 +19,7 @@
     <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.3.0/main.min.css'>
     <link rel="stylesheet" href="{% static 'css/style_mainpage.css' %}">
     <link rel="stylesheet" href="{% static 'css/diy_style2.css' %}">
+      <link rel="icon" href= "../static/img/user-astronaut-solid.svg">
 
 
 </head>
@@ -84,10 +85,11 @@
 
                 <li class="dropdown_items hidden " id="drop-item6">
                     <a href="../sjtulogout">
-                        <span class="fas fa-sign-out-alt"></span>
+                        <span class="fas fa-eraser"></span>
                         <span>delete jaccount</span>
                     </a>
                 </li>
+
 
                 <li class="dropdown_items hidden" id="drop-item4">
                     <a href="../changepassword">
@@ -98,91 +100,56 @@
                 <li class="dropdown_items hidden" id="drop-item5">
                     <br>
                 </li>
-                <script>
-                    function showItem() {
-                        var targetItems = document.querySelectorAll('.dropdown_items');
-                        for (let i = 0; i < targetItems.length; i++) {
-                            if (targetItems[i].classList.contains('hidden')) {
-                                setTimeout(function () {
-                                    targetItems[i].classList.remove('hidden');
-                                }, 20 * i);
-                            } else {
-                                setTimeout(function () {
-                                    targetItems[i].classList.add('hidden');
-                                }, 20 * i);
-                            }
-                        }
-                    }
-                </script>
 
 
                 <li>
                     <a href="../zhihu" id="zhihu">
-                        <span class="fab fa-zhihu"></span>
+                        <img src="../static/img/zhihu.svg" style="width:15px">
                         <span>Zhihu</span>
                     </a>
                 </li>
                 <li>
-                    <a href="../github">
-                        <span class="fab fa-github"></span>
+                    <a href="../github" id="github">
+                        <img src="../static/img/github.svg" style="width:15px">
                         <span>Github</span>
                     </a>
                 </li>
                 <li>
-                    <a href="../bilibili">
-                        <img src="../static/img/bilibili.jpg" style="width:15px">
+                    <a href="../bilibili" id="bilibili">
+                        <img src="../static/img/bilibili.svg" style="width:15px">
                         <span>BiliBili</span>
                     </a>
                 </li>
                 <li>
-                    <a href="../weibo">
-                        <span class="fab fa-weibo"></span>
+                    <a href="../weibo" id="weibo">
+                        <img src="../static/img/weibo.svg" style="width:15px">
                         <span>Weibo</span>
                     </a>
                 </li>
                 <li>
-                    <a href="../shuiyuan">
-                        <span class="fas fa-tint"></span>
+                    <a href="../shuiyuan" id="shuiyuan">
+                        <img src="../static/img/tint-solid.svg" style="width:15px">
                         <span>Shuiyuan</span>
                     </a>
                 </li>
                 <li>
-                    <a href="../canvas">
-                        <span class="fas fa-clipboard-list"></span>
+                    <a href="../canvas" id="canvas">
+                        <img src="../static/img/clipboard-list-solid.svg" style="width:15px">
                         <span>canvas</span>
                     </a>
                 </li>
                 <li>
                     <a href="../dekt" id="dekt">
-                        <span class="fas la-chalkboard-teacher"></span>
+                        <img src="../static/img/chalkboard-teacher-solid.svg" style="width:15px">
                         <span>dekt</span>
                     </a>
                 </li>
                 <li>
                     <a href="../seiee" id="seiee">
-                        <span class="fas la-school"></span>
+                        <img src="../static/img/school-solid.svg" style="width:15px">
                         <span>seiee</span>
                     </a>
                 </li>
-
-
-                <script>
-                    var requestUrl = request.getScheme() //当前链接使用的协议
-                        + "://" + request.getServerName()//服务器地址
-                        + ":" + request.getServerPort() //端口号
-                        + request.getContextPath() //应用名称，如果应用名称为
-                        + request.getServletPath() //请求的相对url
-                        + "?" + request.getQueryString(); //请求参数
-                    print(requestUrl);
-                    var element = document.getElementById("canvas");
-                    element.class = "active";
-
-                    var element2 = document.getElementById("dekt");
-                    element2.href = "../bilibili";
-                    element2.style.background = "green"
-                    element2.setAttribute("class", "active");
-                </script>
-
 
             </ul>
         </div>
