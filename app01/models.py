@@ -14,7 +14,7 @@ class zhihu(models.Model):
 
 
 class github(models.Model):
-    author = models.CharField(max_length=20)
+    author = models.CharField(max_length=200)
     title = models.CharField(max_length=500)
     description = models.CharField(max_length=500)
     href = models.URLField(max_length=500)

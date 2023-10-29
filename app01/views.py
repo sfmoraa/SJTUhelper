@@ -30,7 +30,12 @@ def mainpage(request):
         json_data = "''"
         tablesid = []
     else:
+
+        lock_list = getuserlock(jaccountname)
+        lock_cookies = lock_list[0]
+        lock_calendar = lock_list[2]
         if request.method == "POST":
+
             lock_cookies.acquire()
             required_cookies = load_cookies(username='cookies_' + jaccountname + 'store')
             lock_cookies.release()
@@ -52,7 +57,7 @@ def mainpage(request):
             mysjtu_calendar(username=jaccountname, lock=lock_cookies, lock1=lock_calendar)
             return redirect("/mainpage")
 
-        canvas_sample, dekt_sample, seiee_sample, shuiyuan_sample, data_list, tablesid = get_today_SJTU(jaccountname)
+        canvas_sample, dekt_sample, seiee_sample, shuiyuan_sample, data_list, tablesid = get_today_SJTU(jaccountname,lock_list)
         thread = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
         thread.start()
         processed_data = []
@@ -66,6 +71,7 @@ def mainpage(request):
             json_data = json.dumps(processed_data)
         else:
             json_data="''"
+    seiee_sample=list(seiee_sample)
     return render(request, "main_page.html",
                   {'current_username': request.user.get_username(), 'zhihu_sample': zhihu_sample, 'bilibili_sample': bilibili_sample, 'weibo_sample': weibo_sample, 'github_sample': github_sample, 'canvas_sample': canvas_sample, 'dekt_sample': dekt_sample, 'seiee_sample': seiee_sample,
                    'shuiyuan_sample': shuiyuan_sample, 'json_data': json_data, "tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
@@ -75,6 +81,7 @@ def mainpage(request):
 
 
 def test_job():
+
     print("Update running!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
     try:
         get_zhihu_hot_topic(lock=lock_zhihu,
@@ -101,7 +108,7 @@ def test_job():
 
 
 scheduler = BackgroundScheduler()
-trigger = IntervalTrigger(seconds=100)
+trigger = IntervalTrigger(seconds=600)
 scheduler.add_job(test_job, trigger=trigger, id="update_data")
 scheduler.start()
 
@@ -116,15 +123,23 @@ def sjtu_login(request):
     if request.method == "GET":
         return render(request, "jaccount.html")
     jaccount_user = request.POST.get("signin_usr")
+    adduserlock(username=jaccount_user)
     jaccount_pwd = request.POST.get("signin_pwd")
-    status, msg = validate_account(jaccount_user, jaccount_pwd)
+    lock_list = getuserlock(jaccount_user)
+
+    status, msg = validate_account(jaccount_user, jaccount_pwd,lock_list)
     if not status:
         print("FAILED due to", msg)
+        deleteuserlock(jaccount_user)
         return render(request, "jaccount.html", {"errormsg": "用户名或者密码不正确"})  # 重定向到主页，后续添加错误信息
     request.user.first_name = jaccount_user
     request.user.save()
     check_box = request.POST.get('check_box')
 
+    lock_cookies = lock_list[0]
+    lock_canvas=lock_list[1]
+    lock_calendar=lock_list[2]
+    lock_shuiyuan=lock_list[3]
     thread4 = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread4.start()
     thread1 = threading.Thread(target=process_canvas, kwargs={'username': jaccount_user, 'password': jaccount_pwd, 'lock': lock_cookies, 'lock1': lock_canvas})
@@ -144,6 +159,9 @@ def show_calendar(request):
     if jaccountname == '':
         return redirect("/sjtu_login")
     print(request.user, "|", jaccountname, "|", "calendar")
+    lock_list = getuserlock(jaccountname)
+    lock_cookies = lock_list[0]
+    lock_calendar = lock_list[2]
     thread = threading.Thread(target=mysjtu_calendar, kwargs={"username": jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
     thread.start()
     data_list = gpt_filter(site="calendar_" + jaccountname, lock=lock_calendar, mode=1)
@@ -170,6 +188,7 @@ def sjtu_logout(request):
         user = request.user
         user.first_name = ''
         user.save()
+        deleteuserlock(jaccountname)
 
     return redirect("/mainpage")
 
@@ -217,6 +236,7 @@ def loginpage(request):
                 return render(request, 'sign.html', {'error_message': '用户名或密码不正确'})
             else:
                 auth.login(request, user_obj)
+
                 thread1 = threading.Thread(target=get_zhihu_hot_topic, kwargs={'lock': lock_zhihu,
                                                                                'cookie': '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
                                                                                })
@@ -464,7 +484,11 @@ def canvas(request):
     jaccountname = request.user.first_name
     if jaccountname == '':
         return redirect("/sjtu_login")
+    create_dynamic_model_canvas(jaccountname)
     print(request.user, "|", jaccountname, "|", "canvas")
+    lock_list = getuserlock(jaccountname)
+    lock_cookies = lock_list[0]
+    lock_canvas = lock_list[1]
     thread = threading.Thread(target=process_canvas, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_canvas})
     thread.start()
 
@@ -530,7 +554,11 @@ def shuiyuan(request):
     jaccountname = request.user.first_name
     if jaccountname == '':
         return redirect("/sjtu_login")
+    create_dynamic_model_shuiyuan(jaccountname)
     print(request.user, "|", jaccountname, "|", "shuiyuan")
+    lock_list = getuserlock(jaccountname)
+    lock_cookies = lock_list[0]
+    lock_shuiyuan = lock_list[3]
     thread = threading.Thread(target=process_shuiyuan, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_shuiyuan})
     thread.start()
     mode = 1
@@ -591,8 +619,12 @@ def calendar(request):
     if not request.user.is_authenticated:
         return redirect("/loginpage")
     jaccountname = request.user.first_name
+
     if jaccountname == '':
         return redirect("/sjtu_login")
+    lock_list = getuserlock(jaccountname)
+    lock_cookies = lock_list[0]
+    lock_calendar = lock_list[2]
     print(request.user, "|", jaccountname, "|", "calendar")
     tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
     if request.method == "POST":
@@ -632,8 +664,11 @@ def create__schedule(request):
     if not request.user.is_authenticated:
         return redirect("/loginpage")
     jaccountname = request.user.first_name
+
     if jaccountname == '':
         return redirect("/sjtu_login")
+    lock_list = getuserlock(request.user.username)
+    lock_cookies = lock_list[0]
     tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
     if request.method == "GET":
         return render(request, "create_schedule.html", {"tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
@@ -672,8 +707,6 @@ def show_collection(request):
         collected_data[site].append(solid_data)
     for weibo in collected_data['weibo']:
         weibo[1] = 'img/weibo_default_pic.jpg'
-    for item in collected_data['canvas']:
-        item[5] = mark_safe(item[5])
     weather = gpt_filter("minhang_weather", lock=lock_weather)
     return render(request, "collection.html", {"zhihuHotTopic": collected_data['zhihu'], "github": collected_data['github'], "bilibili": collected_data['bilibili'], "weibo": collected_data['weibo'], "canvas_data_list": collected_data['canvas'],
                                                "shuiyuan_data_list": collected_data['shuiyuan'],

@@ -14,11 +14,11 @@ import http.cookiejar
 from app01.models import *
 import threading
 
-lock_cookies = threading.Lock()
-lock_canvas = threading.Lock()
+# lock_cookies = threading.Lock()
+# lock_canvas = threading.Lock()
+# lock_calendar = threading.Lock()
+# lock_shuiyuan = threading.Lock()
 lock_dekt = threading.Lock()
-lock_calendar = threading.Lock()
-lock_shuiyuan = threading.Lock()
 lock_weibo = threading.Lock()
 lock_github = threading.Lock()
 lock_bilibili = threading.Lock()
@@ -26,6 +26,25 @@ lock_zhihu = threading.Lock()
 lock_weather = threading.Lock()
 lock_seiee = threading.Lock()
 lock_keywords = threading.Lock()
+lock_dict={}
+crawltime={'zhihu':0,'bilibili':0,'github':0,'weibo':0,'minhang':0}
+def getuserlock(username):
+    if username in lock_dict:
+        pass
+    else:
+        adduserlock(username)
+    return lock_dict[username]
+def adduserlock(username):
+    if username not in lock_dict:
+        lock_cookies = threading.Lock()
+        lock_canvas = threading.Lock()
+        lock_calendar = threading.Lock()
+        lock_shuiyuan = threading.Lock()
+        lock_dict[username]=[lock_cookies,lock_canvas,lock_calendar,lock_shuiyuan]
+
+def deleteuserlock(username):
+    if username in lock_dict:
+        del lock_dict[username]
 
 openai.api_key = "sk-NzVkxZUYP9aHqeUbkSxAGvfUgn5vzsPKANnG1UHR3YMa1XLp"
 openai.api_base = "https://api.chatanywhere.com.cn/v1"
@@ -82,6 +101,9 @@ def get_timestamp():
 
 
 def get_github_trending(lock=None):
+    if crawltime['github']+60>time():
+        return
+    crawltime['github']=time()
     github_url = 'https://github.com/trending'
     response = requests.get(github_url)
     text = response.text
@@ -105,6 +127,10 @@ def get_github_trending(lock=None):
 
 
 def get_zhihu_hot_topic(cookie, lock=None):
+    print(crawltime)
+    if crawltime['zhihu']+60>time():
+        return
+    crawltime['zhihu']=time()
     zhihu_url = 'https://www.zhihu.com/hot'
     zhihu_headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Kmyhtml, like Gecko) Chrome/113.0.5672.127  Safari/537.36',
@@ -133,6 +159,9 @@ def get_zhihu_hot_topic(cookie, lock=None):
 
 
 def get_bilibili_ranking(lock=None):
+    if crawltime['bilibili']+60>time():
+        return
+    crawltime['bilibili']=time()
     bilibili_url = 'https://api.bilibili.com/x/web-interface/ranking/v2?rid=0&type=all'
     items = requests.get(bilibili_url).json()['data']['list']
     lock.acquire()
@@ -160,6 +189,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         topics = ""
         for a in current_topics:
             topics += '（' + a.number + '） ' + a.title + '；'
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are supposed to play the role of a proficient Chinese-speaking content auditor. You need to determine whether the given topics meet the filtering criteria based on the filtering standards and a set of numbered topic titles I provide you with. Please note that these topics are all in Chinese. You should understand the content represented by these topics and compare them with the filtering standards. Additionally, you are required to output only the topic numbers of the filtered results, separating them with commas. The following is the selection criteria in Chinese: "{cue}". And here are the numbered topics for screening: "{topics}" Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers)."'}]
         ans = gpt_35_api_stream(messages)
@@ -262,6 +292,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a.title + '；'
             i += 1
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are supposed to play the role of a proficient Chinese-speaking content auditor. You need to determine whether the given topics meet the filtering criteria based on the filtering standards and a set of numbered topic titles I provide you with. Please note that these topics are all in Chinese. You should understand the content represented by these topics and compare them with the filtering standards. Additionally, you are required to output only the topic numbers of the filtered results, separating them with commas. The following is the selection criteria in Chinese: "{cue}". And here are the numbered topics for screening: "{topics}" Please think step by step and be sure to have the right answer in the form I requested, and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
@@ -298,6 +329,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a.category + ":" + a.activity_name + '；'
             i += 1
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are required to play the role of a proficient Chinese-speaking content auditor. You need to evaluate whether the provided activities meet the given selection criteria based on the designated activity categories and titles, which are all in Chinese. Please understand the meaning of the categories and titles and compare them to the selection criteria. Furthermore, you should only output the numbers of the activities that pass the selection, separating them with commas. The following is the selection criteria: "{cue}". Here are the numbered video titles and categories for your evaluation: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the activities that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
@@ -331,6 +363,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a[1] + '；'
             i += 1
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you will play the role of a content auditor proficient in Chinese. You need to determine whether the provided notices meet the filtering criteria by using the filtering criteria I give you and the numbered titles of the school notices. Please note that the titles of these notices are in Chinese. Please understand their content and compare them with the filtering criteria. Additionally, you should only output the numbers of the notices that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered titles of the school notices to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the notices that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
@@ -372,7 +405,6 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a[6] + ":" + a[2] + '；'
             i += 1
-
         topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are going to play the role of a student. You need to determine whether the given topics meet the selection criteria I provide you with, along with a list of numbered topic categories and topic names. Please note that the topics are in Chinese. It is important to understand their content and compare them to the selection criteria. Additionally, you should only output the numbers of the topics that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered topic categories and topic names to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the topics that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
@@ -412,6 +444,7 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
         for a in current_topics:
             topics += '(' + str(i) + ') ' + a[4] + ":" + a[6] + '；'
             i += 1
+        topics = topics.encode('gbk', errors='ignore').decode('gbk')
         messages = [{'role': 'user',
                      'content': f'From now on, you are going to play the role of a student. You need to determine whether the given assignments meet the selection criteria I provide you with, along with a list of numbered courses and assignments. Please note that the titles of these assignments are in Chinese. It is important to understand their content and compare them to the selection criteria Additionally, you should only output the numbers of the assignments that pass the filtering criteria, separating the numbers with commas. Here are my filtering criteria: "{cue}". And here are the numbered courses and assignments to be filtered: "{topics}". Please think step by step and be sure to have the right answer in the form I requested and only output the numbers of the assignments that meet the criteria in the following method in English:"the output should be: (your answers).".'}]
         ans = gpt_35_api_stream(messages)
@@ -434,12 +467,15 @@ def gpt_filter(site, cue=None, mode=None, lock=None):
 
 
 def get_weibo_hot_topic(lock=None):
+    if crawltime['weibo']+60>time():
+        return
+    crawltime['weibo']=time()
     global weibo_count
     weibo_url = 'https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot'
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
     weibo_session = requests.Session()
     weibo_items = []
-    current_turn_folder_path = "SJTUhelperv5/app01/static/img/weibo/" + str(weibo_count) + "/"
+    current_turn_folder_path = "app01/static/img/weibo/" + str(weibo_count) + "/"
     shutil.rmtree(current_turn_folder_path)
     os.mkdir(current_turn_folder_path)
     for index, item in enumerate(items):
@@ -451,7 +487,7 @@ def get_weibo_hot_topic(lock=None):
         pic_path = current_turn_folder_path + str(index) + ".jpg"
         with open(pic_path, 'wb') as f:
             f.write(resp.content)
-        pic_path = pic_path[26:]
+        pic_path = pic_path[13:]
         weibo_items.append([pic_path, item['desc'], item['scheme']])
     lock.acquire()
     weibo.objects.all().delete()
@@ -471,6 +507,9 @@ def get_weibo_hot_topic(lock=None):
 
 
 def get_minhang_24h_weather(lock=None):
+    if crawltime['minhang']+60>time():
+        return
+    crawltime['minhang']=time()
     minhang_weather_url = "https://www.tianqi.com/minhang/"
     myheaders = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127  Safari/537.36'}
     response = requests.get(minhang_weather_url, headers=myheaders)
@@ -790,9 +829,8 @@ def process_dekt(username=None, password=None, lock=None, lock1=None):
     resp_from_dekt = dekt_session.post("https://dekt.sjtu.edu.cn/api/auth/secondclass/loginByJa?time=" + str(round(time() * 1000)) + "&publicaccountid=sjtuvirtual", headers=myheaders_for_dekt,
                                        data=json.dumps({"code": jump_url[39:], "redirect_uri": "https://dekt.sjtu.edu.cn/h5/index", "scope": "basic", "client_id": "sowyD3hGhP6f6O92bevg", "publicaccountid": "sjtuvirtual"}))
     if resp_from_dekt.json()['code'] == 1:
-        lock.acquire()
-        delete_dynamic_model('cookies_' + username)
-        lock.release()
+
+        erase_SJTU_user(jaccountname=username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -881,6 +919,8 @@ def process_canvas(username=None, password=None, lock=None, lock1=None):
     resp_from_oc = oc_session.get(jump_url, headers=myheaders_for_oc)
     planner_data = oc_session.get("https://oc.sjtu.edu.cn/api/v1/planner/items?start_date=" + strftime("%Y-%m-%d", localtime(time() + (-7 * 24 * 60 * 60))) + "&order=asc&per_page=100", headers=myheaders_for_oc)
     if planner_data.status_code != 200:
+        erase_SJTU_user(username)
+
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     json_data = json.loads(planner_data.text[9:])
@@ -986,7 +1026,8 @@ def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
     resp_from_shuiyuan = shuiyuan_session.get(jump_url, headers=myheaders_for_shuiyuan)
     resp_from_latest = shuiyuan_session.get("https://shuiyuan.sjtu.edu.cn/latest.json?ascending=false", headers=default_headers)
     if resp_from_latest.status_code != 200:
-        delete_dynamic_model('cookies_' + username)
+        erase_SJTU_user(username)
+
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
         return
@@ -1002,8 +1043,10 @@ def process_shuiyuan(username=None, password=None, lock=None, lock1=None):
             tags = ""
             for data in item['tags']:
                 tags += data
-            item['tags'] = tags
-        insert_dynamic_model_shuiyuan(table_name=username, ref=ref, title=item['title'], posts_count=item['posts_count'], reply_count=item['reply_count'], unseen=item['unseen'], shuiyuan_category_dict=shuiyuan_category_dict[str(item['category_id'])], tags=item['tags'], views=item['views'])
+            item['tags']=tags
+
+
+        insert_dynamic_model_shuiyuan(table_name=username, ref=ref, title=item['title'].replace("'",""), posts_count=item['posts_count'], reply_count=item['reply_count'], unseen=item['unseen'], shuiyuan_category_dict=shuiyuan_category_dict[str(item['category_id'])], tags=item['tags'], views=item['views'])
     # 仅当category字典需要更新时才调用此函数
     # update_shuiyuan_category(shuiyuan_session,default_headers)
     lock1.release()
@@ -1098,7 +1141,7 @@ def mysjtu_calendar(username=None, password=None, beginfrom=-730, endat=365, loc
         "%Y-%m-%d", localtime(time() + (endat * 24 * 60 * 60))) + "+00:00&weekly=false&ids="
     calendar_list = calendar_session.get(next_week_calendar_url, headers=calendar_headers, allow_redirects=False)
     if calendar_list.status_code != 200:
-        delete_dynamic_model('cookies_' + username)
+        erase_SJTU_user(username)
         print("Cookies expired! Please login again!")
         raise ValueError("重定向到登录页面！")
     delete_dynamic_model_calendar(username)
@@ -1184,17 +1227,17 @@ def seiee_notification(getpages=1, lock=None):
     lock.release()
 
 
-def validate_account(username, password):
+def validate_account(username, password,list):
     canvas_login_url = 'https://oc.sjtu.edu.cn/login/canvas'
     myheaders_for_oc = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.127 Safari/537.36", 'Host': "oc.sjtu.edu.cn"}
     oc_session = requests.Session()
     oc_session.get(canvas_login_url, headers=myheaders_for_oc)
     resp_from_openid_connect = oc_session.get("https://oc.sjtu.edu.cn/login/openid_connect", headers=myheaders_for_oc, allow_redirects=False)
     msg, type = auto_jaccount_authorize(resp_from_openid_connect.headers['Location'], username, password)
-    print()
     if type == 0 or type == 1:
         return False, msg
     else:
+        lock_cookies=list[0]
         lock_cookies.acquire()
         save_cookies(username, msg)
         lock_cookies.release()
@@ -1228,7 +1271,7 @@ def get_today_regular():
     return zhihu_sample, bilibili_sample, weibo_sample, github_sample
 
 
-def get_today_SJTU(jaccountname=None):
+def get_today_SJTU(jaccountname=None,list=[]):
     if not jaccountname:
         return ['登录后显示','/canvas'], ['登录后显示','/dekt'],[ '登录后显示','/seiee'], ['登录后显示','/shuiyuan'],None
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
@@ -1240,6 +1283,7 @@ def get_today_SJTU(jaccountname=None):
     if result:
         # 表存在，执行查询操作
         sql_canvas = "select * from `{}` where submit = 'false'".format('canvas_' + jaccountname)
+        lock_canvas=list[1]
         lock_canvas.acquire()
         cursor.execute(sql_canvas)
         row_canvas = cursor.fetchone()
@@ -1255,6 +1299,7 @@ def get_today_SJTU(jaccountname=None):
     result = cursor.fetchone()
     if result:
         sql_shuiyuan = "select * from `{}`".format('shuiyuan_' + jaccountname)
+        lock_shuiyuan=list[3]
         lock_shuiyuan.acquire()
         cursor.execute(sql_shuiyuan)
         row_shuiyuan = cursor.fetchall()
@@ -1278,7 +1323,7 @@ def get_today_SJTU(jaccountname=None):
         row_dekt = [row_dekt[row_dekt_random_index]['activity_name'] + "开始时间：" + row_dekt[row_dekt_random_index]['active_start_time'],row_dekt[row_dekt_random_index]['category_url']]
 
     lock_seiee.acquire()
-    row_seiee = list(seieeNotification.objects.values('name','href').first().values())
+    row_seiee = seieeNotification.objects.values('name','href').first().values()
     lock_seiee.release()
     if not row_seiee:
         row_seiee=['尚未加载，刷新后即可显示',"/seiee"]
@@ -1286,6 +1331,7 @@ def get_today_SJTU(jaccountname=None):
     cursor.execute(query, ('calendar_' + jaccountname))
     result = cursor.fetchone()
     if result:
+        lock_calendar=list[2]
         data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
         tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
         if data_list is None:
@@ -1324,9 +1370,14 @@ def erase_SJTU_user(jaccountname):
     db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', port=3306, db='nis3368')
     cursor = db.cursor()
     erase_SJTU_user_query = """
-            DROP TABLE `calendar_{}`,`canvas_{}`,`cookies_{}`,`cookies_{}store`,`shuiyuan_{}`,`tablesid_{}`;
+            DROP TABLE IF EXISTS `calendar_{}`,`canvas_{}`,`cookies_{}`,`cookies_{}store`,`shuiyuan_{}`,`tablesid_{}`;
             """.format(jaccountname, jaccountname, jaccountname, jaccountname, jaccountname, jaccountname)
     cursor.execute(erase_SJTU_user_query)
+    db.commit()
+    sql="""
+    UPDATE auth_user set first_name='' where first_name='{}'
+    """.format(jaccountname)
+    cursor.execute(sql)
     db.commit()
     cursor.close()
     db.close()
