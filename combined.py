@@ -437,7 +437,7 @@ def get_weibo_hot_topic(lock=None):
     items = requests.get(weibo_url).json()['data']['cards'][0]['card_group']
     weibo_session = requests.Session()
     weibo_items = []
-    current_turn_folder_path = "app01/static/img/weibo/" + str(weibo_count) + "/"
+    current_turn_folder_path = "SJTUhelperv5/app01/static/img/weibo/" + str(weibo_count) + "/"
     shutil.rmtree(current_turn_folder_path)
     os.mkdir(current_turn_folder_path)
     for index, item in enumerate(items):
@@ -449,7 +449,7 @@ def get_weibo_hot_topic(lock=None):
         pic_path = current_turn_folder_path + str(index) + ".jpg"
         with open(pic_path, 'wb') as f:
             f.write(resp.content)
-        pic_path = pic_path[13:]
+        pic_path = pic_path[26:]
         weibo_items.append([pic_path, item['desc'], item['scheme']])
     lock.acquire()
     weibo.objects.all().delete()
@@ -493,7 +493,7 @@ def get_minhang_24h_weather(lock=None):
         "Sec-Fetch-Site": "cross-site",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.43"
     }
-    weather_pics_path = './weather_pics'  # 由views.py调用
+    weather_pics_path = 'SJTUhelperv5/weather_pics'  # 由views.py调用
     existing_weather_pics = os.listdir(weather_pics_path)
     rst = [[], [], [], [], [], []]  # 依次为该小时的 已保存到本地的天气图片的名称，天气文字，气温，风向，风力，小时
     sections = myhtml.xpath("//div[@class='twty_hour']/div/div")
@@ -1281,8 +1281,17 @@ def get_today_SJTU(jaccountname=None):
     if not row_seiee:
         row_seiee=['尚未加载，刷新后即可显示',"/seiee"]
 
-    data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
-    tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+    cursor.execute(query, ('calendar_' + jaccountname))
+    result = cursor.fetchone()
+    if result:
+        data_list = gpt_filter("calendar_{}".format(jaccountname), lock=lock_calendar)
+        tablesid = transfer_from_database_to_list('tablesid_' + jaccountname)
+        if data_list is None:
+            tablesid=[]
+    else:
+        data_list = None
+        tablesid = []
+
 
     return row_canvas, row_dekt, row_seiee, row_shuiyuan, data_list, tablesid
 

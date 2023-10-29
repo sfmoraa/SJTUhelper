@@ -113,7 +113,7 @@ $(document).ready(function() {
       success: function(response) {
         // 验证码发送成功后的处理逻辑
         alert(response.message);
-        window.location.href="http://127.0.0.1:8000/loginpage/";
+        window.location.href="/loginpage";
 
       },
       error: function(xhr, status, error) {

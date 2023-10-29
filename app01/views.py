@@ -27,7 +27,7 @@ def mainpage(request):
         dekt_sample = ['登录后显示','/dekt']
         seiee_sample = ['登录后显示','/seiee']
         shuiyuan_sample = ['登录后显示','/shuiyuan']
-        json_data = None
+        json_data = "''"
         tablesid = []
     else:
         if request.method == "POST":
@@ -56,13 +56,16 @@ def mainpage(request):
         thread = threading.Thread(target=mysjtu_calendar, kwargs={'username': jaccountname, 'lock': lock_cookies, 'lock1': lock_calendar})
         thread.start()
         processed_data = []
-        for data in data_list:
-            if data[6] == "false" or data[6] == "False":
-                allday = False
-            elif data[6] == "true" or data[6] == "True":
-                allday = True
-            processed_data.append({"id": data[5], "title": data[1] + " [" + data[4] + "]", "start": data[2], "end": data[3], "allDay": allday, 'url': "https://calendar.sjtu.edu.cn/ui/calendar"})
-        json_data = json.dumps(processed_data)
+        if data_list is not None:
+            for data in data_list:
+                if data[6] == "false" or data[6] == "False":
+                    allday = False
+                elif data[6] == "true" or data[6] == "True":
+                    allday = True
+                processed_data.append({"id": data[5], "title": data[1] + " [" + data[4] + "]", "start": data[2], "end": data[3], "allDay": allday, 'url': "https://calendar.sjtu.edu.cn/ui/calendar"})
+            json_data = json.dumps(processed_data)
+        else:
+            json_data="''"
     return render(request, "main_page.html",
                   {'current_username': request.user.get_username(), 'zhihu_sample': zhihu_sample, 'bilibili_sample': bilibili_sample, 'weibo_sample': weibo_sample, 'github_sample': github_sample, 'canvas_sample': canvas_sample, 'dekt_sample': dekt_sample, 'seiee_sample': seiee_sample,
                    'shuiyuan_sample': shuiyuan_sample, 'json_data': json_data, "tableid": [sublist[1] for sublist in tablesid if sublist[1] != '校历']})
@@ -76,24 +79,24 @@ def test_job():
     try:
         get_zhihu_hot_topic(lock=lock_zhihu,
                             cookie='_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410')
-    except:
-        print("get_zhihu_hot_topic FAILED")
+    except Exception as e:
+        print("get_zhihu_hot_topic FAILED",e)
     try:
         get_github_trending(lock=lock_github)
-    except:
-        print("get_github_trending FAILED")
+    except Exception as e:
+        print("get_github_trending FAILED",e)
     try:
         get_weibo_hot_topic(lock=lock_weibo)
-    except:
-        print("get_weibo_hot_topic FAILED")
+    except Exception as e:
+        print("get_weibo_hot_topic FAILED",e)
     try:
         get_minhang_24h_weather(lock=lock_weather)
-    except:
-        print("get_minhang_24h_weather FAILED")
+    except Exception as e:
+        print("get_minhang_24h_weather FAILED",e)
     try:
         get_bilibili_ranking(lock=lock_bilibili)
-    except:
-        print("get_bilibili_ranking FAILED")
+    except Exception as e:
+        print("get_bilibili_ranking FAILED",e)
     print("updated!", strftime("%Y-%m-%d %H:%M:%S", localtime()))
 
 
@@ -256,22 +259,7 @@ def loginpage(request):
             user.is_active = True
             user.save()
 
-            user_obj = auth.authenticate(username=username, password=pwd)
-            auth.login(request, user_obj)
-            thread1 = threading.Thread(target=get_zhihu_hot_topic, kwargs={'lock': lock_zhihu,
-                                                                           'cookie': '_zap=7c19e78f-cc24-40ba-b901-03c5dbc6f5c6; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1695046455; d_c0=AqCUdcs8ahePTm1AlskR2GlKJRZsIi6BHoU=|1695046467; captcha_session_v2=2|1:0|10:1695046472|18:captcha_session_v2|88:U09XVkptekkzbFRRV1hVT1d3ZTZBbmtpNUpndFBYSjBiZ2QxYStSTmZMV001ejY4VU1NK2xTQ3c0WFRTUG4wSQ==|6e425e767457afc3f0c45ccddcaa97fb6e33acf05881980271a533dcc949768e; __snaker__id=9sk6FFpO9I1GGW59; gdxidpyhxdE=LP%2FMjewee%5CMfdkd9rynOLe5BzZBXLU2sK7h%5Cw5TVTm81fomi%2FfUw8vt3baTUeLiszRTP4Irv9PIP%2F%5CNlk533r%2BqSyPpuzMqYdMleidTIalNRae3q5cU6SnNBDIr5tW%5CmtQ4KgZ0OoU1Yn4%5CBE%5C4VrV3RzWjeRLpPEGsRjNv%5C2zoQNRhP%3A1695047380796; z_c0=2|1:0|10:1695046490|4:z_c0|92:Mi4xYVJJZ0RnQUFBQUFDb0pSMXl6eHFGeVlBQUFCZ0FsVk5XcW4xWlFBUkJSRmZ4V3JnWEEzMVlWeWlQQkRHS1JLNzVn|dc53aefcc4aca1ea26078128ae2bbd47513c720ee18127cd27ab30c94d9815db; q_c1=f57083c332484af5a73c717d3f3a0401|1695046490000|1695046490000; tst=h; _xsrf=c3051616-3649-4d34-a21a-322dcdcc7b34; KLBRSID=c450def82e5863a200934bb67541d696|1695261410|1695261410'
-                                                                           })
-            thread1.start()
-            thread2 = threading.Thread(target=get_github_trending, kwargs={'lock': lock_github})
-            thread2.start()
-            thread3 = threading.Thread(target=get_weibo_hot_topic, kwargs={'lock': lock_weibo})
-            thread3.start()
-            thread4 = threading.Thread(target=get_bilibili_ranking, kwargs={'lock': lock_bilibili})
-            thread4.start()
-            thread5 = threading.Thread(target=seiee_notification, kwargs={'lock': lock_seiee})
-            thread5.start()
-            return redirect("/mainpage")
-            # return JsonResponse({'message': '注册成功'})
+            return JsonResponse({'message': '注册成功'})
 
 
 def changepassword(request):

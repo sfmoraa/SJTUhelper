@@ -828,19 +828,24 @@
             <div>
                 <div class="analytic">
                     <div class="analytic-icon">
-                        <img class="weather-img" src="{% static 'img/weather_icon.png' %}">
-                        {#                        <span class="weather-img"></span>#}
+                        <span class="weather-img"></span>
                     </div>
                     <div class="analytic-info">
                         <h3>Weather</h3>
-                        <div>
+                        <table  >
                             {% for obj in minhang_weather %}
-                                <div class="weather">
-                                    {% autoescape off %}
-                                        <img id="dynamic-image-{{ forloop.counter }}" src="" alt="Image" class="weather-img"/>
-                                    {% endautoescape %}
-                                    <a>{{ obj.5 }} {{ obj.1 }} </a>
-                                    <a>{{ obj.2 }}°C {{ obj.3 }} {{ obj.4 }}</a>
+                                <tr class="weather">
+                                    <td>
+                                        {% autoescape off %}
+                                            <img id="dynamic-image-{{ forloop.counter }}" src="" alt="Image" class="weather-img"/>
+                                        {% endautoescape %}
+                                        &nbsp;
+                                    </td>
+                                    <td>{{ obj.5 }}&nbsp;</td>
+                                    <td>{{ obj.1 }}&nbsp; </td>
+                                    <td>{{ obj.2 }}°C&nbsp;</td>
+                                    <td> {{ obj.3 }}&nbsp;</td>
+                                    <td> {{ obj.4 }}&nbsp;</td>
 
                                     <script>
                                         // JavaScript代码
@@ -852,9 +857,9 @@
                                         // 设置图片的src属性，使用动态的图片名称
                                         image_element.src = "{% static "img/" %}" + image_name;
                                     </script>
-                                </div>
+                                </tr>
                             {% endfor %}
-                        </div>
+                        </table>
                     </div>
                 </div>
             </div>
